@@ -1,0 +1,32 @@
+﻿namespace Fizz.UI.Model
+{
+    public class FizzChannelMeta
+    {
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+
+        public bool PersistMessages { get; set; } = true;
+
+        public int InitialQueryMessageCount { get; set; } = 50;
+
+        public int HistoryQueryMessageCount { get; set; } = 50;
+
+        public FizzChannelMeta () { }
+
+        public FizzChannelMeta(string id, string name)
+        {
+            Id = id + "_temp";
+            Name = name;
+        }
+
+        public FizzChannelMeta (string id, string name, bool persist, int initialMessages, int historyMessages)
+        {
+            Id = id;
+            Name = name;
+            PersistMessages = persist;
+            InitialQueryMessageCount = initialMessages;
+            HistoryQueryMessageCount = historyMessages;
+        }
+    }
+}
