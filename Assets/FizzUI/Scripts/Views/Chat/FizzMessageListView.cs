@@ -37,17 +37,9 @@ namespace Fizz.UI
         /// </summary>
         [SerializeField] Button ScrollIndicator;
 
-        public bool EnableHistoryFetch
-        {
-            get { return _enableFetchHistory; }
-            set { _enableFetchHistory = value; }
-        }
+        public bool EnableHistoryFetch { get; set; } = false;
 
-        public bool ShowMessageTranslation
-        {
-            get { return _showTranslation; }
-            set { _showTranslation = value; }
-        }
+        public bool ShowMessageTranslation { get; set; } = false;
 
         void Awake()
         {
@@ -61,10 +53,10 @@ namespace Fizz.UI
 
             try
             {
-                FizzService.Instance.OnChannelMessage += OnChannelMessage;
+                FizzService.Instance.OnChannelMessagePublish += OnChannelMessage;
                 FizzService.Instance.OnChannelMessageDelete += OnChannelMessageDeleted;
                 FizzService.Instance.OnChannelMessageUpdate += OnChannelMessageUpdated;
-                FizzService.Instance.OnChannelHistoryUpdated += OnChannelHistoryUpdated;
+                FizzService.Instance.OnChannelMessagesAvailable += OnChannelHistoryUpdated;
             }
             catch { }
 
@@ -80,10 +72,10 @@ namespace Fizz.UI
 
             try
             {
-                FizzService.Instance.OnChannelMessage -= OnChannelMessage;
+                FizzService.Instance.OnChannelMessagePublish -= OnChannelMessage;
                 FizzService.Instance.OnChannelMessageDelete -= OnChannelMessageDeleted;
                 FizzService.Instance.OnChannelMessageUpdate -= OnChannelMessageUpdated;
-                FizzService.Instance.OnChannelHistoryUpdated -= OnChannelHistoryUpdated;
+                FizzService.Instance.OnChannelMessagesAvailable -= OnChannelHistoryUpdated;
             }
             catch { }
 
@@ -105,17 +97,18 @@ namespace Fizz.UI
 
         public void Setup(bool enableFetchHistory, bool showTranslation)
         {
-            _enableFetchHistory = enableFetchHistory;
-            _showTranslation = showTranslation;
+            EnableHistoryFetch = enableFetchHistory;
+            ShowMessageTranslation = showTranslation;
         }
 
-        public void SetChannel(FizzChannelMeta channelMeta)
+        public void SetChannel(string channelId)
         {
+            Reset();
+
             if (!_isInitialized)
                 Initialize();
 
-            _channelMeta = channelMeta;
-            _channel = GetChannelById(channelMeta.Id);
+            _channel = GetChannelById(channelId);
 
             if (_channel != null)
             {
@@ -129,7 +122,7 @@ namespace Fizz.UI
             catch { }
         }
 
-        public void SetCustomDataSource (IFizzChatViewCustomDataSource source)
+        public void SetCustomDataSource(IFizzChatViewCustomDataSource source)
         {
             _chatDataSource = source;
         }
@@ -139,7 +132,7 @@ namespace Fizz.UI
             if (string.IsNullOrEmpty(message))
                 return;
 
-            if (_channelMeta == null)
+            if (_channel == null)
                 return;
 
             try
@@ -154,7 +147,7 @@ namespace Fizz.UI
                     now,
                     FizzService.Instance.UserId,
                     FizzService.Instance.UserName,
-                    _channelMeta.Id,
+                    _channel.Id,
                     message,
                     data,
                     null,
@@ -163,15 +156,16 @@ namespace Fizz.UI
                     DeliveryState = FizzChatCellDeliveryState.Pending
                 };
 
-                AddAction (model);
+                AddAction(model);
 
                 FizzService.Instance.PublishMessage(
-                    _channelMeta.Id,
+                    _channel.Id,
                     FizzService.Instance.UserName,
                     message,
                     data,
                     FizzService.Instance.IsTranslationEnabled,
-                    _channelMeta.PersistMessages,
+                    _channel.Meta.PersistMessages,
+                    _channel.Meta.FilterContent,
                     exception =>
                     {
                         if (exception == null)
@@ -189,7 +183,6 @@ namespace Fizz.UI
             if (!_isInitialized)
                 Initialize();
 
-            _channelMeta = null;
             _channel = null;
             Spinner.HideSpinner();
 
@@ -341,7 +334,7 @@ namespace Fizz.UI
         private void FetchRoomHistory()
         {
             if (_channel == null) return;
-            if (_enableFetchHistory && !_isFetchHistoryInProgress)
+            if (EnableHistoryFetch && !_isFetchHistoryInProgress)
             {
                 bool isHistoryAvailable = false;
                 if (_lastAction != null && _lastAction.Id > 1)
@@ -494,7 +487,7 @@ namespace Fizz.UI
 
         void OnChannelHistoryUpdated(string channelId)
         {
-            if (_channelMeta != null && _channelMeta.Id.Equals(channelId))
+            if (_channel != null && _channel.Id.Equals(channelId))
             {
                 _channel = GetChannelById(channelId);
                 LoadChatAsync(!_isFetchHistoryInProgress);
@@ -559,7 +552,7 @@ namespace Fizz.UI
             {
                 FizzChatCellView chatCellView = obj.GetComponent<FizzChatCellView>();
                 chatCellView.rowNumber = index;
-                chatCellView.SetData(model, _showTranslation);
+                chatCellView.SetData(model, ShowMessageTranslation);
 
                 if (itemType == (int)ChatCellViewType.TheirsMessageAction)
                 {
@@ -586,7 +579,7 @@ namespace Fizz.UI
             else if (model.Type == FizzChatCellType.DateCell)
             {
                 FizzChatDateHeaderCellView dateHeader = obj.GetComponent<FizzChatDateHeaderCellView>();
-                dateHeader.SetData(model, _showTranslation);
+                dateHeader.SetData(model, ShowMessageTranslation);
             }
 
             return obj;
@@ -662,7 +655,6 @@ namespace Fizz.UI
         /// </summary>
         private FizzChatDateHeaderCellView dateHeaderCellView;
 
-        private FizzChannelMeta _channelMeta;
         /// <summary>
         /// The data.
         /// </summary>
@@ -688,8 +680,6 @@ namespace Fizz.UI
         private bool _isDirty = false;
         private bool _resetScroll = false;
         private bool _userScroll = false;
-        private bool _showTranslation = false;
-        private bool _enableFetchHistory = false;
         private bool _isInitialized = false;
         private bool _isFetchHistoryInProgress = false;
     }

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Fizz.Chat;
+using Fizz.Common;
 
 namespace Fizz.UI.Model
 {
@@ -18,7 +20,7 @@ namespace Fizz.UI.Model
                                   string body,
                                   Dictionary<string, string> data,
                                   IDictionary<string, string> translations,
-                                  long created) 
+                                  long created)
             : base(id, from, nick, to, body, data, translations, created)
         {
             TranslationState = FizzChatCellTranslationState.Translated;
@@ -50,9 +52,10 @@ namespace Fizz.UI.Model
             }
             else
             {
-                if (Translations != null && Translations.ContainsKey(Utils.GetSystemLanguage()))
+                string langCode = GetLanguageCode();
+                if (Translations != null && Translations.ContainsKey(langCode))
                 {
-                    return Translations[Utils.GetSystemLanguage()];
+                    return Translations[langCode];
                 }
                 else
                 {
@@ -61,7 +64,7 @@ namespace Fizz.UI.Model
             }
         }
 
-        public void Update (FizzChatCellModel model)
+        public void Update(FizzChatCellModel model)
         {
             Id = model.Id;
             From = model.From;
@@ -75,6 +78,21 @@ namespace Fizz.UI.Model
             AlternateId = model.AlternateId;
             DeliveryState = model.DeliveryState;
             TranslationState = model.TranslationState;
+        }
+
+        private string GetLanguageCode()
+        {
+            string langCode = FizzLanguageCodes.English.Code;
+            try
+            {
+                langCode = FizzService.Instance.LanguageCode.Code;
+            }
+            catch (Exception)
+            {
+                FizzLogger.E("Unable to get LanguageCode");
+            }
+
+            return langCode;
         }
     }
 

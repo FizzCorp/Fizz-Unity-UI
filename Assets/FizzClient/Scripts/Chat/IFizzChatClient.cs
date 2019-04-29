@@ -12,14 +12,16 @@ namespace Fizz.Chat
             string body,
             Dictionary<string, string> data,
             bool translate,
+            bool filter,
             bool persist,
             Action<FizzException> callback);
-        void UpdateMessage (string channel,
+        void UpdateMessage(string channel,
             long messageId,
             string nick,
             string body,
             Dictionary<string, string> data,
             bool translate,
+            bool filter,
             bool persist,
             Action<FizzException> callback);
         void DeleteMessage (string channelId, 

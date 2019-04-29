@@ -8,6 +8,10 @@
 
         public bool PersistMessages { get; set; } = true;
 
+        public bool FilterContent { get; set; } = false;
+
+        public bool Readonly { get; set; } = false;
+
         public int InitialQueryMessageCount { get; set; } = 50;
 
         public int HistoryQueryMessageCount { get; set; } = 50;

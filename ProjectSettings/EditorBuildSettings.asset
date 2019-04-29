@@ -9,18 +9,18 @@ EditorBuildSettings:
     path: Assets/FizzUI/Samples/SceneSelector.unity
     guid: 1d0102a7ac1b6a14cb6370ecfd8388a4
   - enabled: 1
-    path: Assets/FizzUI/Samples/FullView/FullViewScene.unity
+    path: Assets/FizzUI/Samples/1. FullView/FullViewScene.unity
     guid: b401f832c070c9f498c1dddaf743bef1
   - enabled: 1
-    path: Assets/FizzUI/Samples/CustomCells/CustomCellScene.unity
-    guid: 56bb940b7da863947b5561f8e65fafd4
+    path: Assets/FizzUI/Samples/2. TabView/TabViewScene.unity
+    guid: 70843c5a213b1d64daa727c87b6d5afc
   - enabled: 1
-    path: Assets/FizzUI/Samples/Guilds/GuildScene.unity
+    path: Assets/FizzUI/Samples/3. Guilds/GuildScene.unity
     guid: 0bb8527d3b08c3547b217db9d9a7de36
   - enabled: 1
-    path: Assets/FizzUI/Samples/SlidingView/SlidingViewScene.unity
-    guid: 4469dba346544c648a85e67890f14828
+    path: Assets/FizzUI/Samples/4. CustomCells/CustomCellScene.unity
+    guid: 56bb940b7da863947b5561f8e65fafd4
   - enabled: 1
-    path: Assets/FizzUI/Samples/TabView/TabViewScene.unity
-    guid: 70843c5a213b1d64daa727c87b6d5afc
+    path: Assets/FizzUI/Samples/5. SlidingView/SlidingViewScene.unity
+    guid: 4469dba346544c648a85e67890f14828
   m_configObjects: {}

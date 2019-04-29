@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Fizz.Common;
 using Fizz.UI.Core;
@@ -29,16 +30,18 @@ namespace Fizz.UI
         /// </summary>
         public FizzChannelItemSelectedEvent OnChannelSelected;
 
-        [System.Serializable]
-        public class FizzChannelItemSelectedEvent : UnityEvent<FizzChannelMeta>
+        [Serializable]
+        public class FizzChannelItemSelectedEvent : UnityEvent<FizzChannel>
         { }
 
+        private List<string> _channelWatchList;
         private Dictionary<string, FizzChannelListItem> _channels;
         private int _reloadContainerLayout = -1;
-        private FizzChannelMeta _currentChannelData;
         private VerticalLayoutGroup _backgroundVLG;
 
         private bool _isInitialized = false;
+
+        public FizzChannel CurrentSelectedChannel { get; private set; }
 
         void Awake()
         {
@@ -61,6 +64,34 @@ namespace Fizz.UI
             }
         }
 
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            try
+            {
+                FizzService.Instance.OnChannelSubscribed += HandleOnChannelSubscribe;
+                FizzService.Instance.OnChannelUnsubscribed += HandleOnChannelUnsubscribe;
+            }
+            catch
+            { }
+
+            SyncViewState();
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            try
+            {
+                FizzService.Instance.OnChannelSubscribed -= HandleOnChannelSubscribe;
+                FizzService.Instance.OnChannelUnsubscribed -= HandleOnChannelUnsubscribe;
+            }
+            catch
+            { }
+        }
+
         #region Public Methods
 
         public void SetVisibility(bool visible)
@@ -72,70 +103,72 @@ namespace Fizz.UI
             }
         }
 
-        public void Setup(bool visible)
+        public void AddChannel(string channelId, bool select = false)
         {
             if (!_isInitialized)
             {
                 Initialize();
             }
 
-            _reloadContainerLayout = 0;
+            FizzChannel channel = GetChannelById(channelId);
 
-            gameObject.GetComponent<CanvasGroup>().alpha = visible ? 1 : 0;
-        }
-
-        public void AddChannel(FizzChannelMeta channelMeta, bool select = false)
-        {
-            if (!_isInitialized)
+            if (channel == null)
             {
-                Initialize();
+                if (!_channelWatchList.Contains(channelId)) _channelWatchList.Add(channelId);
+                FizzLogger.W("Channel not found, please add channel [" + channelId + "] to FizzService first.");
+                return;
             }
 
-            if (!_channels.ContainsKey(channelMeta.Id))
+            if (!_channels.ContainsKey(channel.Id))
             {
-                ResetLayout();
-                _AddButton(channelMeta);
-                _reloadContainerLayout = 1;
+                _AddButton(channel);
             }
 
-            if (_channels.ContainsKey(channelMeta.Id) && select)
+            if (_channels.ContainsKey(channel.Id) && select)
             {
-                TabButtonPressed(channelMeta);
+                TabButtonPressed(channel);
             }
         }
 
-        public void RemoveChannel(FizzChannelMeta channelMeta)
+        public void RemoveChannel(string channelId)
         {
             if (!_isInitialized)
             {
                 Initialize();
             }
+            
+            if (!_isInitialized)
+            {
+                Initialize();
+            }
 
-            ResetLayout();
-            _RemoveButton(channelMeta);
-            _reloadContainerLayout = 1;
+            _channelWatchList.Remove(channelId);
+
+            _RemoveButton(channelId);
         }
 
-        public void SetChannel(FizzChannelMeta channelMeta)
+        public bool SetChannel(string channelId)
         {
             if (!_isInitialized)
             {
                 Initialize();
             }
 
-            if (_channels.ContainsKey(channelMeta.Id))
+            FizzChannel channel = GetChannelById(channelId);
+
+            if (channel == null)
+                return false;
+
+            if (_channels.ContainsKey(channel.Id))
             {
-                TabButtonPressed(channelMeta);
+                TabButtonPressed(channel);
+                return true;
             }
             else
             {
                 FizzLogger.W("FizzChatView: Unable to set channel, add channel first");
+                return false;
             }
-        }
-
-        public FizzChannelMeta GetChannel()
-        {
-            return _currentChannelData;
         }
 
         public void Reset()
@@ -145,9 +178,8 @@ namespace Fizz.UI
                 Initialize();
             }
 
-            _currentChannelData = null;
-            if (_channels == null)
-                return;
+            CurrentSelectedChannel = null;
+            
             foreach (KeyValuePair<string, FizzChannelListItem> pair in _channels)
             {
                 FizzChannelListItem button = pair.Value;
@@ -157,6 +189,7 @@ namespace Fizz.UI
                 }
             }
             _channels.Clear();
+            _channelWatchList.Clear();
         }
 
         #endregion
@@ -168,8 +201,9 @@ namespace Fizz.UI
             if (_isInitialized)
                 return;
 
-            _currentChannelData = null;
+            CurrentSelectedChannel = null;
             _channels = new Dictionary<string, FizzChannelListItem>();
+            _channelWatchList = new List<string>();
             _backgroundVLG = ChannelItemPrefab.GetComponentInChildren<VerticalLayoutGroup>();
             _isInitialized = true;
         }
@@ -210,24 +244,28 @@ namespace Fizz.UI
                 ChannelsContainer.SetLayoutHorizontal();
             }
 
-            if (_currentChannelData == null && _channels.Count > 0)
+            if (CurrentSelectedChannel == null && _channels.Count > 0)
             {
                 TabButtonPressed(_channels.Values.First().GetChannel());
             }
         }
 
-        private void TabButtonPressed(FizzChannelMeta data)
+        private void TabButtonPressed(FizzChannel data)
         {
-            if (_currentChannelData != null)
+            if (CurrentSelectedChannel != null)
             {
-                if (_currentChannelData.Id.Equals(data.Id))
+                if (CurrentSelectedChannel.Id.Equals(data.Id))
+                {
+                    if (OnChannelSelected != null)
+                        OnChannelSelected.Invoke(data);
                     return;
+                }
 
-                FizzChannelListItem currentButton = _channels[_currentChannelData.Id];
+                FizzChannelListItem currentButton = _channels[CurrentSelectedChannel.Id];
                 currentButton.SetSelected(false);
             }
 
-            _currentChannelData = data;
+            CurrentSelectedChannel = data;
             if (OnChannelSelected != null)
                 OnChannelSelected.Invoke(data);
 
@@ -262,8 +300,10 @@ namespace Fizz.UI
             ChannelsContainer.SetLayoutHorizontal();
         }
 
-        private bool _AddButton(FizzChannelMeta _item)
+        private bool _AddButton(FizzChannel _item)
         {
+            if (_item == null) return false;
+
             bool _added = false;
             if (!_channels.ContainsKey(_item.Id))
             {
@@ -274,28 +314,96 @@ namespace Fizz.UI
                 _button.SetChannel(_item, TabButtonPressed);
                 _channels.Add(_item.Id, _button);
                 _added = true;
+
+                ResetLayout();
+                _reloadContainerLayout = 1;
             }
             return _added;
         }
 
-        private bool _RemoveButton(FizzChannelMeta _item)
+        private bool _RemoveButton(string channelId)
         {
             bool _removed = false;
-            if (!string.IsNullOrEmpty(_item.Id) && _channels.ContainsKey(_item.Id))
+            if (!string.IsNullOrEmpty(channelId) && _channels.ContainsKey(channelId))
             {
-                if (_currentChannelData != null && _currentChannelData.Id.Equals(_item.Id))
+                if (CurrentSelectedChannel != null && CurrentSelectedChannel.Id.Equals(channelId))
                 {
-                    _currentChannelData = null;
+                    CurrentSelectedChannel = null;
                 }
 
-                Destroy(_channels[_item.Id].gameObject);
-                _channels.Remove(_item.Id);
+                Destroy(_channels[channelId].gameObject);
+                _channels.Remove(channelId);
                 _removed = true;
+                ResetLayout();
                 _reloadContainerLayout = 1;
 
             }
             return _removed;
         }
+
+        private void SyncViewState()
+        {
+            try
+            {
+                foreach (FizzChannel channel in FizzService.Instance.Channels)
+                {
+                    if (_channelWatchList.Contains(channel.Id) && !_channels.ContainsKey(channel.Id))
+                    {
+                        _AddButton(channel);
+                        _channelWatchList.Remove(channel.Id);
+                    }
+                }
+
+                foreach (string channelId in _channels.Keys)
+                {
+                    if (FizzService.Instance.GetChannelById(channelId) == null)
+                    {
+                        _RemoveButton(channelId);
+                    }
+                }
+            }
+            catch { }
+        }
+
+        private void HandleOnChannelSubscribe(string channelId)
+        {
+            if (string.IsNullOrEmpty(channelId))
+                return;
+
+            if (_channels.ContainsKey(channelId))
+                return;
+
+            if (_channelWatchList.Contains(channelId))
+            {
+                _AddButton(GetChannelById(channelId));
+                _channelWatchList.Remove(channelId);
+            }
+        }
+
+        private void HandleOnChannelUnsubscribe(string channelId)
+        {
+            if (string.IsNullOrEmpty(channelId))
+                return;
+
+            if (!_channels.ContainsKey(channelId))
+                return;
+
+            _RemoveButton(channelId);
+        }
+
+        FizzChannel GetChannelById(string channelId)
+        {
+            try
+            {
+                return FizzService.Instance.GetChannelById(channelId);
+            }
+            catch (Exception)
+            {
+                FizzLogger.W("ChannelList unable to get channel with id " + channelId);
+            }
+            return null;
+        }
+
         #endregion
     }
 }

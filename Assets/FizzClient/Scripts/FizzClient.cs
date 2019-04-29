@@ -17,7 +17,7 @@ namespace Fizz
     [Flags]
     public enum FizzServices
     {
-        Chat =      1 << 0,
+        Chat = 1 << 0,
         Analytics = 1 << 1,
         All = Chat | Analytics
     }
@@ -34,7 +34,7 @@ namespace Fizz
         string Version { get; }
     }
 
-    public class FizzClient: IFizzClient
+    public class FizzClient : IFizzClient
     {
         readonly FizzChatClient _chat;
         readonly IFizzRestClient _restClient;
@@ -42,7 +42,7 @@ namespace Fizz
         readonly IFizzSessionProvider _sessionClient;
         readonly FizzIngestionClient _ingestionClient;
         readonly FizzActionDispatcher _dispatcher = new FizzActionDispatcher();
-        
+
         public FizzClient(string appId, string appSecret)
         {
             if (string.IsNullOrEmpty(appId))
@@ -51,13 +51,13 @@ namespace Fizz
             }
 
             _chat = new FizzChatClient(appId, _dispatcher);
-            _restClient = new FizzRestClient (_dispatcher);
-            _sessionClient = new FizzIdSecretSessionProvider (appId, appSecret, _restClient);
+            _restClient = new FizzRestClient(_dispatcher);
+            _sessionClient = new FizzIdSecretSessionProvider(appId, appSecret, _restClient);
             _authClient = new FizzAuthRestClient(_restClient);
             _ingestionClient = new FizzIngestionClient(new FizzInMemoryEventLog(), _dispatcher);
         }
 
-        public FizzClient (string appId, IFizzSessionProvider sessionClient)
+        public FizzClient(string appId, IFizzSessionProvider sessionClient)
         {
             if (string.IsNullOrEmpty(appId))
             {
@@ -66,7 +66,7 @@ namespace Fizz
 
             _sessionClient = sessionClient;
             _chat = new FizzChatClient(appId, _dispatcher);
-            _restClient = new FizzRestClient (_dispatcher);
+            _restClient = new FizzRestClient(_dispatcher);
             _authClient = new FizzAuthRestClient(_restClient);
             _ingestionClient = new FizzIngestionClient(new FizzInMemoryEventLog(), _dispatcher);
         }
@@ -126,7 +126,7 @@ namespace Fizz
         {
             _dispatcher.Process();
         }
-        
+
         public IFizzChatClient Chat
         {
             get
@@ -151,11 +151,9 @@ namespace Fizz
         {
             _ingestionClient.Close(() =>
             {
-                _chat.Close();
                 _authClient.Close();
+                _chat.Close(callback);
                 State = FizzClientState.Closed;
-
-                callback();
             });
         }
     }

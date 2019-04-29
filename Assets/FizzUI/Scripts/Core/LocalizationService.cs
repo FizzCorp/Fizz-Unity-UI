@@ -17,7 +17,7 @@ namespace Fizz.UI.Core
 
         private void InitLangugageResources()
         {
-            m_language = Utils.GetSystemLanguage();
+            m_language = "en";//Utils.GetSystemLanguage();
             TextAsset textAssets = Resources.Load(m_path + m_language) as TextAsset;
             if (textAssets != null && !string.IsNullOrEmpty(textAssets.text))
             {

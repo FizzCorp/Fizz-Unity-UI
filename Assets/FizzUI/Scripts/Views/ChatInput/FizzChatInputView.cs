@@ -76,8 +76,16 @@ namespace Fizz.UI
             CanvasGroup cg = gameObject.GetComponent<CanvasGroup>();
             if (cg != null)
             {
-                UnityEngine.Debug.Log("Interactable " + interactable);
                 cg.interactable = interactable;
+            }
+        }
+
+        public void SetVisibility(bool visible)
+        {
+            CanvasGroup cg = gameObject.GetComponent<CanvasGroup>();
+            if (cg != null)
+            {
+                cg.alpha = visible ? 1 : 0;
             }
         }
 
