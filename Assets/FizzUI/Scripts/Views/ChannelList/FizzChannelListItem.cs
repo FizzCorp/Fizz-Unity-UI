@@ -21,8 +21,8 @@ namespace Fizz.UI
         /// </summary>
         [SerializeField] Image LabelBackground;
 
-        private FizzChannelMeta _meta;
-        private Action<FizzChannelMeta> _onClick;
+        private FizzChannel _meta;
+        private Action<FizzChannel> _onClick;
 
         protected override void OnEnable()
         {
@@ -38,7 +38,7 @@ namespace Fizz.UI
             gameObject.GetComponent<Button>().onClick.RemoveListener(HandleButtonClick);
         }
 
-        public void SetChannel(FizzChannelMeta channel, Action<FizzChannelMeta> onClick)
+        public void SetChannel(FizzChannel channel, Action<FizzChannel> onClick)
         {
             _meta = channel;
             _onClick = onClick;
@@ -48,7 +48,7 @@ namespace Fizz.UI
             LabelBackground.color = Color.white;
         }
 
-        public FizzChannelMeta GetChannel()
+        public FizzChannel GetChannel()
         {
             return _meta;
         }

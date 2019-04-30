@@ -21,7 +21,7 @@ namespace Fizz.Chat.Impl
 
         private string _userId;
         private IFizzAuthRestClient _restClient;
-        private FizzSessionRepository sessionRepository;
+        private readonly FizzSessionRepository sessionRepository;
 
         public IFizzChannelMessageListener Listener
         {
@@ -72,14 +72,14 @@ namespace Fizz.Chat.Impl
             });
         }
 
-        public void Close ()
+        public void Close (Action cb)
         {
             IfOpened (() =>
             {
                 _userId = null;
                 _restClient = null;
 
-                _messageListener.Close ();
+                _messageListener.Close (cb);
             });
         }
 
@@ -88,6 +88,7 @@ namespace Fizz.Chat.Impl
             string body,
             Dictionary<string, string> data,
             bool translate,
+            bool filter,
             bool persist,
             Action<FizzException> callback)
         {
@@ -106,6 +107,7 @@ namespace Fizz.Chat.Impl
                     json[FizzJsonChannelMessage.KEY_NICK] = nick;
                     json[FizzJsonChannelMessage.KEY_BODY] = body;
                     json[FizzJsonChannelMessage.KEY_PERSIST].AsBool = persist;
+                    json[FizzJsonChannelMessage.KEY_FILTER].AsBool = filter;
                     json[FizzJsonChannelMessage.KEY_TRANSLATE].AsBool = translate;
 
                     string dataStr = string.Empty;
@@ -140,6 +142,7 @@ namespace Fizz.Chat.Impl
             string body,
             Dictionary<string, string> data,
             bool translate,
+            bool filter,
             bool persist,
             Action<FizzException> callback)
         {
@@ -164,6 +167,7 @@ namespace Fizz.Chat.Impl
                     json[FizzJsonChannelMessage.KEY_NICK] = nick;
                     json[FizzJsonChannelMessage.KEY_BODY] = body;
                     json[FizzJsonChannelMessage.KEY_PERSIST].AsBool = persist;
+                    json[FizzJsonChannelMessage.KEY_FILTER].AsBool = filter;
                     json[FizzJsonChannelMessage.KEY_TRANSLATE].AsBool = translate;
 
                     string dataStr = string.Empty;

@@ -3,22 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using Fizz.Chat;
 using Fizz.Common;
-using Fizz.UI.Model;
 
-namespace Fizz
+namespace Fizz.UI.Model
 {
     public class FizzChannel
     {
-        private bool cached = false;
-        private FizzChannelMeta channelMeta = null;
-        private SortedList<long, FizzChannelMessage> _messageList = new SortedList<long, FizzChannelMessage>(new FizzChannelMessageComparer());
-        IList<FizzChannelMessage> cachedMessageList = null;
+        public string Id { get { return Meta.Id; } }
 
-        public string Id { get { return channelMeta.Id; } }
+        public string Name { get { return Meta.Name; } }
 
-        public string Name { get { return channelMeta.Name; } }
-
-        public FizzChannelMeta Meta { get { return channelMeta; } }
+        public FizzChannelMeta Meta { get; } = null;
 
         public IList<FizzChannelMessage> Messages
         {
@@ -35,7 +29,7 @@ namespace Fizz
 
         public FizzChannel(FizzChannelMeta channelMeta)
         {
-            this.channelMeta = channelMeta;
+            this.Meta = channelMeta;
         }
 
         public void AddMessage(FizzChannelMessage message, bool notify = true)
@@ -75,12 +69,34 @@ namespace Fizz
 
         public void Subscribe(Action<FizzException> cb)
         {
-            FizzService.Instance.Client.Chat.Subscribe(Id, cb);
+            FizzService.Instance.Client.Chat.Subscribe(Id, ex =>
+            {
+                if (ex == null)
+                {
+                    if (FizzService.Instance.OnChannelSubscribed != null)
+                    {
+                        FizzService.Instance.OnChannelSubscribed.Invoke(Id);
+                    }
+                }
+
+                FizzUtils.DoCallback(ex, cb);
+            });
         }
 
         public void Unsubscribe(Action<FizzException> cb)
         {
-            FizzService.Instance.Client.Chat.Unsubscribe(Id, cb);
+            FizzService.Instance.Client.Chat.Unsubscribe(Id, ex =>
+            {
+                if (ex == null)
+                {
+                    if (FizzService.Instance.OnChannelUnsubscribed != null)
+                    {
+                        FizzService.Instance.OnChannelUnsubscribed.Invoke(Id);
+                    }
+                }
+
+                FizzUtils.DoCallback(ex, cb);
+            });
         }
 
         public void SubscribeAndQuery()
@@ -96,11 +112,11 @@ namespace Fizz
                     else
                     {
                         FizzLogger.D("Subscribed " + Id);
-                        FizzService.Instance.Client.Chat.QueryLatest(Id, channelMeta.InitialQueryMessageCount, (msgs, qEx) =>
+
+                        FizzService.Instance.Client.Chat.QueryLatest(Id, Meta.InitialQueryMessageCount, (msgs, qEx) =>
                         {
                             if (qEx == null)
                             {
-                                FizzLogger.D("QueryLatest " + msgs.Count);
                                 Reset();
 
                                 if (msgs != null && msgs.Count > 0)
@@ -108,9 +124,9 @@ namespace Fizz
                                     AddMessages(msgs);
                                 }
 
-                                if (FizzService.Instance.OnChannelHistoryUpdated != null)
+                                if (FizzService.Instance.OnChannelMessagesAvailable != null)
                                 {
-                                    FizzService.Instance.OnChannelHistoryUpdated.Invoke(Id);
+                                    FizzService.Instance.OnChannelMessagesAvailable.Invoke(Id);
                                 }
                             }
                             else
@@ -138,7 +154,7 @@ namespace Fizz
 
             try
             {
-                FizzService.Instance.Client.Chat.QueryLatest(Id, channelMeta.InitialQueryMessageCount, beforeId, (msgs, qEx) =>
+                FizzService.Instance.Client.Chat.QueryLatest(Id, Meta.InitialQueryMessageCount, beforeId, (msgs, qEx) =>
                 {
                     if (qEx == null)
                     {
@@ -147,9 +163,9 @@ namespace Fizz
                             AddMessages(msgs);
                         }
 
-                        if (FizzService.Instance.OnChannelHistoryUpdated != null)
+                        if (FizzService.Instance.OnChannelMessagesAvailable != null)
                         {
-                            FizzService.Instance.OnChannelHistoryUpdated.Invoke(Id);
+                            FizzService.Instance.OnChannelMessagesAvailable.Invoke(Id);
                         }
                     }
 
@@ -170,6 +186,10 @@ namespace Fizz
             _messageList.Clear();
             cached = false;
         }
+
+        private bool cached = false;
+        IList<FizzChannelMessage> cachedMessageList = null;
+        private SortedList<long, FizzChannelMessage> _messageList = new SortedList<long, FizzChannelMessage>(new FizzChannelMessageComparer());
     }
 
     class FizzChannelMessageComparer : IComparer<long>

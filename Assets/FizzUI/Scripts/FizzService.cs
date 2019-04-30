@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Fizz;
 using Fizz.Chat;
 using Fizz.Common;
-using Fizz.UI;
 using Fizz.UI.Model;
 using UnityEngine;
 
@@ -12,8 +10,8 @@ namespace Fizz
     public class FizzService : MonoBehaviour
     {
 
-        private static string APP_ID = "751326fc-305b-4aef-950a-074c9a21d461";
-        private static string APP_SECRET = "5c963d03-64e6-439a-b2a9-31db60dd0b34";
+        private static readonly string APP_ID = "751326fc-305b-4aef-950a-074c9a21d461";
+        private static readonly string APP_SECRET = "5c963d03-64e6-439a-b2a9-31db60dd0b34";
 
         public IFizzClient Client { get; private set; }
 
@@ -25,16 +23,20 @@ namespace Fizz
 
         public string UserName { get; private set; }
 
+        public IFizzLanguageCode LanguageCode { get; private set; }
+
         public List<FizzChannel> Channels { get; private set; }
 
-        public Action<bool> OnConnected;
-        public Action<FizzException> OnDisconnected;
+        public Action<bool> OnConnected { get; set; }
+        public Action<FizzException> OnDisconnected { get; set; }
 
-        public Action<string, FizzChannelMessage> OnChannelMessage;
-        public Action<string, FizzChannelMessage> OnChannelMessageUpdate;
-        public Action<string, FizzChannelMessage> OnChannelMessageDelete;
+        public Action<string, FizzChannelMessage> OnChannelMessagePublish { get; set; }
+        public Action<string, FizzChannelMessage> OnChannelMessageUpdate { get; set; }
+        public Action<string, FizzChannelMessage> OnChannelMessageDelete { get; set; }
 
-        public Action<string> OnChannelHistoryUpdated;
+        public Action<string> OnChannelSubscribed { get; set; }
+        public Action<string> OnChannelUnsubscribed { get; set; }
+        public Action<string> OnChannelMessagesAvailable { get; set; }
 
         private Dictionary<string, FizzChannel> channelLoopup;
 
@@ -70,17 +72,135 @@ namespace Fizz
             }
         }
 
+        public void Open(string userId, string userName, IFizzLanguageCode langCode, bool tranlation, Action<bool> onDone)
+        {
+            if (string.IsNullOrEmpty(userId))
+            {
+                FizzLogger.E("FizzService can not open client with null of empty userId.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(userName))
+            {
+                FizzLogger.E("FizzService can not open client with null of empty userName.");
+                return;
+            }
+
+            if (langCode == null)
+            {
+                FizzLogger.E("FizzService can not open client with null language code.");
+                return;
+            }
+
+            UserId = userId;
+            UserName = userName;
+            LanguageCode = langCode;
+            IsTranslationEnabled = tranlation;
+            Client.Open(userId, langCode.Code, FizzServices.All, ex =>
+            {
+                if (onDone != null)
+                    onDone(ex == null);
+            });
+        }
+
+        public void Close()
+        {
+            if (Client != null)
+            {
+                Client.Close(ex =>
+                {
+                    IsConnected = false;
+                });
+            }
+
+            Channels.Clear();
+            channelLoopup.Clear();
+        }
+
+        public void SubscribeChannel(FizzChannelMeta meta)
+        {
+            if (Client.State == FizzClientState.Closed)
+            {
+                FizzLogger.W("FizzClient should be opnened before subscrirbing channel.");
+                return;
+            }
+
+            if (meta == null)
+            {
+                FizzLogger.E("FizzClient unable to subscribe, channel meta is null.");
+                return;
+            }
+
+            if (channelLoopup.ContainsKey(meta.Id))
+            {
+                FizzLogger.W("FizzClient channel is already subscribed.");
+                return;
+            }
+
+            FizzChannel fizzChannel = AddChannelToList(meta);
+
+            if (IsConnected && fizzChannel != null)
+            {
+                fizzChannel.SubscribeAndQuery();
+            }
+        }
+
+        public void UnsubscribeChannel(string channelId)
+        {
+            if (Client.State == FizzClientState.Closed)
+            {
+                FizzLogger.W("FizzClient should be opnened before unsubscrirbing channel.");
+                return;
+            }
+
+            if (string.IsNullOrEmpty(channelId))
+            {
+                FizzLogger.E("FizzClient unable to unsubscribe, channelId is null or empty.");
+                return;
+            }
+
+            try
+            {
+                if (channelLoopup.ContainsKey(channelId))
+                {
+                    FizzChannel fizzChannel = channelLoopup[channelId];
+                    channelLoopup.Remove(channelId);
+                    Channels.Remove(fizzChannel);
+                    fizzChannel.Unsubscribe(ex => { });
+                }
+                else
+                {
+                    FizzLogger.W("FizzService unable to unsibscribe, channel [" + channelId + "] does not exist. ");
+                }
+            }
+            catch (Exception e)
+            {
+                FizzLogger.E(e);
+            }
+        }
+
+        public FizzChannel GetChannel(string id)
+        {
+            if (channelLoopup.ContainsKey(id))
+                return channelLoopup[id];
+
+            return null;
+        }
+
         void Awake()
         {
             UserId = "fizz_user";
             UserName = "Fizz User";
             IsConnected = false;
             IsTranslationEnabled = true;
+            LanguageCode = FizzLanguageCodes.English;
 
             Client = new FizzClient(APP_ID, APP_SECRET);
             Channels = new List<FizzChannel>();
 
             channelLoopup = new Dictionary<string, FizzChannel>();
+
+            AddInternalListeners();
         }
 
         void Update()
@@ -91,149 +211,25 @@ namespace Fizz
             }
         }
 
-        public void Open(string userId, string userName, string locale, bool tranlation, List<FizzChannelMeta> channelList, Action<bool> onDone)
+        void AddInternalListeners()
         {
-            UserId = userId;
-            UserName = userName;
-            AddChannelsInternal(channelList);
-            IsTranslationEnabled = tranlation;
-            Client.Open(userId, locale, FizzServices.All, ex =>
-            {
-                if (ex == null)
-                {
-
-                    Client.Chat.Listener.OnConnected += Listener_OnConnected;
-                    Client.Chat.Listener.OnDisconnected += Listener_OnDisconnected;
-                    Client.Chat.Listener.OnMessageUpdated += Listener_OnMessageUpdated;
-                    Client.Chat.Listener.OnMessageDeleted += Listener_OnMessageDeleted;
-                    Client.Chat.Listener.OnMessagePublished += Listener_OnMessagePublished;
-                }
-
-                if (onDone != null)
-                    onDone(ex == null);
-            });
+            Client.Chat.Listener.OnConnected += Listener_OnConnected;
+            Client.Chat.Listener.OnDisconnected += Listener_OnDisconnected;
+            Client.Chat.Listener.OnMessageUpdated += Listener_OnMessageUpdated;
+            Client.Chat.Listener.OnMessageDeleted += Listener_OnMessageDeleted;
+            Client.Chat.Listener.OnMessagePublished += Listener_OnMessagePublished;
         }
 
-        public void Close()
-        {
-            if (Client != null)
-            {
-                if (Client.Chat != null)
-                {
-                    Client.Chat.Listener.OnConnected -= Listener_OnConnected;
-                    Client.Chat.Listener.OnDisconnected -= Listener_OnDisconnected;
-                    Client.Chat.Listener.OnMessageUpdated -= Listener_OnMessageUpdated;
-                    Client.Chat.Listener.OnMessageDeleted -= Listener_OnMessageDeleted;
-                    Client.Chat.Listener.OnMessagePublished -= Listener_OnMessagePublished;
-                }
-
-                Client.Close(ex =>
-                {
-                    IsConnected = false;
-                });
-
-            }
-
-            Channels.Clear();
-            channelLoopup.Clear();
-        }
-
-        public void AddChannel(FizzChannelMeta channel)
-        {
-            if (channel == null)
-                return;
-
-            if (channelLoopup.ContainsKey(channel.Id))
-                return;
-
-            FizzChannel fizzChannel = AddChannelInternal(channel);
-
-            if (IsConnected && fizzChannel != null)
-            {
-                fizzChannel.SubscribeAndQuery();
-            }
-        }
-
-        public void RemoveChannel(FizzChannelMeta channel)
-        {
-            if (channel == null)
-                return;
-
-            if (string.IsNullOrEmpty(channel.Id))
-                return;
-
-            try
-            {
-                if (channelLoopup.ContainsKey(channel.Id))
-                {
-                    FizzChannel fizzChannel = channelLoopup[channel.Id];
-                    channelLoopup.Remove(channel.Id);
-                    Channels.Remove(fizzChannel);
-                    fizzChannel.Unsubscribe(ex => { });
-                }
-                else
-                {
-                    FizzLogger.W("FizzService RemoveChannel channel does not exist");
-                }
-            }
-            catch (Exception e)
-            {
-                FizzLogger.E(e);
-            }
-        }
-
-        public void PublishMessage(string channel, string nick, string body, Dictionary<string, string> data, bool translate, bool persist, Action<FizzException> callback)
-        {
-            if (Client != null)
-            {
-                Client.Chat.PublishMessage(channel, nick, body, data, translate, persist, ex =>
-                {
-                    if (ex == null)
-                    {
-                        Client.Ingestion.TextMessageSent(channel, body, nick);
-                    }
-                    if (callback != null)
-                    {
-                        callback.Invoke(ex);
-                    }
-                });
-            }
-        }
-
-        public void UpdateMessage(string channel, long messageId, string nick, string body, Dictionary<string, string> data, bool translate, bool persist, Action<FizzException> callback)
-        {
-            if (Client != null)
-            {
-                Client.Chat.UpdateMessage(channel, messageId, nick, body, data, translate, persist, callback);
-            }
-        }
-
-        public void DeleteMessage(string channelId, long messageId, Action<FizzException> callback)
-        {
-            if (Client != null)
-            {
-                Client.Chat.DeleteMessage(channelId, messageId, callback);
-            }
-        }
-
-        public FizzChannel GetChannelById(string id)
-        {
-            if (channelLoopup.ContainsKey(id))
-                return channelLoopup[id];
-
-            return null;
-        }
-
-        void Listener_OnMessagePublished(Fizz.Chat.FizzChannelMessage msg)
+        void Listener_OnMessagePublished(FizzChannelMessage msg)
         {
             if (channelLoopup.ContainsKey(msg.To))
             {
                 channelLoopup[msg.To].AddMessage(msg);
             }
 
-            if (OnChannelMessage != null)
+            if (OnChannelMessagePublish != null)
             {
-                OnChannelMessage.Invoke(msg.To, msg);
+                OnChannelMessagePublish.Invoke(msg.To, msg);
             }
         }
 
@@ -291,18 +287,7 @@ namespace Fizz
             }
         }
 
-        void AddChannelsInternal(List<FizzChannelMeta> channelList)
-        {
-            if (channelList == null)
-                return;
-
-            foreach (FizzChannelMeta meta in channelList)
-            {
-                AddChannelInternal(meta);
-            }
-        }
-
-        FizzChannel AddChannelInternal(FizzChannelMeta channelMeta)
+        FizzChannel AddChannelToList(FizzChannelMeta channelMeta)
         {
             if (channelLoopup.ContainsKey(channelMeta.Id))
                 return null;
