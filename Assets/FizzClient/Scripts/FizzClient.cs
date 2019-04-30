@@ -145,7 +145,7 @@ namespace Fizz
 
         public FizzClientState State { get; private set; }
 
-        public string Version { get; } = "v1.4.4";
+        public string Version { get; } = "v1.4.5";
 
         private void Close(Action callback)
         {
