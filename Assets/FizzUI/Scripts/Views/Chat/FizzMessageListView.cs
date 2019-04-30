@@ -158,20 +158,22 @@ namespace Fizz.UI
 
                 AddAction(model);
 
-                FizzService.Instance.PublishMessage(
+                FizzService.Instance.Client.Chat.PublishMessage(
                     _channel.Id,
                     FizzService.Instance.UserName,
                     message,
                     data,
                     FizzService.Instance.IsTranslationEnabled,
-                    _channel.Meta.PersistMessages,
                     _channel.Meta.FilterContent,
+                    _channel.Meta.PersistMessages,
                     exception =>
                     {
                         if (exception == null)
                         {
                             model.DeliveryState = FizzChatCellDeliveryState.Sent;
                             AddAction(model);
+                            
+                            FizzService.Instance.Client.Ingestion.TextMessageSent(_channel.Id, message, FizzService.Instance.UserName);
                         }
                     });
             }
@@ -473,7 +475,7 @@ namespace Fizz.UI
         {
             try
             {
-                return FizzService.Instance.GetChannelById(id);
+                return FizzService.Instance.GetChannel(id);
             }
             catch
             {

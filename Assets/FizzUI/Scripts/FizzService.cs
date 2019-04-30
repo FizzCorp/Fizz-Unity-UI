@@ -10,8 +10,8 @@ namespace Fizz
     public class FizzService : MonoBehaviour
     {
 
-        private static string APP_ID = "751326fc-305b-4aef-950a-074c9a21d461";
-        private static string APP_SECRET = "5c963d03-64e6-439a-b2a9-31db60dd0b34";
+        private static readonly string APP_ID = "751326fc-305b-4aef-950a-074c9a21d461";
+        private static readonly string APP_SECRET = "5c963d03-64e6-439a-b2a9-31db60dd0b34";
 
         public IFizzClient Client { get; private set; }
 
@@ -69,30 +69,6 @@ namespace Fizz
 
                     return m_Instance;
                 }
-            }
-        }
-
-        void Awake()
-        {
-            UserId = "fizz_user";
-            UserName = "Fizz User";
-            IsConnected = false;
-            IsTranslationEnabled = true;
-            LanguageCode = FizzLanguageCodes.English;
-
-            Client = new FizzClient(APP_ID, APP_SECRET);
-            Channels = new List<FizzChannel>();
-
-            channelLoopup = new Dictionary<string, FizzChannel>();
-
-            AddInternalListeners();
-        }
-
-        void Update()
-        {
-            if (Client != null)
-            {
-                Client.Update();
             }
         }
 
@@ -203,64 +179,36 @@ namespace Fizz
             }
         }
 
-        public void PublishMessage(string channel, string nick, string body, Dictionary<string, string> data, bool translate, bool filter, bool persist, Action<FizzException> callback)
-        {
-            if (Client.State == FizzClientState.Closed)
-            {
-                FizzLogger.W("FizzClient should be opnened before publishing a message.");
-                return;
-            }
-
-            if (Client != null)
-            {
-                Client.Chat.PublishMessage(channel, nick, body, data, translate, filter, persist, ex =>
-                {
-                    if (ex == null)
-                    {
-                        Client.Ingestion.TextMessageSent(channel, body, nick);
-                    }
-                    if (callback != null)
-                    {
-                        callback.Invoke(ex);
-                    }
-                });
-            }
-        }
-
-        public void UpdateMessage(string channel, long messageId, string nick, string body, Dictionary<string, string> data, bool translate, bool filter, bool persist, Action<FizzException> callback)
-        {
-            if (Client.State == FizzClientState.Closed)
-            {
-                FizzLogger.W("FizzClient should be opnened before updating a message.");
-                return;
-            }
-
-            if (Client != null)
-            {
-                Client.Chat.UpdateMessage(channel, messageId, nick, body, data, translate, filter, persist, callback);
-            }
-        }
-
-        public void DeleteMessage(string channelId, long messageId, Action<FizzException> callback)
-        {
-            if (Client.State == FizzClientState.Closed)
-            {
-                FizzLogger.W("FizzClient should be opnened before deleting a message.");
-                return;
-            }
-
-            if (Client != null)
-            {
-                Client.Chat.DeleteMessage(channelId, messageId, callback);
-            }
-        }
-
-        public FizzChannel GetChannelById(string id)
+        public FizzChannel GetChannel(string id)
         {
             if (channelLoopup.ContainsKey(id))
                 return channelLoopup[id];
 
             return null;
+        }
+
+        void Awake()
+        {
+            UserId = "fizz_user";
+            UserName = "Fizz User";
+            IsConnected = false;
+            IsTranslationEnabled = true;
+            LanguageCode = FizzLanguageCodes.English;
+
+            Client = new FizzClient(APP_ID, APP_SECRET);
+            Channels = new List<FizzChannel>();
+
+            channelLoopup = new Dictionary<string, FizzChannel>();
+
+            AddInternalListeners();
+        }
+
+        void Update()
+        {
+            if (Client != null)
+            {
+                Client.Update();
+            }
         }
 
         void AddInternalListeners()

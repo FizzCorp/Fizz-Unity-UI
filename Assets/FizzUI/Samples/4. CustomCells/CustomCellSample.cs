@@ -79,7 +79,7 @@ namespace Fizz.Demo
             };
 
             // Publish a new message with custom data
-            FizzService.Instance.PublishMessage(
+            FizzService.Instance.Client.Chat.PublishMessage(
                 statusChannel.Id,
                 FizzService.Instance.UserName,
                 string.Empty,

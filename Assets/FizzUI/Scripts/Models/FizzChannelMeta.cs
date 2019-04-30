@@ -8,7 +8,7 @@
 
         public bool PersistMessages { get; set; } = true;
 
-        public bool FilterContent { get; set; } = false;
+        public bool FilterContent { get; set; } = true;
 
         public bool Readonly { get; set; } = false;
 

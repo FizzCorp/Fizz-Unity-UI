@@ -356,7 +356,7 @@ namespace Fizz.UI
 
                 foreach (string channelId in _channels.Keys)
                 {
-                    if (FizzService.Instance.GetChannelById(channelId) == null)
+                    if (FizzService.Instance.GetChannel(channelId) == null)
                     {
                         _RemoveButton(channelId);
                     }
@@ -395,7 +395,7 @@ namespace Fizz.UI
         {
             try
             {
-                return FizzService.Instance.GetChannelById(channelId);
+                return FizzService.Instance.GetChannel(channelId);
             }
             catch (Exception)
             {

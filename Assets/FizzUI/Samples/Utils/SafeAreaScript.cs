@@ -1,40 +1,55 @@
 ﻿using UnityEngine;
 
-public class SafeAreaScript : MonoBehaviour
+namespace Fizz.Demo
 {
-    private Rect safeRect = new Rect(0, 0, Screen.width, Screen.height);
-    private RectTransform rectTransform;
-
-    void Awake()
+    public class SafeAreaScript : MonoBehaviour
     {
-        rectTransform = gameObject.GetComponent<RectTransform>();
+        private RectTransform panel;
 
-        UpdateSafeAreaRect();
-    }
+        private Rect lastSafeArea = new Rect(0, 0, Screen.width, Screen.height);
 
-    void Start()
-    {
-        ApplySafeArea();
-    }
+        void Awake()
+        {
+            panel = GetComponent<RectTransform>();
 
-    void UpdateSafeAreaRect()
-    {
+            Refresh();
+        }
+
+        void Update()
+        {
+            Refresh();
+        }
+
+        void Refresh()
+        {
+            Rect safeRect = UpdateSafeAreaRect();
+            if (safeRect != lastSafeArea)
+            {
+                ApplySafeArea(safeRect);
+            }
+        }
+
+        Rect UpdateSafeAreaRect()
+        {
 #if UNITY_2017_2_OR_NEWER
-        safeRect = Screen.safeArea;
+            return Screen.safeArea;
 #endif
-    }
+        }
 
-    void ApplySafeArea()
-    {
-        var anchorMin = safeRect.position;
-        var anchorMax = safeRect.position + safeRect.size;
+        void ApplySafeArea(Rect sRect)
+        {
+            lastSafeArea = sRect;
 
-        anchorMin.x /= Screen.width;
-        anchorMin.y /= Screen.height;
-        anchorMax.x /= Screen.width;
-        anchorMax.y /= Screen.height;
+            var anchorMin = sRect.position;
+            var anchorMax = sRect.position + sRect.size;
 
-        rectTransform.anchorMin = anchorMin;
-        rectTransform.anchorMax = anchorMax;
+            anchorMin.x /= Screen.width;
+            anchorMin.y /= Screen.height;
+            anchorMax.x /= Screen.width;
+            anchorMax.y /= Screen.height;
+
+            panel.anchorMin = anchorMin;
+            panel.anchorMax = anchorMax;
+        }
     }
 }

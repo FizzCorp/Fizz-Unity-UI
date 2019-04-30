@@ -83,13 +83,17 @@ namespace Fizz.Demo
                 return;
 
             // Delete message
-            FizzService.Instance.DeleteMessage(_message.To, _message.Id, ex =>
+            try
             {
-                if (ex == null)
+                FizzService.Instance.Client.Chat.DeleteMessage(_message.To, _message.Id, ex =>
                 {
-                    FizzLogger.D("Status Deleted");
-                }
-            });
+                    if (ex == null)
+                    {
+                        FizzLogger.D("Status Deleted");
+                    }
+                });
+            }
+            catch { }
         }
 
         private void UpdateStatus(string status)
@@ -97,16 +101,20 @@ namespace Fizz.Demo
             if (_message == null)
                 return;
 
-            // Update message with updated data\
-            Dictionary<string, string> data = _message.Data;
-            data[CustomCellSample.KEY_DATA_STATUS] = status;
-            FizzService.Instance.UpdateMessage(_message.To, _message.Id, _message.Nick, _message.Body, data, true, false, true, ex =>
+            // Update message with updated data
+            try
             {
-                if (ex == null)
+                Dictionary<string, string> data = _message.Data;
+                data[CustomCellSample.KEY_DATA_STATUS] = status;
+                FizzService.Instance.Client.Chat.UpdateMessage(_message.To, _message.Id, _message.Nick, _message.Body, data, true, false, true, ex =>
                 {
-                    FizzLogger.D("Status Updated");
-                }
-            });
+                    if (ex == null)
+                    {
+                        FizzLogger.D("Status Updated");
+                    }
+                });
+            }
+            catch { }
         }
     }
 }
