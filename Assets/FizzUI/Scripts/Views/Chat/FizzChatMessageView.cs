@@ -14,7 +14,7 @@ namespace Fizz.UI
     /// <summary>
     /// User interface chat view.
     /// </summary>
-    public class FizzMessageListView : FizzBaseComponent, ICustomScrollRectDataSource
+    public class FizzChatMessageView : FizzBaseComponent, ICustomScrollRectDataSource
     {
         /// <summary>
         /// The background image.

@@ -20,7 +20,7 @@
 
         public FizzChannelMeta(string id, string name)
         {
-            Id = id + "_temp";
+            Id = id;
             Name = name;
         }
 

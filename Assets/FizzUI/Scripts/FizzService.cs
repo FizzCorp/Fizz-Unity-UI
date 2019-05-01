@@ -7,12 +7,14 @@ using UnityEngine;
 
 namespace Fizz
 {
-    public class FizzService : MonoBehaviour
+    public class FizzService : Singleton<FizzService>
     {
-
+        #region Id and Secret
         private static readonly string APP_ID = "751326fc-305b-4aef-950a-074c9a21d461";
         private static readonly string APP_SECRET = "5c963d03-64e6-439a-b2a9-31db60dd0b34";
+        #endregion
 
+        #region Properties
         public IFizzClient Client { get; private set; }
 
         public bool IsConnected { get; private set; }
@@ -26,7 +28,9 @@ namespace Fizz
         public IFizzLanguageCode LanguageCode { get; private set; }
 
         public List<FizzChannel> Channels { get; private set; }
+        #endregion
 
+        #region Events
         public Action<bool> OnConnected { get; set; }
         public Action<FizzException> OnDisconnected { get; set; }
 
@@ -37,43 +41,12 @@ namespace Fizz
         public Action<string> OnChannelSubscribed { get; set; }
         public Action<string> OnChannelUnsubscribed { get; set; }
         public Action<string> OnChannelMessagesAvailable { get; set; }
-
-        private Dictionary<string, FizzChannel> channelLoopup;
-
-        private static readonly object m_Lock = new object();
-        private static FizzService m_Instance = null;
-
-        public static FizzService Instance
-        {
-            get
-            {
-                lock (m_Lock)
-                {
-                    if (m_Instance == null)
-                    {
-                        // Search for existing instance.
-                        m_Instance = (FizzService)FindObjectOfType(typeof(FizzService));
-
-                        // Create new instance if one doesn't already exist.
-                        if (m_Instance == null)
-                        {
-                            // Need to create a new GameObject to attach the singleton to.
-                            var singletonObject = new GameObject();
-                            m_Instance = singletonObject.AddComponent<FizzService>();
-                            singletonObject.name = typeof(FizzService).ToString() + " (Singleton)";
-
-                            // Make instance persistent.
-                            DontDestroyOnLoad(singletonObject);
-                        }
-                    }
-
-                    return m_Instance;
-                }
-            }
-        }
+        #endregion
 
         public void Open(string userId, string userName, IFizzLanguageCode langCode, bool tranlation, Action<bool> onDone)
         {
+            if (!_isIntialized) Initialize();
+
             if (string.IsNullOrEmpty(userId))
             {
                 FizzLogger.E("FizzService can not open client with null of empty userId.");
@@ -105,6 +78,8 @@ namespace Fizz
 
         public void Close()
         {
+            if (!_isIntialized) Initialize();
+
             if (Client != null)
             {
                 Client.Close(ex =>
@@ -113,12 +88,14 @@ namespace Fizz
                 });
             }
 
-            Channels.Clear();
-            channelLoopup.Clear();
+            if (Channels != null) Channels.Clear();
+            if (channelLoopup != null) channelLoopup.Clear();
         }
 
         public void SubscribeChannel(FizzChannelMeta meta)
         {
+            if (!_isIntialized) Initialize();
+
             if (Client.State == FizzClientState.Closed)
             {
                 FizzLogger.W("FizzClient should be opnened before subscrirbing channel.");
@@ -147,6 +124,8 @@ namespace Fizz
 
         public void UnsubscribeChannel(string channelId)
         {
+            if (!_isIntialized) Initialize();
+
             if (Client.State == FizzClientState.Closed)
             {
                 FizzLogger.W("FizzClient should be opnened before unsubscrirbing channel.");
@@ -181,6 +160,8 @@ namespace Fizz
 
         public FizzChannel GetChannel(string id)
         {
+            if (!_isIntialized) Initialize();
+
             if (channelLoopup.ContainsKey(id))
                 return channelLoopup[id];
 
@@ -189,6 +170,23 @@ namespace Fizz
 
         void Awake()
         {
+            if (!_isIntialized) Initialize();
+
+            AddInternalListeners();
+        }
+
+        void Update()
+        {
+            if (Client != null)
+            {
+                Client.Update();
+            }
+        }
+
+        void Initialize ()
+        {
+            if (_isIntialized) return;
+
             UserId = "fizz_user";
             UserName = "Fizz User";
             IsConnected = false;
@@ -200,15 +198,23 @@ namespace Fizz
 
             channelLoopup = new Dictionary<string, FizzChannel>();
 
-            AddInternalListeners();
+            _isIntialized = true;
         }
 
-        void Update()
+        FizzChannel AddChannelToList(FizzChannelMeta channelMeta)
         {
-            if (Client != null)
-            {
-                Client.Update();
-            }
+            if (channelLoopup.ContainsKey(channelMeta.Id))
+                return null;
+
+            FizzChannel channel = new FizzChannel(channelMeta);
+            Channels.Add(channel);
+            channelLoopup.Add(channel.Id, channel);
+            return channel;
+        }
+
+        void OnDestroy()
+        {
+            Close();
         }
 
         void AddInternalListeners()
@@ -287,20 +293,7 @@ namespace Fizz
             }
         }
 
-        FizzChannel AddChannelToList(FizzChannelMeta channelMeta)
-        {
-            if (channelLoopup.ContainsKey(channelMeta.Id))
-                return null;
-
-            FizzChannel channel = new FizzChannel(channelMeta);
-            Channels.Add(channel);
-            channelLoopup.Add(channel.Id, channel);
-            return channel;
-        }
-
-        void OnApplicationQuit()
-        {
-            Close();
-        }
+        private bool _isIntialized = false;
+        private Dictionary<string, FizzChannel> channelLoopup;
     }
 }

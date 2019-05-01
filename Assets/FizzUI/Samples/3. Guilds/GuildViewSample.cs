@@ -18,7 +18,7 @@ namespace Fizz.Demo
         [SerializeField] ChatPopup chatPopup;
 
         // Global Channel Id
-        private readonly string globalChannelId = "global-channel_temp";
+        private readonly string globalChannelId = "global-channel";
 
         private FizzChannelMeta guildChannel;
 

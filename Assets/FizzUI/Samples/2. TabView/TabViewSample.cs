@@ -14,9 +14,9 @@ namespace Fizz.Demo
         [SerializeField] RectTransform[] tabContainers;
 
         // Global channel Id
-        private readonly string globalChannelId = "global-channel_temp";
+        private readonly string globalChannelId = "global-channel";
         // Local channel Id
-        private readonly string localChannelId = "local-channel_temp";
+        private readonly string localChannelId = "local-channel";
 
         private FizzChatView globalChatView;
         private FizzChatView localChatView;

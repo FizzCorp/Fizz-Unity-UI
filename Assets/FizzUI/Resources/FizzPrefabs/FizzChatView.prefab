@@ -1248,7 +1248,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ConnectionNode: {fileID: 0}
   ChannelListView: {fileID: 114716160598738634}
-  ChatMessageListView: {fileID: 114583435342734236}
+  ChatMessageView: {fileID: 114583435342734236}
   ChatInputView: {fileID: 114194297956660058}
 --- !u!114 &114499375056434344
 MonoBehaviour:

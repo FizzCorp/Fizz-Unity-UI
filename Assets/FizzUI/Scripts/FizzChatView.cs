@@ -8,7 +8,7 @@ namespace Fizz.UI
     public class FizzChatView : FizzBaseComponent
     {
         [SerializeField] FizzChannelListView ChannelListView;
-        [SerializeField] FizzMessageListView ChatMessageListView;
+        [SerializeField] FizzChatMessageView ChatMessageView;
         [SerializeField] FizzChatInputView ChatInputView;
 
         private bool _showChannels = true;
@@ -51,7 +51,7 @@ namespace Fizz.UI
             set
             {
                 _enableFetchHistory = value;
-                ChatMessageListView.EnableHistoryFetch = _enableFetchHistory;
+                ChatMessageView.EnableHistoryFetch = _enableFetchHistory;
             }
         }
 
@@ -64,7 +64,7 @@ namespace Fizz.UI
             set
             {
                 _showTranslation = value;
-                ChatMessageListView.ShowMessageTranslation = _showTranslation;
+                ChatMessageView.ShowMessageTranslation = _showTranslation;
             }
         }
 
@@ -102,7 +102,7 @@ namespace Fizz.UI
         /// <param name="source"></param>
         public void SetCustomDataViewSource(IFizzChatViewCustomDataSource source)
         {
-            ChatMessageListView.SetCustomDataSource(source);
+            ChatMessageView.SetCustomDataSource(source);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@ namespace Fizz.UI
         public void Reset()
         {
             ChannelListView.Reset();
-            ChatMessageListView.Reset();
+            ChatMessageView.Reset();
             ChatInputView.Reset();
         }
 
@@ -144,31 +144,31 @@ namespace Fizz.UI
         {
             if (string.IsNullOrEmpty(text)) return;
 
-            ChatMessageListView.AddNewMessage(text);
+            ChatMessageView.AddNewMessage(text);
         }
 
         private void HandleChannelSelected(FizzChannel channel)
         {
             if (channel != null)
             {
-                ChatMessageListView.SetChannel(channel.Id);
+                ChatMessageView.SetChannel(channel.Id);
             }
             else
             {
-                ChatMessageListView.Reset();
+                ChatMessageView.Reset();
             }
         }
 
         private void UpdateChannelListVisibility()
         {
             ChannelListView.SetVisibility(_showChannels);
-            ChatMessageListView.RectTransform.offsetMax = _showChannels ? Vector2.down * 80 : Vector2.zero;
+            ChatMessageView.RectTransform.offsetMax = _showChannels ? Vector2.down * 80 : Vector2.zero;
         }
 
         private void UpdateInputViewVisibility()
         {
             ChatInputView.gameObject.SetActive(_showInputView);
-            ChatMessageListView.RectTransform.offsetMin = _showInputView ? Vector2.up * 80 : Vector2.zero;
+            ChatMessageView.RectTransform.offsetMin = _showInputView ? Vector2.up * 80 : Vector2.zero;
         }
 
         private void SyncViewState()

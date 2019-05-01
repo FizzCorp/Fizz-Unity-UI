@@ -12,8 +12,8 @@ namespace Fizz.Demo
         [SerializeField] FizzChatView chatView;
         [SerializeField] RectTransform blocker;
 
-        private readonly string globalChannelId = "global-channel_temp";
-        private readonly string localChannelId = "local-channel_temp";
+        private readonly string globalChannelId = "global-channel";
+        private readonly string localChannelId = "local-channel";
 
         private void Awake()
         {

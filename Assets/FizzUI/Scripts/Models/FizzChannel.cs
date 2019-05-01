@@ -85,18 +85,24 @@ namespace Fizz.UI.Model
 
         public void Unsubscribe(Action<FizzException> cb)
         {
-            FizzService.Instance.Client.Chat.Unsubscribe(Id, ex =>
+            try
             {
-                if (ex == null)
+                FizzService.Instance.Client.Chat.Unsubscribe(Id, ex =>
                 {
-                    if (FizzService.Instance.OnChannelUnsubscribed != null)
+                    if (ex == null)
                     {
-                        FizzService.Instance.OnChannelUnsubscribed.Invoke(Id);
-                    }
-                }
+                        FizzLogger.D("Unsubscribed " + Id);
 
-                FizzUtils.DoCallback(ex, cb);
-            });
+                        if (FizzService.Instance.OnChannelUnsubscribed != null)
+                        {
+                            FizzService.Instance.OnChannelUnsubscribed.Invoke(Id);
+                        }
+                    }
+
+                    FizzUtils.DoCallback(ex, cb);
+                });
+            }
+            catch { }
         }
 
         public void SubscribeAndQuery()
