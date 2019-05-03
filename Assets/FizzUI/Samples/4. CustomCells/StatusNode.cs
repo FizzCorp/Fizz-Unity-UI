@@ -93,7 +93,10 @@ namespace Fizz.Demo
                     }
                 });
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while calling DeleteMessage of FizzService.");
+            }
         }
 
         private void UpdateStatus(string status)
@@ -114,7 +117,10 @@ namespace Fizz.Demo
                     }
                 });
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while calling UpdateMessage of FizzService.");
+            }
         }
     }
 }

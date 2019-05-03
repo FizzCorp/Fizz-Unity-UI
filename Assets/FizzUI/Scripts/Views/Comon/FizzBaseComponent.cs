@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Fizz.Common;
+using UnityEngine;
 
 namespace Fizz.UI.Core
 {
@@ -31,7 +32,10 @@ namespace Fizz.UI.Core
                 FizzService.Instance.OnConnected += HandleOnConnected;
                 FizzService.Instance.OnDisconnected += HandleOnDisconnected;
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while binding event of FizzService.");
+            }
         }
 
         protected virtual void OnDisable()
@@ -41,7 +45,10 @@ namespace Fizz.UI.Core
                 FizzService.Instance.OnConnected -= HandleOnConnected;
                 FizzService.Instance.OnDisconnected -= HandleOnDisconnected;
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while binding event of FizzService.");
+            }
         }
 
         protected virtual void OnConnectionStateChange(bool isConnected)

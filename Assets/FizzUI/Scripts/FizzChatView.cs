@@ -5,11 +5,17 @@ using UnityEngine;
 
 namespace Fizz.UI
 {
+    /// <summary>
+    /// FizzChatView is the core UI compoment which contains channel list, messages and input. 
+    /// Channels are added and removed from it in order to show or hide them from view. But note
+    /// that a channel should be Subsribed first by using FizzService. It can be configured to 
+    /// show/hide channel list and input. It can be added to any container like, Tabs and Popup etc.
+    /// </summary>
     public class FizzChatView : FizzBaseComponent
     {
-        [SerializeField] FizzChannelListView ChannelListView;
-        [SerializeField] FizzChatMessageView ChatMessageView;
-        [SerializeField] FizzChatInputView ChatInputView;
+        [SerializeField] FizzChannelsView ChannelsView;
+        [SerializeField] FizzMessagesView MessagesView;
+        [SerializeField] FizzInputView InputView;
 
         private bool _showChannels = true;
         private bool _showInputView = true;
@@ -51,7 +57,7 @@ namespace Fizz.UI
             set
             {
                 _enableFetchHistory = value;
-                ChatMessageView.EnableHistoryFetch = _enableFetchHistory;
+                MessagesView.EnableHistoryFetch = _enableFetchHistory;
             }
         }
 
@@ -64,7 +70,7 @@ namespace Fizz.UI
             set
             {
                 _showTranslation = value;
-                ChatMessageView.ShowMessageTranslation = _showTranslation;
+                MessagesView.ShowMessageTranslation = _showTranslation;
             }
         }
 
@@ -75,7 +81,7 @@ namespace Fizz.UI
         /// <param name="select">Select channel</param>
         public void AddChannel(string channelId, bool select = false)
         {
-            ChannelListView.AddChannel(channelId, select);
+            ChannelsView.AddChannel(channelId, select);
         }
 
         /// <summary>
@@ -84,7 +90,7 @@ namespace Fizz.UI
         /// <param name="channelId">Id of channel to be removed from UI</param>
         public void RemoveChannel(string channelId)
         {
-            ChannelListView.RemoveChannel(channelId);
+            ChannelsView.RemoveChannel(channelId);
         }
 
         /// <summary>
@@ -93,16 +99,16 @@ namespace Fizz.UI
         /// <param name="channelId">Id of the Channel to select</param>
         public bool SetCurrentChannel(string channelId)
         {
-            return ChannelListView.SetChannel(channelId);
+            return ChannelsView.SetChannel(channelId);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="source"></param>
-        public void SetCustomDataViewSource(IFizzChatViewCustomDataSource source)
+        public void SetCustomDataViewSource(IFizzCustomMessageCellViewDataSource source)
         {
-            ChatMessageView.SetCustomDataSource(source);
+            MessagesView.SetCustomDataSource(source);
         }
 
         /// <summary>
@@ -110,17 +116,17 @@ namespace Fizz.UI
         /// </summary>
         public void Reset()
         {
-            ChannelListView.Reset();
-            ChatMessageView.Reset();
-            ChatInputView.Reset();
+            ChannelsView.Reset();
+            MessagesView.Reset();
+            InputView.Reset();
         }
 
         protected override void OnEnable()
         {
             base.OnEnable();
 
-            ChatInputView.OnSend.AddListener(HandleSend);
-            ChannelListView.OnChannelSelected.AddListener(HandleChannelSelected);
+            InputView.OnSend.AddListener(HandleSend);
+            ChannelsView.OnChannelSelected.AddListener(HandleChannelSelected);
 
             SyncViewState();
         }
@@ -129,8 +135,8 @@ namespace Fizz.UI
         {
             base.OnDisable();
 
-            ChatInputView.OnSend.RemoveListener(HandleSend);
-            ChannelListView.OnChannelSelected.RemoveListener(HandleChannelSelected);
+            InputView.OnSend.RemoveListener(HandleSend);
+            ChannelsView.OnChannelSelected.RemoveListener(HandleChannelSelected);
         }
 
         protected override void OnConnectionStateChange(bool isConnected)
@@ -144,38 +150,38 @@ namespace Fizz.UI
         {
             if (string.IsNullOrEmpty(text)) return;
 
-            ChatMessageView.AddNewMessage(text);
+            MessagesView.AddNewMessage(text);
         }
 
         private void HandleChannelSelected(FizzChannel channel)
         {
             if (channel != null)
             {
-                ChatMessageView.SetChannel(channel.Id);
+                MessagesView.SetChannel(channel.Id);
             }
             else
             {
-                ChatMessageView.Reset();
+                MessagesView.Reset();
             }
         }
 
         private void UpdateChannelListVisibility()
         {
-            ChannelListView.SetVisibility(_showChannels);
-            ChatMessageView.RectTransform.offsetMax = _showChannels ? Vector2.down * 80 : Vector2.zero;
+            ChannelsView.SetVisibility(_showChannels);
+            MessagesView.RectTransform.offsetMax = _showChannels ? Vector2.down * 80 : Vector2.zero;
         }
 
         private void UpdateInputViewVisibility()
         {
-            ChatInputView.gameObject.SetActive(_showInputView);
-            ChatMessageView.RectTransform.offsetMin = _showInputView ? Vector2.up * 80 : Vector2.zero;
+            InputView.gameObject.SetActive(_showInputView);
+            MessagesView.RectTransform.offsetMin = _showInputView ? Vector2.up * 80 : Vector2.zero;
         }
 
         private void SyncViewState()
         {
-            HandleChannelSelected(ChannelListView.CurrentSelectedChannel);
+            HandleChannelSelected(ChannelsView.CurrentSelectedChannel);
 
-            ChatInputView.Reset();
+            InputView.Reset();
         }
     }
 }

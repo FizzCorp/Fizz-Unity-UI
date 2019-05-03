@@ -8,7 +8,7 @@ namespace Fizz.UI.Components
     /// <summary>
     /// User interface other chat cell view.
     /// </summary>
-    public class FizzChatOtherCellView : FizzChatCellView
+    public class FizzMessageOtherCellView : FizzMessageCellView
     {
         /// <summary>
         /// Sender nick name label.
@@ -49,7 +49,7 @@ namespace Fizz.UI.Components
         #region Public Methods
 
 
-        public override void SetData(FizzChatCellModel model, bool appTranslationEnabled)
+        public override void SetData(FizzMessageCellModel model, bool appTranslationEnabled)
         {
             base.SetData(model, appTranslationEnabled);
 

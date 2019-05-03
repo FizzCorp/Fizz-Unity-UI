@@ -10,7 +10,7 @@ namespace Fizz.UI
     /// <summary>
     /// Cell view for chat messages
     /// </summary>
-    public class FizzChatCellView : FizzBaseComponent
+    public class FizzMessageCellView : FizzBaseComponent
     {
         /// <summary>
         /// Chat cell background image.
@@ -40,12 +40,12 @@ namespace Fizz.UI
         /// <value>The row number.</value>
         public int rowNumber { get; set; }
 
-        protected FizzChatCellModel _model;
+        protected FizzMessageCellModel _model;
         protected bool _appTranslationEnabled;
 
         #region Public Methods
 
-        public virtual void SetData(FizzChatCellModel model, bool appTranslationEnabled)
+        public virtual void SetData(FizzMessageCellModel model, bool appTranslationEnabled)
         {
             _model = model;
             _appTranslationEnabled = appTranslationEnabled;

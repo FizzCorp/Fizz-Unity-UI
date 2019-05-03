@@ -26,12 +26,12 @@ namespace Fizz.Demo
             SetupView();
         }
 
-        private void OnEnable()
-        {
+        void OnEnable()
+        { 
             AddListeners();
         }
 
-        private void OnDisable()
+        void OnDisable()
         {
             RemoveListeners();
         }
@@ -114,8 +114,15 @@ namespace Fizz.Demo
 
         private void AddListeners()
         {
-            FizzService.Instance.OnConnected += OnConnected;
-            FizzService.Instance.OnDisconnected += OnDisconnected;
+            try
+            {
+                FizzService.Instance.OnConnected += OnConnected;
+                FizzService.Instance.OnDisconnected += OnDisconnected;
+            }
+            catch
+            {
+                FizzLogger.E("Someting went wrong with binding events with FizzService.");
+            }
 
             userNameInputField.onEndEdit.AddListener(HandleUserCradChange);
             userNameInputField.onEndEdit.AddListener(HandleUserCradChange);
@@ -126,8 +133,15 @@ namespace Fizz.Demo
 
         private void RemoveListeners()
         {
-            FizzService.Instance.OnConnected -= OnConnected;
-            FizzService.Instance.OnDisconnected -= OnDisconnected;
+            try
+            {
+                FizzService.Instance.OnConnected -= OnConnected;
+                FizzService.Instance.OnDisconnected -= OnDisconnected;
+            }
+            catch
+            {
+                FizzLogger.E("Someting went wrong with binding events with FizzService.");
+            }
 
             userNameInputField.onEndEdit.RemoveListener(HandleUserCradChange);
             userNameInputField.onEndEdit.RemoveListener(HandleUserCradChange);
@@ -136,7 +150,7 @@ namespace Fizz.Demo
             translationToggle.onValueChanged.RemoveListener(HandleTranslationToggleChange);
         }
 
-        private void OnConnected (bool sync)
+        private void OnConnected(bool sync)
         {
             connectButton.gameObject.SetActive(false);
             disconnectButton.gameObject.SetActive(true);
@@ -144,9 +158,8 @@ namespace Fizz.Demo
             launchButton.interactable = true;
         }
 
-        private void OnDisconnected (FizzException ex)
+        private void OnDisconnected(FizzException ex)
         {
-            Debug.Log("OnDisconnected");
             connectButton.gameObject.SetActive(true);
             disconnectButton.gameObject.SetActive(false);
 

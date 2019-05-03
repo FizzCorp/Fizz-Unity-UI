@@ -7,7 +7,7 @@ namespace Fizz.UI.Components
 	/// <summary>
 	/// User interface own repeat chat cell view.
 	/// </summary>
-	public class FizzChatUserRepeatCellView : FizzChatCellView
+	public class FizzMessageUserRepeatCellView : FizzMessageCellView
 	{
 		/// <summary>
 		/// Chat message delivery status image.
@@ -20,11 +20,7 @@ namespace Fizz.UI.Components
 
 		#region Public Methods
 
-		/// <summary>
-		/// Set the data to populate ChatCellView.
-		/// </summary>
-		/// <param name="model">FIZZChatMessageAction. Please see <see cref="FIZZ.Actions.IFIZZChatMessageAction"/></param>
-		public override void SetData (FizzChatCellModel model, bool appTranslationEnabled)
+		public override void SetData (FizzMessageCellModel model, bool appTranslationEnabled)
 		{
 			base.SetData (model, appTranslationEnabled);
 

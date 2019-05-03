@@ -11,7 +11,7 @@ using UnityEngine.UI;
 namespace Fizz.UI
 {
     //Fizz Channel List
-    public class FizzChannelListView : FizzBaseComponent
+    public class FizzChannelsView : FizzBaseComponent
     {
         /// <summary>
 		/// The background.
@@ -20,7 +20,7 @@ namespace Fizz.UI
         /// <summary>
         /// The button prefab.
         /// </summary>
-        [SerializeField] FizzChannelListItem ChannelItemPrefab;
+        [SerializeField] FizzChannelView ChannelItemPrefab;
         /// <summary>
         /// The buttons contianer.
         /// </summary>
@@ -35,7 +35,7 @@ namespace Fizz.UI
         { }
 
         private List<string> _channelWatchList;
-        private Dictionary<string, FizzChannelListItem> _channels;
+        private Dictionary<string, FizzChannelView> _channels;
         private int _reloadContainerLayout = -1;
         private VerticalLayoutGroup _backgroundVLG;
 
@@ -74,7 +74,9 @@ namespace Fizz.UI
                 FizzService.Instance.OnChannelUnsubscribed += HandleOnChannelUnsubscribe;
             }
             catch
-            { }
+            {
+                FizzLogger.E("Unable to call FizzService.");
+            }
 
             SyncViewState();
         }
@@ -89,7 +91,9 @@ namespace Fizz.UI
                 FizzService.Instance.OnChannelUnsubscribed -= HandleOnChannelUnsubscribe;
             }
             catch
-            { }
+            {
+                FizzLogger.E("Unable to call FizzService.");
+            }
         }
 
         #region Public Methods
@@ -136,7 +140,7 @@ namespace Fizz.UI
             {
                 Initialize();
             }
-            
+
             if (!_isInitialized)
             {
                 Initialize();
@@ -179,10 +183,10 @@ namespace Fizz.UI
             }
 
             CurrentSelectedChannel = null;
-            
-            foreach (KeyValuePair<string, FizzChannelListItem> pair in _channels)
+
+            foreach (KeyValuePair<string, FizzChannelView> pair in _channels)
             {
-                FizzChannelListItem button = pair.Value;
+                FizzChannelView button = pair.Value;
                 if (button != null)
                 {
                     Destroy(button.gameObject);
@@ -202,7 +206,7 @@ namespace Fizz.UI
                 return;
 
             CurrentSelectedChannel = null;
-            _channels = new Dictionary<string, FizzChannelListItem>();
+            _channels = new Dictionary<string, FizzChannelView>();
             _channelWatchList = new List<string>();
             _backgroundVLG = ChannelItemPrefab.GetComponentInChildren<VerticalLayoutGroup>();
             _isInitialized = true;
@@ -219,9 +223,9 @@ namespace Fizz.UI
             else
             {
                 float elementSize = barSize.width / _channels.Count;
-                foreach (KeyValuePair<string, FizzChannelListItem> pair in _channels)
+                foreach (KeyValuePair<string, FizzChannelView> pair in _channels)
                 {
-                    FizzChannelListItem barButton = pair.Value;
+                    FizzChannelView barButton = pair.Value;
                     LayoutElement layoutElement = barButton.GetComponent<LayoutElement>();
                     layoutElement.preferredWidth = elementSize;
                 }
@@ -261,7 +265,7 @@ namespace Fizz.UI
                     return;
                 }
 
-                FizzChannelListItem currentButton = _channels[CurrentSelectedChannel.Id];
+                FizzChannelView currentButton = _channels[CurrentSelectedChannel.Id];
                 currentButton.SetSelected(false);
             }
 
@@ -269,15 +273,15 @@ namespace Fizz.UI
             if (OnChannelSelected != null)
                 OnChannelSelected.Invoke(data);
 
-            FizzChannelListItem barButton = _channels[data.Id];
+            FizzChannelView barButton = _channels[data.Id];
             barButton.SetSelected(true);
         }
 
         private void ResetLayout()
         {
-            foreach (KeyValuePair<string, FizzChannelListItem> pair in _channels)
+            foreach (KeyValuePair<string, FizzChannelView> pair in _channels)
             {
-                FizzChannelListItem barButton = pair.Value;
+                FizzChannelView barButton = pair.Value;
                 LayoutElement layoutElement = barButton.GetComponent<LayoutElement>();
                 layoutElement.preferredWidth = -1;
             }
@@ -307,7 +311,7 @@ namespace Fizz.UI
             bool _added = false;
             if (!_channels.ContainsKey(_item.Id))
             {
-                FizzChannelListItem _button = Instantiate(ChannelItemPrefab);
+                FizzChannelView _button = Instantiate(ChannelItemPrefab);
                 _button.gameObject.SetActive(true);
                 _button.transform.SetParent(ChannelsContainer.transform, false);
                 _button.transform.localScale = Vector3.one;
@@ -362,7 +366,10 @@ namespace Fizz.UI
                     }
                 }
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while calling Channels of FizzService.");
+            }
         }
 
         private void HandleOnChannelSubscribe(string channelId)

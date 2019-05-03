@@ -5,15 +5,15 @@ using Fizz.Common;
 
 namespace Fizz.UI.Model
 {
-    public class FizzChatCellModel : FizzChannelMessage
+    public class FizzMessageCellModel : FizzChannelMessage
     {
         public FizzChatCellType Type { get; set; }
 
         public static readonly string KEY_CLIENT_ID = "clientId";
 
-        public FizzChatCellModel() { }
+        public FizzMessageCellModel() { }
 
-        public FizzChatCellModel(long id,
+        public FizzMessageCellModel(long id,
                                   string from,
                                   string nick,
                                   string to,
@@ -64,7 +64,7 @@ namespace Fizz.UI.Model
             }
         }
 
-        public void Update(FizzChatCellModel model)
+        public void Update(FizzMessageCellModel model)
         {
             Id = model.Id;
             From = model.From;

@@ -7,6 +7,11 @@ using UnityEngine;
 
 namespace Fizz
 {
+    /// <summary>
+    /// FizzService is an intermediate class(MonoBehaviour, DontDestroyOnLoad) designed to work like bridge 
+    /// between FizzClient and FizzUI. It contains an instance of FizzClient which can be opened and closed 
+    /// according to game client need. It's also used to Subscribe and Unsubsribe channels when client is opened.
+    /// </summary>
     public class FizzService : Singleton<FizzService>
     {
         #region Id and Secret
@@ -73,6 +78,11 @@ namespace Fizz
             {
                 if (onDone != null)
                     onDone(ex == null);
+
+                if (ex != null)
+                {
+                    FizzLogger.E("Someting went wrong while connecting to FizzClient. " + ex);
+                }
             });
         }
 

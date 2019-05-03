@@ -14,7 +14,7 @@ namespace Fizz.UI
     /// <summary>
     /// User interface chat view.
     /// </summary>
-    public class FizzChatMessageView : FizzBaseComponent, ICustomScrollRectDataSource
+    public class FizzMessagesView : FizzBaseComponent, ICustomScrollRectDataSource
     {
         /// <summary>
         /// The background image.
@@ -58,7 +58,10 @@ namespace Fizz.UI
                 FizzService.Instance.OnChannelMessageUpdate += OnChannelMessageUpdated;
                 FizzService.Instance.OnChannelMessagesAvailable += OnChannelHistoryUpdated;
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while binding event of FizzService.");
+            }
 
             ScrollIndicator.onClick.AddListener(OnScrollIndicator);
 
@@ -77,7 +80,10 @@ namespace Fizz.UI
                 FizzService.Instance.OnChannelMessageUpdate -= OnChannelMessageUpdated;
                 FizzService.Instance.OnChannelMessagesAvailable -= OnChannelHistoryUpdated;
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while binding event of FizzService.");
+            }
 
             ScrollIndicator.onClick.RemoveListener(OnScrollIndicator);
 
@@ -119,10 +125,13 @@ namespace Fizz.UI
             {
                 _userId = FizzService.Instance.UserId;
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while calling FizzService.");
+            }
         }
 
-        public void SetCustomDataSource(IFizzChatViewCustomDataSource source)
+        public void SetCustomDataSource(IFizzCustomMessageCellViewDataSource source)
         {
             _chatDataSource = source;
         }
@@ -140,10 +149,10 @@ namespace Fizz.UI
                 long now = FizzUtils.Now();
                 Dictionary<string, string> data = new Dictionary<string, string>
                 {
-                    { FizzChatCellModel.KEY_CLIENT_ID, now + "" }
+                    { FizzMessageCellModel.KEY_CLIENT_ID, now + "" }
                 };
 
-                FizzChatCellModel model = new FizzChatCellModel(
+                FizzMessageCellModel model = new FizzMessageCellModel(
                     now,
                     FizzService.Instance.UserId,
                     FizzService.Instance.UserName,
@@ -172,12 +181,15 @@ namespace Fizz.UI
                         {
                             model.DeliveryState = FizzChatCellDeliveryState.Sent;
                             AddAction(model);
-                            
+
                             FizzService.Instance.Client.Ingestion.TextMessageSent(_channel.Id, message, FizzService.Instance.UserName);
                         }
                     });
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while calling PublishMessage of FizzService.");
+            }
         }
 
         public void Reset()
@@ -208,8 +220,8 @@ namespace Fizz.UI
 
         private void Initialize()
         {
-            _chatCellModelList = new List<FizzChatCellModel>();
-            _actionsLookUpDict = new Dictionary<string, FizzChatCellModel>();
+            _chatCellModelList = new List<FizzMessageCellModel>();
+            _actionsLookUpDict = new Dictionary<string, FizzMessageCellModel>();
             ScrollRect.pullDirection = CustomScrollRect.PullDirection.Up;
             ScrollRect.Initialize(this);
             ScrollRect.RebuildContent();
@@ -220,10 +232,10 @@ namespace Fizz.UI
 
         private void LoadCellPrefabs()
         {
-            otherCellView = Utils.LoadPrefabs<FizzChatOtherCellView>("Cells/OtherCell");
-            otherRepeatCellView = Utils.LoadPrefabs<FizzChatOtherRepeatCellView>("Cells/OtherRepeatCell");
-            userCellView = Utils.LoadPrefabs<FizzChatUserCellView>("Cells/UserCell");
-            dateHeaderCellView = Utils.LoadPrefabs<FizzChatDateHeaderCellView>("Cells/DateHeaderCell");
+            otherCellView = Utils.LoadPrefabs<FizzMessageOtherCellView>("Cells/OtherCell");
+            otherRepeatCellView = Utils.LoadPrefabs<FizzMessageOtherRepeatCellView>("Cells/OtherRepeatCell");
+            userCellView = Utils.LoadPrefabs<FizzMessageUserCellView>("Cells/UserCell");
+            dateHeaderCellView = Utils.LoadPrefabs<FizzMessageDateHeaderCellView>("Cells/DateHeaderCell");
         }
 
         private void LoadChatAsync(bool scrollDown)
@@ -256,7 +268,7 @@ namespace Fizz.UI
 
                 CheckForDateHeader(action);
 
-                FizzChatCellModel model = GetChatCellModelFromAction(action);
+                FizzMessageCellModel model = GetChatCellModelFromAction(action);
                 model.DeliveryState = FizzChatCellDeliveryState.Published;
 
                 _chatCellModelList.Add(model);
@@ -287,7 +299,7 @@ namespace Fizz.UI
 
             if (shouldAddHeaderModel)
             {
-                FizzChatCellModel model = GetChatCellModelFromAction(action);
+                FizzMessageCellModel model = GetChatCellModelFromAction(action);
                 model.Type = FizzChatCellType.DateCell;
 
                 _chatCellModelList.Add(model);
@@ -357,12 +369,12 @@ namespace Fizz.UI
             }
         }
 
-        private void AddAction(FizzChatCellModel model, bool groupRefresh = false, bool hardRefresh = false, bool updateOnly = false)
+        private void AddAction(FizzMessageCellModel model, bool groupRefresh = false, bool hardRefresh = false, bool updateOnly = false)
         {
             if (model.Type == FizzChatCellType.ChatCell
                 && _channel.Id.Equals(model.To))
             {
-                FizzChatCellModel existingModel = GetActionFromLookup(model);
+                FizzMessageCellModel existingModel = GetActionFromLookup(model);
                 if (existingModel != null)
                 {
                     existingModel.Update(model);
@@ -396,12 +408,12 @@ namespace Fizz.UI
             }
         }
 
-        private void RemoveAction(FizzChatCellModel model)
+        private void RemoveAction(FizzMessageCellModel model)
         {
             if (model.Type == FizzChatCellType.ChatCell
                 && _channel.Id.Equals(model.To))
             {
-                FizzChatCellModel existingModel = GetActionFromLookup(model);
+                FizzMessageCellModel existingModel = GetActionFromLookup(model);
                 if (existingModel != null)
                 {
                     if (!string.IsNullOrEmpty(existingModel.AlternateId.ToString())
@@ -433,16 +445,16 @@ namespace Fizz.UI
             ScrollIndicator.gameObject.SetActive(false);
         }
 
-        private FizzChatCellModel GetChatCellModelFromAction(FizzChannelMessage action)
+        private FizzMessageCellModel GetChatCellModelFromAction(FizzChannelMessage action)
         {
-            var model = new FizzChatCellModel(action.Id, action.From, action.Nick, action.To, action.Body, action.Data, action.Translations, action.Created)
+            var model = new FizzMessageCellModel(action.Id, action.From, action.Nick, action.To, action.Body, action.Data, action.Translations, action.Created)
             {
                 Type = FizzChatCellType.ChatCell
             };
             return model;
         }
 
-        private void AddActionInLookup(FizzChatCellModel model)
+        private void AddActionInLookup(FizzMessageCellModel model)
         {
             if (model.Type == FizzChatCellType.ChatCell)
             {
@@ -457,9 +469,9 @@ namespace Fizz.UI
             }
         }
 
-        private FizzChatCellModel GetActionFromLookup(FizzChatCellModel action)
+        private FizzMessageCellModel GetActionFromLookup(FizzMessageCellModel action)
         {
-            FizzChatCellModel model = null;
+            FizzMessageCellModel model = null;
             if (!string.IsNullOrEmpty(action.AlternateId.ToString()) && _actionsLookUpDict.ContainsKey(action.AlternateId.ToString()))
             {
                 _actionsLookUpDict.TryGetValue(action.AlternateId.ToString(), out model);
@@ -500,7 +512,7 @@ namespace Fizz.UI
         {
             if (_channel != null && _channel.Id.Equals(channelId))
             {
-                FizzChatCellModel model = GetChatCellModelFromAction(action);
+                FizzMessageCellModel model = GetChatCellModelFromAction(action);
                 model.DeliveryState = FizzChatCellDeliveryState.Published;
                 AddAction(model);
             }
@@ -549,21 +561,21 @@ namespace Fizz.UI
                 }
             }
 
-            FizzChatCellModel model = _chatCellModelList[index];
+            FizzMessageCellModel model = _chatCellModelList[index];
             if (model.Type == FizzChatCellType.ChatCell)
             {
-                FizzChatCellView chatCellView = obj.GetComponent<FizzChatCellView>();
+                FizzMessageCellView chatCellView = obj.GetComponent<FizzMessageCellView>();
                 chatCellView.rowNumber = index;
                 chatCellView.SetData(model, ShowMessageTranslation);
 
                 if (itemType == (int)ChatCellViewType.TheirsMessageAction)
                 {
-                    var leftCell = chatCellView as FizzChatOtherCellView;
+                    var leftCell = chatCellView as FizzMessageOtherCellView;
                     leftCell.OnTranslateToggle = OnTranslateToggleClicked;
                 }
                 else if (itemType == (int)ChatCellViewType.TheirsRepeatMessageAction)
                 {
-                    var leftRepeatCell = chatCellView as FizzChatOtherRepeatCellView;
+                    var leftRepeatCell = chatCellView as FizzMessageOtherRepeatCellView;
                     leftRepeatCell.OnTranslateToggle = OnTranslateToggleClicked;
                 }
 
@@ -572,7 +584,7 @@ namespace Fizz.UI
                     RectTransform customView = null;
                     if (_chatDataSource != null)
                     {
-                        customView = _chatDataSource.GetCustomMessageDrawable(model);
+                        customView = _chatDataSource.GetCustomMessageCellViewNode(model);
                         if (customView != null)
                             chatCellView.SetCustomData(customView);
                     }
@@ -580,7 +592,7 @@ namespace Fizz.UI
             }
             else if (model.Type == FizzChatCellType.DateCell)
             {
-                FizzChatDateHeaderCellView dateHeader = obj.GetComponent<FizzChatDateHeaderCellView>();
+                FizzMessageDateHeaderCellView dateHeader = obj.GetComponent<FizzMessageDateHeaderCellView>();
                 dateHeader.SetData(model, ShowMessageTranslation);
             }
 
@@ -595,12 +607,12 @@ namespace Fizz.UI
         public int GetItemType(int index)
         {
             ChatCellViewType actionType;
-            FizzChatCellModel model = _chatCellModelList[index];
+            FizzMessageCellModel model = _chatCellModelList[index];
             if (model.Type == FizzChatCellType.ChatCell)
             {
 
-                FizzChatCellModel lastAction = null;
-                FizzChatCellModel chatAction = _chatCellModelList[index];
+                FizzMessageCellModel lastAction = null;
+                FizzMessageCellModel chatAction = _chatCellModelList[index];
 
                 int lastIndex = index - 1;
                 while (lastIndex > -1)
@@ -643,19 +655,19 @@ namespace Fizz.UI
         /// <summary>
         /// The left cell view.
         /// </summary>
-        private FizzChatOtherCellView otherCellView;
+        private FizzMessageOtherCellView otherCellView;
         /// <summary>
         /// The left repeat cell view.
         /// </summary>
-        private FizzChatOtherRepeatCellView otherRepeatCellView;
+        private FizzMessageOtherRepeatCellView otherRepeatCellView;
         /// <summary>
         /// The right cell view.
         /// </summary>
-        private FizzChatUserCellView userCellView;
+        private FizzMessageUserCellView userCellView;
         /// <summary>
         /// The chat date header cell view.
         /// </summary>
-        private FizzChatDateHeaderCellView dateHeaderCellView;
+        private FizzMessageDateHeaderCellView dateHeaderCellView;
 
         /// <summary>
         /// The data.
@@ -668,15 +680,15 @@ namespace Fizz.UI
         /// <summary>
         /// The chat actions.
         /// </summary>
-        private List<FizzChatCellModel> _chatCellModelList;
+        private List<FizzMessageCellModel> _chatCellModelList;
         /// <summary>
         /// The lookup dictionary for actions
         /// </summary>
-        Dictionary<string, FizzChatCellModel> _actionsLookUpDict;
+        Dictionary<string, FizzMessageCellModel> _actionsLookUpDict;
         /// <summary>
         /// The chat data source
         /// </summary>
-        IFizzChatViewCustomDataSource _chatDataSource = null;
+        IFizzCustomMessageCellViewDataSource _chatDataSource = null;
 
         private string _userId = string.Empty;
         private bool _isDirty = false;

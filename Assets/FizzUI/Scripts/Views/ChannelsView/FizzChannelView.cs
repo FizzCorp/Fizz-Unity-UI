@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Fizz.UI
 {
-    public class FizzChannelListItem : FizzBaseComponent
+    public class FizzChannelView : FizzBaseComponent
     {
         /// <summary>
 		/// The m text.

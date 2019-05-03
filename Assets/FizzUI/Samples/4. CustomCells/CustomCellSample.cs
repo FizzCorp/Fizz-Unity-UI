@@ -10,10 +10,10 @@ using UnityEngine.UI;
 namespace Fizz.Demo
 {
     /// <summary>
-    /// CustomCellSample demonstrate the use of IFizzChatViewCustomDataSource to show custom cells
+    /// CustomCellSample demonstrate the use of IFizzCustomMessageCellViewDataSource to show custom cells
     /// StatusNode is used to set status from (Happy, Sad, Bored, Angry) and delete it.
     /// </summary>
-    public class CustomCellSample : MonoBehaviour, IFizzChatViewCustomDataSource
+    public class CustomCellSample : MonoBehaviour, IFizzCustomMessageCellViewDataSource
     {
         [SerializeField] FizzChatView chatView;
         [SerializeField] Button sendStatusButton;
@@ -27,23 +27,18 @@ namespace Fizz.Demo
         private void Awake()
         {
             SetupChatView();
-
-            AddStatusChannel();
         }
 
         void OnEnable()
         {
+            AddStatusChannel();
             sendStatusButton.onClick.AddListener(OnSendStatusButtonPressed);
         }
 
         void OnDisable()
         {
+            RemoveStatusChannel();
             sendStatusButton.onClick.RemoveListener(OnSendStatusButtonPressed);
-        }
-
-        void OnDestroy()
-        {
-            FizzService.Instance.UnsubscribeChannel(statusChannel.Id);
         }
 
         private void SetupChatView()
@@ -52,7 +47,7 @@ namespace Fizz.Demo
             chatView.EnableFetchHistory = true;
             //Hide Channels list
             chatView.ShowChannels = false;
-
+            //Hide input
             chatView.ShowInput = false;
             //Hide message translation and toggle
             chatView.ShowMessageTranslation = false;
@@ -68,6 +63,11 @@ namespace Fizz.Demo
 
             //Add and Set channel
             chatView.AddChannel(statusChannel.Id, true);
+        }
+
+        void RemoveStatusChannel()
+        {
+            FizzService.Instance.UnsubscribeChannel(statusChannel.Id);
         }
 
         private void OnSendStatusButtonPressed()
@@ -90,7 +90,7 @@ namespace Fizz.Demo
                 null);
         }
 
-        RectTransform IFizzChatViewCustomDataSource.GetCustomMessageDrawable(FizzChannelMessage message)
+        RectTransform IFizzCustomMessageCellViewDataSource.GetCustomMessageCellViewNode(FizzChannelMessage message)
         {
             try
             {
@@ -103,7 +103,10 @@ namespace Fizz.Demo
 
                 }
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Unable to add custom node in message cell.");
+            }
 
             return null;
         }

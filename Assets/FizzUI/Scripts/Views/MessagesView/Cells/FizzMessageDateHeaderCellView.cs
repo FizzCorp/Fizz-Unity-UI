@@ -2,11 +2,11 @@
 
 namespace Fizz.UI.Components
 {
-    public class FizzChatDateHeaderCellView : FizzChatCellView
+    public class FizzMessageDateHeaderCellView : FizzMessageCellView
     {
         #region Public Methods
 
-        public override void SetData(FizzChatCellModel model, bool appTranslationEnabled)
+        public override void SetData(FizzMessageCellModel model, bool appTranslationEnabled)
         {
             base.SetData(model, appTranslationEnabled);
 

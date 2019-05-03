@@ -102,7 +102,10 @@ namespace Fizz.UI.Model
                     FizzUtils.DoCallback(ex, cb);
                 });
             }
-            catch { }
+            catch
+            {
+                FizzLogger.E("Something went wrong while calling Unsubscribe of FizzService.");
+            }
         }
 
         public void SubscribeAndQuery()

@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace Fizz.UI
 {
-    public class FizzChatInputView : FizzBaseComponent
+    public class FizzInputView : FizzBaseComponent
     {
         /// <summary>
         /// The background image.

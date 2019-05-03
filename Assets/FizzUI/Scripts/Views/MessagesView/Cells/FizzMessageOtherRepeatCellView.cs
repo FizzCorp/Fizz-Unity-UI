@@ -8,7 +8,7 @@ namespace Fizz.UI.Components
     /// <summary>
     /// User interface other repeat chat cell view.
     /// </summary>
-    public class FizzChatOtherRepeatCellView : FizzChatCellView
+    public class FizzMessageOtherRepeatCellView : FizzMessageCellView
     {
         /// <summary>
         /// The translate toggle node.
@@ -45,7 +45,7 @@ namespace Fizz.UI.Components
         #region Public Methods
 
 
-        public override void SetData(FizzChatCellModel model, bool appTranslationEnabled)
+        public override void SetData(FizzMessageCellModel model, bool appTranslationEnabled)
         {
             base.SetData(model, appTranslationEnabled);
 

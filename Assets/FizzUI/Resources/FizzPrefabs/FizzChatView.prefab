@@ -962,7 +962,7 @@ MonoBehaviour:
   OnSend:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: Fizz.UI.FizzChatInputView+SendEvent, Assembly-CSharp, Version=0.0.0.0,
+    m_TypeName: Fizz.UI.FizzInputView+SendEvent, Assembly-CSharp, Version=0.0.0.0,
       Culture=neutral, PublicKeyToken=null
 --- !u!114 &114222110282036316
 MonoBehaviour:
@@ -1247,9 +1247,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ConnectionNode: {fileID: 0}
-  ChannelListView: {fileID: 114716160598738634}
-  ChatMessageView: {fileID: 114583435342734236}
-  ChatInputView: {fileID: 114194297956660058}
+  ChannelsView: {fileID: 114716160598738634}
+  MessagesView: {fileID: 114583435342734236}
+  InputView: {fileID: 114194297956660058}
 --- !u!114 &114499375056434344
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1634,7 +1634,7 @@ MonoBehaviour:
   OnChannelSelected:
     m_PersistentCalls:
       m_Calls: []
-    m_TypeName: Fizz.UI.FizzChannelListView+FizzChannelItemSelectedEvent, Assembly-CSharp,
+    m_TypeName: Fizz.UI.FizzChannelsView+FizzChannelItemSelectedEvent, Assembly-CSharp,
       Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
 --- !u!114 &114729128602041126
 MonoBehaviour:
@@ -2342,7 +2342,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 76.129166, y: -35}
+  m_AnchoredPosition: {x: 76.12891, y: -35}
   m_SizeDelta: {x: 72.25833, y: 70}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224139123187358036
@@ -2665,7 +2665,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 80, y: 0}
   m_Pivot: {x: 0, y: 0.5}
 --- !u!224 &224582615763554790
 RectTransform:
@@ -2760,8 +2760,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: -30}
+  m_SizeDelta: {x: 0, y: -60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224660663348863092
 RectTransform:
