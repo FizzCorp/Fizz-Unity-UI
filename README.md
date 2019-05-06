@@ -25,3 +25,5 @@ FizzService is an intermediate class(MonoBehaviour, DontDestroyOnLoad) designed 
 
 ### FizzChatView
 FizzChatView is the core UI compoment which contains channel list, messages and input. Channels are added and removed from it in order to show or hide them from view. But note that a channel should be Subsribed first by using FizzService. It can be configured to show/hide channel list and input. It can be added to any container like, Tabs and Popup etc. 
+
+> Note: FizzChatView is designed with reference resolution of 750x1334.
