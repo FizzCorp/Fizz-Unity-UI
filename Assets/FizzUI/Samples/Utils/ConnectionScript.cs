@@ -18,8 +18,8 @@ namespace Fizz.Demo
 
         [SerializeField] Button launchButton;
 
-        private readonly FizzChannelMeta globalChannel = new FizzChannelMeta("global-channel", "Global");
-        private readonly FizzChannelMeta localChannel = new FizzChannelMeta("local-channel", "Local");
+        private readonly FizzChannelMeta globalChannel = new FizzChannelMeta("global-channel", "Global", "GROUP");
+        private readonly FizzChannelMeta localChannel = new FizzChannelMeta("local-channel", "Local", "GROUP");
 
         private void Awake()
         {
@@ -54,8 +54,8 @@ namespace Fizz.Demo
                     {
                         FizzLogger.D("FizzClient Opened Successfully!!");
 
-                        FizzService.Instance.SubscribeChannel(globalChannel);
                         FizzService.Instance.SubscribeChannel(localChannel);
+                        FizzService.Instance.SubscribeChannel(globalChannel);
                     }
                 });
             }

@@ -45,6 +45,8 @@ namespace Fizz.Demo
 
             // Show messaage translations
             chatView.ShowMessageTranslation = true;
+
+            chatView.onClose.AddListener (() => gameObject.SetActive (false));
         }
 
         private void AddChannels()

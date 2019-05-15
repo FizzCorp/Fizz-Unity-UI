@@ -45,8 +45,8 @@ namespace Fizz.Demo
         {
             //Enable history fetch
             chatView.EnableFetchHistory = true;
-            //Hide Channels list
-            chatView.ShowChannels = false;
+            //Hide Header view
+            chatView.ShowHeaderView = false;
             //Hide input
             chatView.ShowInput = false;
             //Hide message translation and toggle

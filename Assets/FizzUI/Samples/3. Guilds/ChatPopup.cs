@@ -11,6 +11,11 @@ namespace Fizz.Demo
     {
         [SerializeField] FizzChatView chatView;
 
+        private void Awake ()
+        {
+            chatView.ShowCloseButton = false;
+        }
+
         public void Show(List<string> channels)
         {
             gameObject.SetActive(true);

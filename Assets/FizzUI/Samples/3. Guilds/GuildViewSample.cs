@@ -20,6 +20,8 @@ namespace Fizz.Demo
         // Global Channel Id
         private readonly string globalChannelId = "global-channel";
 
+        private readonly string localChannelId = "local-channel";
+
         private FizzChannelMeta guildChannel;
 
         // Called when any of GuildA, GuildB, GuildC or GuildD is selected.
@@ -28,7 +30,7 @@ namespace Fizz.Demo
             // Remove previous channel if any
             RemoveGuildChannel();
 
-            guildChannel = new FizzChannelMeta(string.Join("-", guild, "channel"), guild);
+            guildChannel = new FizzChannelMeta(string.Join("-", guild, "channel"), guild, "GUILD");
 
             // Subscribe to channel (Note that it is compalsory to Subscribe a channel before adding to UI)
             FizzService.Instance.SubscribeChannel(guildChannel);
@@ -49,7 +51,8 @@ namespace Fizz.Demo
         {
             List<string> channelList = new List<string>
             {
-                globalChannelId
+                globalChannelId,
+                localChannelId
             };
 
             // Add guild channel to  list if joined

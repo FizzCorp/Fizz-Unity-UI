@@ -2,6 +2,8 @@
 using Fizz.UI.Core;
 using Fizz.UI.Model;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace Fizz.UI
 {
@@ -13,14 +15,24 @@ namespace Fizz.UI
     /// </summary>
     public class FizzChatView : FizzBaseComponent
     {
+        [SerializeField] FizzHeaderView HeaderView;
         [SerializeField] FizzChannelsView ChannelsView;
         [SerializeField] FizzMessagesView MessagesView;
         [SerializeField] FizzInputView InputView;
+        [SerializeField] RectTransform BlockingLayer;
 
         private bool _showChannels = true;
         private bool _showInputView = true;
+        private bool _showHeaderView = true;
         private bool _showTranslation = true;
+        private bool _showCloseButton = true;
         private bool _enableFetchHistory = true;
+        
+        public UnityEvent onClose
+        {
+            get { return HeaderView.OnClose; }
+            set { HeaderView.OnClose = value; }
+        }
 
         /// <summary>
         /// Show/Hide Channel list
@@ -31,7 +43,7 @@ namespace Fizz.UI
             set
             {
                 _showChannels = value;
-                UpdateChannelListVisibility();
+                HeaderView.SetChannelButtonVisibility (_showChannels);
             }
         }
 
@@ -44,7 +56,7 @@ namespace Fizz.UI
             set
             {
                 _showInputView = value;
-                UpdateInputViewVisibility();
+                UpdateInputViewVisibility ();
             }
         }
 
@@ -74,114 +86,163 @@ namespace Fizz.UI
             }
         }
 
+        public bool ShowHeaderView
+        {
+            get { return _showHeaderView; }
+            set
+            {
+                _showHeaderView = value;
+                HandleHeaderViewVisibility ();
+            }
+        }
+
+        public bool ShowCloseButton
+        {
+            get { return _showCloseButton; }
+            set
+            {
+                _showCloseButton = value;
+                HeaderView.SetCloseButtonVisibility (_showCloseButton);
+            }
+        }
+
         /// <summary>
         /// Add Channel to UI. Note that Channel should be added to FizzService first.
         /// </summary>
         /// <param name="channelId">Id of channel to be added in UI</param>
         /// <param name="select">Select channel</param>
-        public void AddChannel(string channelId, bool select = false)
+        public void AddChannel (string channelId, bool select = false)
         {
-            ChannelsView.AddChannel(channelId, select);
+            ChannelsView.AddChannel (channelId, select);
         }
 
         /// <summary>
         /// Remove channel from UI
         /// </summary>
         /// <param name="channelId">Id of channel to be removed from UI</param>
-        public void RemoveChannel(string channelId)
+        public void RemoveChannel (string channelId)
         {
-            ChannelsView.RemoveChannel(channelId);
+            ChannelsView.RemoveChannel (channelId);
         }
 
         /// <summary>
         /// Set the current channel which is already added to UI.
         /// </summary>
         /// <param name="channelId">Id of the Channel to select</param>
-        public bool SetCurrentChannel(string channelId)
+        public bool SetCurrentChannel (string channelId)
         {
-            return ChannelsView.SetChannel(channelId);
+            return ChannelsView.SetChannel (channelId);
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="source"></param>
-        public void SetCustomDataViewSource(IFizzCustomMessageCellViewDataSource source)
+        public void SetCustomDataViewSource (IFizzCustomMessageCellViewDataSource source)
         {
-            MessagesView.SetCustomDataSource(source);
+            MessagesView.SetCustomDataSource (source);
         }
 
         /// <summary>
         /// Reset all the content which includes channel list, messages and input. 
         /// </summary>
-        public void Reset()
+        public void Reset ()
         {
-            ChannelsView.Reset();
-            MessagesView.Reset();
-            InputView.Reset();
+            HeaderView.Reset ();
+            ChannelsView.Reset ();
+            MessagesView.Reset ();
+            InputView.Reset ();
         }
 
-        protected override void OnEnable()
+        protected override void OnEnable ()
         {
-            base.OnEnable();
+            base.OnEnable ();
 
-            InputView.OnSend.AddListener(HandleSend);
-            ChannelsView.OnChannelSelected.AddListener(HandleChannelSelected);
+            InputView.OnSend.AddListener (HandleSend);
+            ChannelsView.OnChannelSelected.AddListener (HandleChannelSelected);
+            HeaderView.OnChannel.AddListener (HandleChannelsButton);
+            BlockingLayer.GetComponent<Button> ().onClick.AddListener (HandleBlockingLayerTap);
 
-            SyncViewState();
+            SyncViewState ();
         }
 
-        protected override void OnDisable()
+        protected override void OnDisable ()
         {
-            base.OnDisable();
+            base.OnDisable ();
 
-            InputView.OnSend.RemoveListener(HandleSend);
-            ChannelsView.OnChannelSelected.RemoveListener(HandleChannelSelected);
+            InputView.OnSend.RemoveListener (HandleSend);
+            ChannelsView.OnChannelSelected.RemoveListener (HandleChannelSelected);
+            HeaderView.OnChannel.RemoveListener (HandleChannelsButton);
+            BlockingLayer.GetComponent<Button> ().onClick.RemoveListener (HandleBlockingLayerTap);
         }
 
-        protected override void OnConnectionStateChange(bool isConnected)
+        protected override void OnConnectionStateChange (bool isConnected)
         {
-            base.OnConnectionStateChange(isConnected);
+            base.OnConnectionStateChange (isConnected);
 
-            FizzLogger.D("OnConnectionStateChange isConnected " + isConnected);
+            FizzLogger.D ("OnConnectionStateChange isConnected " + isConnected);
         }
 
-        private void HandleSend(string text)
+        private void HandleSend (string text)
         {
-            if (string.IsNullOrEmpty(text)) return;
+            if (string.IsNullOrEmpty (text)) return;
 
-            MessagesView.AddNewMessage(text);
+            MessagesView.AddNewMessage (text);
         }
 
-        private void HandleChannelSelected(FizzChannel channel)
+        private void HandleChannelSelected (FizzChannel channel)
         {
             if (channel != null)
             {
-                MessagesView.SetChannel(channel.Id);
+                MessagesView.SetChannel (channel.Id);
+                HeaderView.SetTitleText (channel.Name);
             }
             else
             {
-                MessagesView.Reset();
+                MessagesView.Reset ();
             }
         }
 
-        private void UpdateChannelListVisibility()
+        private void HandleBlockingLayerTap ()
+        { 
+            transform.GetChild(0).GetComponent<RectTransform> ().anchoredPosition = Vector2.zero;
+            SetBlockingLayerActive (false);
+        }
+
+        private void HandleChannelsButton ()
         {
-            ChannelsView.SetVisibility(_showChannels);
+            transform.GetChild (0).GetComponent<RectTransform> ().anchoredPosition = Vector2.right * 400;
+            SetBlockingLayerActive (true);
+        }
+
+        private void HandleHeaderViewVisibility ()
+        {
+            HeaderView.SetVisibility (_showHeaderView);
+            HeaderView.RectTransform.offsetMax = _showHeaderView ? Vector2.down * 80 : Vector2.zero;
+        }
+
+        private void UpdateChannelListVisibility ()
+        {
+            ChannelsView.SetVisibility (_showChannels);
             MessagesView.RectTransform.offsetMax = _showChannels ? Vector2.down * 80 : Vector2.zero;
         }
 
-        private void UpdateInputViewVisibility()
+        private void UpdateInputViewVisibility ()
         {
-            InputView.gameObject.SetActive(_showInputView);
+            InputView.gameObject.SetActive (_showInputView);
             MessagesView.RectTransform.offsetMin = _showInputView ? Vector2.up * 80 : Vector2.zero;
         }
 
-        private void SyncViewState()
+        private void SyncViewState ()
         {
-            HandleChannelSelected(ChannelsView.CurrentSelectedChannel);
+            HandleChannelSelected (ChannelsView.CurrentSelectedChannel);
 
-            InputView.Reset();
+            InputView.Reset ();
+        }
+
+        private void SetBlockingLayerActive (bool active)
+        {
+            BlockingLayer.gameObject.SetActive (active);
         }
     }
 }

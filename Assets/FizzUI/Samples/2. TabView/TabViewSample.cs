@@ -70,11 +70,11 @@ namespace Fizz.Demo
 
             // Hide channel list for both chat views as this sample use its own Tabs
 
-            globalChatView.ShowChannels = false;
+            globalChatView.ShowHeaderView = false;
             globalChatView.EnableFetchHistory = true;
             globalChatView.ShowMessageTranslation = true;
 
-            localChatView.ShowChannels = false;
+            localChatView.ShowHeaderView = false;
             localChatView.EnableFetchHistory = true;
 
             // Hide message translations from local chat view, for demonstraions 
