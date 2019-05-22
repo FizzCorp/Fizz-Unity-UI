@@ -19,7 +19,6 @@ namespace Fizz.UI
         [SerializeField] FizzChannelsView ChannelsView;
         [SerializeField] FizzMessagesView MessagesView;
         [SerializeField] FizzInputView InputView;
-        [SerializeField] RectTransform BlockingLayer;
 
         private bool _showChannels = true;
         private bool _showInputView = true;
@@ -27,6 +26,8 @@ namespace Fizz.UI
         private bool _showTranslation = true;
         private bool _showCloseButton = true;
         private bool _enableFetchHistory = true;
+
+        private bool _isChannelListVisible = false;
         
         public UnityEvent onClose
         {
@@ -152,6 +153,8 @@ namespace Fizz.UI
             ChannelsView.Reset ();
             MessagesView.Reset ();
             InputView.Reset ();
+
+            ResetHeaderVisibility ();
         }
 
         protected override void OnEnable ()
@@ -161,7 +164,7 @@ namespace Fizz.UI
             InputView.OnSend.AddListener (HandleSend);
             ChannelsView.OnChannelSelected.AddListener (HandleChannelSelected);
             HeaderView.OnChannel.AddListener (HandleChannelsButton);
-            BlockingLayer.GetComponent<Button> ().onClick.AddListener (HandleBlockingLayerTap);
+            HeaderView.OnClose.AddListener (HandleCloseButton);
 
             SyncViewState ();
         }
@@ -173,7 +176,7 @@ namespace Fizz.UI
             InputView.OnSend.RemoveListener (HandleSend);
             ChannelsView.OnChannelSelected.RemoveListener (HandleChannelSelected);
             HeaderView.OnChannel.RemoveListener (HandleChannelsButton);
-            BlockingLayer.GetComponent<Button> ().onClick.RemoveListener (HandleBlockingLayerTap);
+            HeaderView.OnClose.RemoveListener (HandleCloseButton);
         }
 
         protected override void OnConnectionStateChange (bool isConnected)
@@ -203,22 +206,26 @@ namespace Fizz.UI
             }
         }
 
-        private void HandleBlockingLayerTap ()
-        { 
-            transform.GetChild(0).GetComponent<RectTransform> ().anchoredPosition = Vector2.zero;
-            SetBlockingLayerActive (false);
-        }
-
         private void HandleChannelsButton ()
         {
-            transform.GetChild (0).GetComponent<RectTransform> ().anchoredPosition = Vector2.right * 400;
-            SetBlockingLayerActive (true);
+            _isChannelListVisible = !_isChannelListVisible;
+            Tween.TweenRect.Begin (transform.GetChild (0).GetComponent<RectTransform> (),
+                _isChannelListVisible? Vector2.zero : Vector2.right * 400, 
+                _isChannelListVisible? Vector2.right * 400 : Vector2.zero, 
+                0.25f, 0);
+
+            InputView.SetInteractable (!_isChannelListVisible);
+        }
+
+        private void HandleCloseButton ()
+        {
+            ResetHeaderVisibility ();
         }
 
         private void HandleHeaderViewVisibility ()
         {
             HeaderView.SetVisibility (_showHeaderView);
-            HeaderView.RectTransform.offsetMax = _showHeaderView ? Vector2.down * 80 : Vector2.zero;
+            MessagesView.RectTransform.offsetMax = _showHeaderView ? Vector2.down * 80 : Vector2.zero;
         }
 
         private void UpdateChannelListVisibility ()
@@ -240,9 +247,10 @@ namespace Fizz.UI
             InputView.Reset ();
         }
 
-        private void SetBlockingLayerActive (bool active)
+        private void ResetHeaderVisibility ()
         {
-            BlockingLayer.gameObject.SetActive (active);
+            _isChannelListVisible = false;
+            transform.GetChild (0).GetComponent<RectTransform> ().anchoredPosition = Vector2.zero;
         }
     }
 }

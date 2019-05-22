@@ -25,10 +25,12 @@ namespace Fizz.Demo
 
         private void SetupChatViews()
         {
-            chatView.ShowCloseButton = false;
+            chatView.ShowCloseButton = true;
             chatView.ShowChannels = true;
             chatView.EnableFetchHistory = true;
             chatView.ShowMessageTranslation = true;
+
+            chatView.onClose.AddListener (HandleViewToggle);
         }
 
         bool _isVisible = false;

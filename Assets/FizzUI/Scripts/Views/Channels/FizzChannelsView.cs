@@ -270,10 +270,17 @@ namespace Fizz.UI
                 FizzChannelView _button = Instantiate (channelPrefab);
                 _button.gameObject.SetActive (true);
                 _button.transform.SetParent (GetChannelGroup (_item).transform, false);
+                _button.transform.SetAsLastSibling ();
                 _button.transform.localScale = Vector3.one;
                 _button.SetData (_item, HandleChannelSelected);
                 _channelsLookup.Add (_item.Id, _button);
                 _button.gameObject.name = _item.Name;
+
+                if (!string.IsNullOrEmpty (_item.Meta.Group) && _groupsLookup.ContainsKey (_item.Meta.Group))
+                {
+                    _groupsLookup[_item.Meta.Group].ChannelCount++;
+                }
+
                 _added = true;
             }
             return _added;
@@ -289,11 +296,23 @@ namespace Fizz.UI
                     CurrentSelectedChannel = null;
                 }
 
+                FizzChannel channel = _channelsLookup[channelId].GetChannel ();
+                if (channel != null && !string.IsNullOrEmpty (channel.Meta.Group) && _groupsLookup.ContainsKey (channel.Meta.Group))
+                {
+                    _groupsLookup[channel.Meta.Group].ChannelCount--;
+                }
+
                 Destroy (_channelsLookup[channelId].gameObject);
                 _channelsLookup.Remove (channelId);
                 _removed = true;
 
             }
+
+            if (_removed)
+            {
+                RemoveChannelGroup (channelId);
+            }
+
             return _removed;
         }
 
@@ -328,6 +347,25 @@ namespace Fizz.UI
                 channelGroupView.gameObject.name = channelGroup;
             }
             return groupRect;
+        }
+
+        private void RemoveChannelGroup (string channelId)
+        {
+            string groupToRemove = string.Empty;
+            foreach (KeyValuePair<string, FizzChannelGroupView> pair in _groupsLookup)
+            {
+                if (pair.Value.ChannelCount < 1)
+                {
+                    groupToRemove = pair.Key;
+                    break;
+                }
+            }
+
+            if (!string.IsNullOrEmpty (groupToRemove))
+            {
+                Destroy (_groupsLookup[groupToRemove].gameObject);
+                _groupsLookup.Remove (groupToRemove);
+            }
         }
 
         private
