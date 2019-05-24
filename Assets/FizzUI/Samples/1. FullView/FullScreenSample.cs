@@ -35,7 +35,7 @@ namespace Fizz.Demo
         private void SetupChatView()
         {
             // Show channel list
-            chatView.ShowChannels = true;
+            chatView.ShowChannelsButton = true;
 
             // Show chat input 
             chatView.ShowInput = true;

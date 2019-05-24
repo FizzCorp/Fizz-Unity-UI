@@ -38,7 +38,7 @@ namespace Fizz.UI
         /// <summary>
         /// Show/Hide Channel list
         /// </summary>
-        public bool ShowChannels
+        public bool ShowChannelsButton
         {
             get { return _showChannels; }
             set
@@ -154,7 +154,7 @@ namespace Fizz.UI
             MessagesView.Reset ();
             InputView.Reset ();
 
-            ResetHeaderVisibility ();
+            ResetChannelsVisibility ();
         }
 
         protected override void OnEnable ()
@@ -213,13 +213,11 @@ namespace Fizz.UI
                 _isChannelListVisible? Vector2.zero : Vector2.right * 400, 
                 _isChannelListVisible? Vector2.right * 400 : Vector2.zero, 
                 0.25f, 0);
-
-            InputView.SetInteractable (!_isChannelListVisible);
         }
 
         private void HandleCloseButton ()
         {
-            ResetHeaderVisibility ();
+            ResetChannelsVisibility ();
         }
 
         private void HandleHeaderViewVisibility ()
@@ -247,7 +245,7 @@ namespace Fizz.UI
             InputView.Reset ();
         }
 
-        private void ResetHeaderVisibility ()
+        private void ResetChannelsVisibility ()
         {
             _isChannelListVisible = false;
             transform.GetChild (0).GetComponent<RectTransform> ().anchoredPosition = Vector2.zero;

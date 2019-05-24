@@ -9,10 +9,11 @@
 /// </summary>
 using System;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.UI;
 
-namespace UnityEngine.UI.Extensions
+namespace Fizz.UI.Extentions
 {
-    [AddComponentMenu("UI/Effects/Extensions/Gradient")]
     public class Gradient : BaseMeshEffect
     {
         [SerializeField]

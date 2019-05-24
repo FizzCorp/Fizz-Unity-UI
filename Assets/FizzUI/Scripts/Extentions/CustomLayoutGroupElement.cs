@@ -5,7 +5,10 @@
 //
 using UnityEngine;
 
-public class CustomLayoutGroupElement : MonoBehaviour
+namespace Fizz.UI.Extentions
 {
-	public TextAnchor anchor = TextAnchor.LowerCenter;
+    public class CustomLayoutGroupElement : MonoBehaviour
+    {
+        public TextAnchor anchor = TextAnchor.LowerCenter;
+    }
 }

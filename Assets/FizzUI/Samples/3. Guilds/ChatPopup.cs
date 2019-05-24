@@ -21,7 +21,7 @@ namespace Fizz.Demo
             gameObject.SetActive(true);
 
             // Show channels only if list contains more than one channel
-            chatView.ShowChannels = channels.Count > 1;
+            chatView.ShowChannelsButton = channels.Count > 1;
 
             for (int index = 0; index < channels.Count; index++)
             {
