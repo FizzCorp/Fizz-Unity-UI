@@ -5,6 +5,7 @@ namespace Fizz
 	public class FizzException: Exception
     {
         public static readonly FizzException ERROR_INVALID_APP_ID = new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_app_id");
+        public static readonly FizzException ERROR_INVALID_APP_SECRET = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_app_secret");
         public static readonly FizzException ERROR_INVALID_USER_ID = new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_user_id");
         public static readonly FizzException ERROR_INVALID_SESSION_REPOSITORY = new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_session_repository");
         public static readonly FizzException ERROR_INVALID_EVENTBUS = new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_eventbus");

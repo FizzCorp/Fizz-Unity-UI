@@ -249,6 +249,7 @@ namespace Fizz.Common.Json
                     case '{':
                         if (QuoteMode)
                         {
+                            Token = (Token == null) ? "" : Token;
                             Token += aJSON[i];
                             break;
                         }
@@ -262,13 +263,14 @@ namespace Fizz.Common.Json
                                 ctx.Add(TokenName,stack.Peek());
                         }
                         TokenName = "";
-                        Token = "";
+                        Token = null;
                         ctx = stack.Peek();
                     break;
  
                     case '[':
                         if (QuoteMode)
                         {
+                            Token = (Token == null) ? "" : Token;
                             Token += aJSON[i];
                             break;
                         }
@@ -283,7 +285,7 @@ namespace Fizz.Common.Json
                                 ctx.Add(TokenName,stack.Peek());
                         }
                         TokenName = "";
-                        Token = "";
+                        Token = null;
                         ctx = stack.Peek();
                     break;
  
@@ -291,6 +293,7 @@ namespace Fizz.Common.Json
                     case ']':
                         if (QuoteMode)
                         {
+                            Token = (Token == null) ? "" : Token;
                             Token += aJSON[i];
                             break;
                         }
@@ -298,7 +301,7 @@ namespace Fizz.Common.Json
                             throw new Exception("JSON Parse: Too many closing brackets");
  
                         stack.Pop();
-                        if (Token != "")
+                        if (Token != null)
                         {
                             TokenName = TokenName.Trim();
                             if (ctx is JSONArray)
@@ -307,7 +310,7 @@ namespace Fizz.Common.Json
                                 ctx.Add(TokenName,Token);
                         }
                         TokenName = "";
-                        Token = "";
+                        Token = null;
                         if (stack.Count>0)
                             ctx = stack.Peek();
                     break;
@@ -315,6 +318,7 @@ namespace Fizz.Common.Json
                     case ':':
                         if (QuoteMode)
                         {
+                            Token = (Token == null) ? "" : Token;
                             Token += aJSON[i];
                             break;
                         }
@@ -329,10 +333,11 @@ namespace Fizz.Common.Json
                     case ',':
                         if (QuoteMode)
                         {
+                            Token = (Token == null) ? "" : Token;
                             Token += aJSON[i];
                             break;
                         }
-                        if (Token != "")
+                        if (Token != null)
                         {
                             if (ctx is JSONArray)
                                 ctx.Add(Token);
@@ -350,14 +355,18 @@ namespace Fizz.Common.Json
                     case ' ':
                     case '\t':
                         if (QuoteMode)
+                        {
+                            Token = (Token == null) ? "" : Token;
                             Token += aJSON[i];
-                    break;
- 
+                        }
+                        break;
+
                     case '\\':
                         ++i;
                         if (QuoteMode)
                         {
                             char C = aJSON[i];
+                            Token = (Token == null) ? "" : Token;
                             switch (C)
                             {
                                 case 't' : Token += '\t'; break;
@@ -376,8 +385,9 @@ namespace Fizz.Common.Json
                             }
                         }
                     break;
- 
+
                     default:
+                        Token = (Token == null) ? "" : Token;
                         Token += aJSON[i];
                     break;
                 }

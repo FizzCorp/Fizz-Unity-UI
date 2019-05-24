@@ -22,6 +22,8 @@ namespace Fizz.Common
         public static readonly string API_BASE_URL = string.Format("{0}://{1}/{2}", API_PROTOCOL, API_ENDPOINT, API_VERSION);
         public static readonly string API_PATH_SESSIONS = "/sessions";
         public static readonly string API_PATH_EVENTS = "/events";
+        public static readonly string API_PATH_REPORTS = "/reports";
+        public static readonly string API_PATH_CONTENT_MODERATION = "/moderatedTexts";
         public static readonly string API_PATH_MESSAGES = "/channels/{0}/messages";
         public static readonly string API_PATH_SUBSCRIBERS = "/channels/{0}/subscribers";
         public static readonly string API_PATH_MESSAGE_ACTION = "/channels/{0}/messages/{1}";

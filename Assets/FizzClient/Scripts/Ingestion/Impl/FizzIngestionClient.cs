@@ -190,10 +190,10 @@ namespace Fizz.Ingestion.Impl
             
             //Persist Session Start
             UnityEngine.PlayerPrefs.SetString (KEY_SESSION, _sessionId);
-            UnityEngine.PlayerPrefs.SetString (KEY_SESSION_START_TS, (FizzUtils.Now () + _timeOffset).ToString ());
+            UnityEngine.PlayerPrefs.SetString (KEY_SESSION_START_TS, (_startTime).ToString ());
             UnityEngine.PlayerPrefs.Save ();
 
-            _eventLog.Put(BuildEvent(_sessionId, FizzEventType.session_started, FizzUtils.Now () + _timeOffset, null));   
+            _eventLog.Put(BuildEvent(_sessionId, FizzEventType.session_started, _startTime, null));   
         }
 
         private void SessionEnded(string sessionId, long sessionStartTime, long sessionEndTime)
