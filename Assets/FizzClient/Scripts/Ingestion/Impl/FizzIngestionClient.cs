@@ -82,7 +82,7 @@ namespace Fizz.Ingestion.Impl
                _client = client;
                _userId = userId;
                _timeOffset = FizzUtils.Now() - curServerTS;
-               _startTime = FizzUtils.Now();
+               _startTime = FizzUtils.Now() + _timeOffset;
                _sessionId = Guid.NewGuid().ToString();
 
                ClosePreviousSession();
@@ -98,7 +98,8 @@ namespace Fizz.Ingestion.Impl
             IfOpened(() =>
             {
                 _interval.Disable();
-                SessionEnded(_sessionId, FizzUtils.Now() - _startTime);
+                UpdateSessionTimestamp ();
+                //SessionEnded(_startTime, FizzUtils.Now() + _timeOffset);
 
                 _onLogEmpty = () =>
                 {
@@ -135,7 +136,7 @@ namespace Fizz.Ingestion.Impl
                 }
                 fields["amount"].AsDouble = amount;
 
-                _eventLog.Put(BuildEvent(_sessionId, FizzEventType.product_purchased, fields)); 
+                _eventLog.Put(BuildEvent(_sessionId, FizzEventType.product_purchased, FizzUtils.Now () + _timeOffset, fields)); 
             });
         }
 
@@ -160,7 +161,7 @@ namespace Fizz.Ingestion.Impl
                     fields["nick"] = senderNick;
                 }
 
-                _eventLog.Put(BuildEvent(_sessionId, FizzEventType.text_msg_sent, fields)); 
+                _eventLog.Put(BuildEvent(_sessionId, FizzEventType.text_msg_sent, FizzUtils.Now () + _timeOffset, fields)); 
             });
         }
 
@@ -174,7 +175,7 @@ namespace Fizz.Ingestion.Impl
                 long.TryParse (UnityEngine.PlayerPrefs.GetString (KEY_SESSION_START_TS), out sessionStartTs);
                 long.TryParse (UnityEngine.PlayerPrefs.GetString (KEY_SESSION_UPDATE_TS), out sessionUpdateTs);
 
-                SessionEnded (lastSessionId, sessionUpdateTs - sessionStartTs);
+                SessionEnded (lastSessionId, sessionStartTs, sessionUpdateTs);
 
                 UnityEngine.PlayerPrefs.DeleteKey (KEY_SESSION);
                 UnityEngine.PlayerPrefs.DeleteKey (KEY_SESSION_START_TS);
@@ -192,21 +193,29 @@ namespace Fizz.Ingestion.Impl
             UnityEngine.PlayerPrefs.SetString (KEY_SESSION_START_TS, (FizzUtils.Now () + _timeOffset).ToString ());
             UnityEngine.PlayerPrefs.Save ();
 
-            _eventLog.Put(BuildEvent(_sessionId, FizzEventType.session_started, null));   
+            _eventLog.Put(BuildEvent(_sessionId, FizzEventType.session_started, FizzUtils.Now () + _timeOffset, null));   
         }
 
-        private void SessionEnded(string sessionId, long duration)
+        private void SessionEnded(string sessionId, long sessionStartTime, long sessionEndTime)
         {
             FizzLogger.D("Session Ended");
 
             JSONClass fields = new JSONClass();
 
+            long duration = (sessionEndTime - sessionStartTime) / 1000;
+
             fields["duration"].AsDouble = duration;
             
-            _eventLog.Put(BuildEvent(_sessionId, FizzEventType.session_ended, fields));
+            _eventLog.Put(BuildEvent(sessionId, FizzEventType.session_ended, sessionEndTime, fields));
         }
 
-        private FizzEvent BuildEvent(string sessionId, FizzEventType type, JSONNode fields)
+        private void UpdateSessionTimestamp ()
+        {
+            UnityEngine.PlayerPrefs.SetString (KEY_SESSION_UPDATE_TS, (FizzUtils.Now () + _timeOffset).ToString ());
+            UnityEngine.PlayerPrefs.Save ();
+        }
+
+        private FizzEvent BuildEvent(string sessionId, FizzEventType type, long timestamp, JSONNode fields)
         {
             try
             {
@@ -218,7 +227,7 @@ namespace Fizz.Ingestion.Impl
                     type,
                     EVENT_VER,
                     sessionId,
-                    FizzUtils.Now() + _timeOffset,
+                    timestamp,
                     PLATFORM,
                     BuildVer,
                     CustomDimesion01, CustomDimesion02, CustomDimesion03,
@@ -322,7 +331,7 @@ namespace Fizz.Ingestion.Impl
             {
                 events.Add(ParseEvent(item));
             }
-
+            
             return events.ToString();
         }
 
