@@ -70,7 +70,9 @@ namespace Fizz.Common
         public static readonly IFizzLanguageCode Welsh = new FizzLanguageCode("Welsh", "cy");
         public static readonly IFizzLanguageCode YucatecMaya = new FizzLanguageCode("YucatecMaya", "yua");
 
-        public static IList<IFizzLanguageCode> AllLanguages { get; } = new List<IFizzLanguageCode>()
+        public static IList<IFizzLanguageCode> AllLanguages { get { return _languageCodes; } } 
+
+        private static IList<IFizzLanguageCode> _languageCodes = new List<IFizzLanguageCode>()
         {
             Afrikaans,
             Arabic,
@@ -142,13 +144,16 @@ namespace Fizz.Common
         
         class FizzLanguageCode : IFizzLanguageCode
         {
-            public string Language { get; }
-            public string Code { get; }
+            public string Language { get { return _language; } }
+            public string Code { get { return _code; } }
+
+            private string _language;
+            private string _code;
 
             internal FizzLanguageCode(string lang, string code)
             {
-                Language = lang;
-                Code = code;
+                _language = lang;
+                _code = code;
             }
         }
     }
