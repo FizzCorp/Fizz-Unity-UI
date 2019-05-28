@@ -121,7 +121,7 @@ namespace Fizz.Chat.Impl
             {
                 try
                 {
-                    byte ret = _client.Connect (_clientId, _username, _password, _cleanSession, 60);
+                    byte ret = _client.Connect (_clientId, _username, _password, _cleanSession, 30);
                     if (ret == 0)
                     {
                         if (Connected != null)
