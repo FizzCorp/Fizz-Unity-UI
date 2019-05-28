@@ -8,11 +8,12 @@ namespace Fizz.UI.Model
 {
     public class FizzChannel
     {
-        public string Id { get { return Meta.Id; } }
+        public string Id { get { return _channelMeta.Id; } }
 
-        public string Name { get { return Meta.Name; } }
+        public string Name { get { return _channelMeta.Name; } }
 
-        public FizzChannelMeta Meta { get; } = null;
+        public FizzChannelMeta Meta { get { return _channelMeta; } }
+        private FizzChannelMeta _channelMeta = null;
 
         public IList<FizzChannelMessage> Messages
         {
@@ -29,7 +30,7 @@ namespace Fizz.UI.Model
 
         public FizzChannel(FizzChannelMeta channelMeta)
         {
-            this.Meta = channelMeta;
+            this._channelMeta = channelMeta;
         }
 
         public void AddMessage(FizzChannelMessage message, bool notify = true)
@@ -122,7 +123,7 @@ namespace Fizz.UI.Model
                     {
                         FizzLogger.D("Subscribed " + Id);
 
-                        FizzService.Instance.Client.Chat.QueryLatest(Id, Meta.InitialQueryMessageCount, (msgs, qEx) =>
+                        FizzService.Instance.Client.Chat.QueryLatest(Id, _channelMeta.InitialQueryMessageCount, (msgs, qEx) =>
                         {
                             if (qEx == null)
                             {
@@ -163,7 +164,7 @@ namespace Fizz.UI.Model
 
             try
             {
-                FizzService.Instance.Client.Chat.QueryLatest(Id, Meta.InitialQueryMessageCount, beforeId, (msgs, qEx) =>
+                FizzService.Instance.Client.Chat.QueryLatest(Id, _channelMeta.InitialQueryMessageCount, beforeId, (msgs, qEx) =>
                 {
                     if (qEx == null)
                     {

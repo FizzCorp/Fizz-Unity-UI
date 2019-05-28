@@ -21,8 +21,8 @@ namespace Fizz.Demo
         private FizzChannelMeta statusChannel;
 
         // Custom data keys
-        public static string KEY_DATA_TYPE { get; set; } = "custom-type";
-        public static string KEY_DATA_STATUS { get; set; } = "custom-type-data";
+        public static string KEY_DATA_TYPE = "custom-type";
+        public static string KEY_DATA_STATUS = "custom-type-data";
 
         private void Awake()
         {

@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using System.Text;
 using Fizz.Common;
 using Fizz.Common.Json;
-using MQTTnet;
-using MQTTnet.Client;
 
 namespace Fizz.Chat.Impl
 {
     public class FizzMQTTChannelMessageListener : IFizzChannelMessageListener
     {
-        private static readonly FizzException ERROR_INVALID_APP_ID = new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_app_id");
-        private static readonly FizzException ERROR_INVALID_DISPATCHER = new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_dispatcher");
-        private static readonly FizzException ERROR_CONNECTION_FAILED = new FizzException(FizzError.ERROR_REQUEST_FAILED, "request_failed");
-        private static readonly FizzException ERROR_AUTH_FAILED = new FizzException(FizzError.ERROR_AUTH_FAILED, "auth_failed");
+        private static readonly FizzException ERROR_INVALID_APP_ID = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_app_id");
+        private static readonly FizzException ERROR_INVALID_DISPATCHER = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_dispatcher");
+        private static readonly FizzException ERROR_CONNECTION_FAILED = new FizzException (FizzError.ERROR_REQUEST_FAILED, "request_failed");
+        private static readonly FizzException ERROR_AUTH_FAILED = new FizzException (FizzError.ERROR_AUTH_FAILED, "auth_failed");
 
         public Action<bool> OnConnected { get; set; }
         public Action<FizzException> OnDisconnected { get; set; }
@@ -25,13 +23,13 @@ namespace Fizz.Chat.Impl
         protected IFizzMqttConnection _connection;
         protected FizzSessionRepository _sessionRepo;
 
-        private readonly object synclock = new object();
+        private readonly object synclock = new object ();
         private readonly IFizzActionDispatcher _dispatcher;
 
-        public FizzMQTTChannelMessageListener(string appId,
+        public FizzMQTTChannelMessageListener (string appId,
                                               IFizzActionDispatcher dispatcher)
         {
-            if (string.IsNullOrEmpty(appId))
+            if (string.IsNullOrEmpty (appId))
             {
                 throw ERROR_INVALID_APP_ID;
             }
@@ -43,14 +41,14 @@ namespace Fizz.Chat.Impl
             _dispatcher = dispatcher;
         }
 
-        public void Open(string userId, FizzSessionRepository sessionRepository)
+        public void Open (string userId, FizzSessionRepository sessionRepository)
         {
             if (_connection != null)
             {
                 return;
             }
 
-            if (string.IsNullOrEmpty(userId))
+            if (string.IsNullOrEmpty (userId))
             {
                 throw FizzException.ERROR_INVALID_USER_ID;
             }
@@ -73,23 +71,23 @@ namespace Fizz.Chat.Impl
 
             lock (synclock)
             {
-                _connection = CreateConnection();
+                _connection = CreateConnection ();
                 _connection.Connected += OnConnConnected;
                 _connection.Disconnected += OnConnDisconnected;
                 _connection.MessageReceived += OnMessage;
-                _connection.ConnectAsync();
+                _connection.ConnectAsync ();
             }
 
             _closeCallback = null;
         }
 
         private Action _closeCallback;
-        public void Close(Action cb)
+        public void Close (Action cb)
         {
             _closeCallback = cb;
             if (_connection == null)
             {
-                FizzUtils.DoCallback(_closeCallback);
+                FizzUtils.DoCallback (_closeCallback);
                 _closeCallback = null;
                 return;
             }
@@ -100,13 +98,13 @@ namespace Fizz.Chat.Impl
                 _sessionRepo = null;
                 var conn = _connection;
                 _connection = null;
-                conn.DisconnectAsync();
+                conn.DisconnectAsync ();
             }
         }
 
-        protected virtual IFizzMqttConnection CreateConnection()
+        protected virtual IFizzMqttConnection CreateConnection ()
         {
-            return new FizzMQTTConnection(_userId,
+            return new FizzMQTTConnection (_userId,
                                           _sessionRepo.Session._token,
                                           clientId: _sessionRepo.Session._subscriberId,
                                           retry: true,
@@ -114,153 +112,152 @@ namespace Fizz.Chat.Impl
                                           dispatcher: _dispatcher);
         }
 
-        private void OnSessionUpdate()
+        private void OnSessionUpdate ()
         {
             try
             {
-
                 if (_connection != null)
                 {
                     var conn = _connection;
                     _connection = null;
-                    conn.DisconnectAsync();
+                    conn.DisconnectAsync ();
                 }
 
-                _connection = CreateConnection();
+                _connection = CreateConnection ();
                 _connection.Connected += OnConnConnected;
                 _connection.Disconnected += OnConnDisconnected;
                 _connection.MessageReceived += OnMessage;
-                _connection.ConnectAsync();
+                _connection.ConnectAsync ();
             }
             catch (Exception e)
             {
-                FizzLogger.E("Reconnect Session " + e);
+                FizzLogger.E ("Reconnect Session " + e);
             }
         }
 
-        private void OnConnConnected(int connId, object sender, MqttClientConnectedEventArgs args)
+        private void OnConnConnected (object sender, bool sessionPresent)
         {
-            if (_connection != null && _connection.Id != connId)
+            if (_connection != null)
             {
-                FizzLogger.W("Received conneced event for old connection.");
+                FizzLogger.W ("Received conneced event for old connection.");
             }
 
-            FizzLogger.D("MQTT - OnConnected: " + args.IsSessionPresent.ToString());
+            FizzLogger.D ("MQTT - OnConnected: " + sessionPresent);
 
             if (OnConnected != null)
             {
-                OnConnected.Invoke(!args.IsSessionPresent);
+                OnConnected.Invoke (!sessionPresent);
             }
         }
 
-        private void OnConnDisconnected(int connId, object sender, MqttClientDisconnectedEventArgs args)
+        private void OnConnDisconnected (object sender, FizzMqttDisconnectedArgs args)
         {
-            if (_connection != null && _connection.Id != connId)
+            if (_connection != null)
             {
-                FizzLogger.W("Received disconnected event for old connection.");
+                FizzLogger.W ("Received disconnected event for old connection.");
             }
 
-            FizzLogger.D("MQTT - OnDisconnected: " + args.ClientWasConnected.ToString());
+            FizzLogger.D ("MQTT - OnDisconnected: " + args.ClientWasConnected.ToString ());
 
             if (OnDisconnected != null)
             {
                 if (args.Exception == null)
                 {
-                    OnDisconnected.Invoke(null);
+                    OnDisconnected.Invoke (null);
                 }
                 else
                 {
-                    if (args.Exception.GetType() == typeof(MQTTnet.Adapter.MqttConnectingFailedException))
+                    if (args.Exception.GetType () == typeof (FizzMqttAuthException))
                     {
-                        OnDisconnected.Invoke(ERROR_AUTH_FAILED);
+                        OnDisconnected.Invoke (ERROR_AUTH_FAILED);
                         if (_sessionRepo != null)
                         {
-                            _sessionRepo.FetchToken(null);
+                            _sessionRepo.FetchToken (null);
                         }
                     }
                     else
                     {
-                        OnDisconnected.Invoke(ERROR_CONNECTION_FAILED);
+                        OnDisconnected.Invoke (ERROR_CONNECTION_FAILED);
                     }
                 }
             }
 
             if (_closeCallback != null)
             {
-                FizzUtils.DoCallback(_closeCallback);
+                FizzUtils.DoCallback (_closeCallback);
             }
         }
 
-        private void OnMessage(int connId, object sender, MqttApplicationMessageReceivedEventArgs args)
+        private void OnMessage (object sender, byte[] messagePayload)
         {
             try
             {
-                string payload = Encoding.UTF8.GetString(args.ApplicationMessage.Payload);
-                FizzTopicMessage message = new FizzTopicMessage(payload);
+                string payload = Encoding.UTF8.GetString (messagePayload);
+                FizzTopicMessage message = new FizzTopicMessage (payload);
 
-                FizzLogger.D("OnMessage with id: " + message.Id);
+                FizzLogger.D ("OnMessage with id: " + message.Id);
 
                 switch (message.Type)
                 {
                     case "CMSGP":
                         if (OnMessagePublished != null)
                         {
-                            OnMessagePublished.Invoke(AdaptTo(message));
+                            OnMessagePublished.Invoke (AdaptTo (message));
                         }
                         break;
                     case "CMSGU":
                         if (OnMessageUpdated != null)
                         {
-                            OnMessageUpdated.Invoke(AdaptTo(message));
+                            OnMessageUpdated.Invoke (AdaptTo (message));
                         }
                         break;
                     case "CMSGD":
                         if (OnMessageDeleted != null)
                         {
-                            OnMessageDeleted.Invoke(AdaptTo(message));
+                            OnMessageDeleted.Invoke (AdaptTo (message));
                         }
                         break;
                     default:
-                        FizzLogger.W("unrecognized packet received: " + payload);
+                        FizzLogger.W ("unrecognized packet received: " + payload);
                         break;
                 }
             }
             catch
             {
-                FizzLogger.W("received invalid message: " + args.ApplicationMessage.Payload);
+                FizzLogger.W ("received invalid message: " + messagePayload);
             }
         }
 
-        private FizzChannelMessage AdaptTo(FizzTopicMessage message)
+        private FizzChannelMessage AdaptTo (FizzTopicMessage message)
         {
-            JSONNode payload = JSONNode.Parse(message.Data);
+            JSONNode payload = JSONNode.Parse (message.Data);
             JSONClass translationData = payload["translations"].AsObject;
             IDictionary<string, string> translations = null;
 
             if (translationData != null)
             {
-                translations = new Dictionary<string, string>();
+                translations = new Dictionary<string, string> ();
                 foreach (string key in translationData.Keys)
                 {
-                    translations.Add(key, translationData[key]);
+                    translations.Add (key, translationData[key]);
                 }
             }
 
             Dictionary<string, string> dataDict = null;
             if (payload["data"] != null)
             {
-                JSONNode messageData = JSONNode.Parse(payload["data"]);
+                JSONNode messageData = JSONNode.Parse (payload["data"]);
                 if (messageData != null)
                 {
-                    dataDict = new Dictionary<string, string>();
+                    dataDict = new Dictionary<string, string> ();
                     foreach (string key in messageData.Keys)
                     {
-                        dataDict.Add(key, messageData[key]);
+                        dataDict.Add (key, messageData[key]);
                     }
                 }
             }
 
-            return new FizzChannelMessage(
+            return new FizzChannelMessage (
                 message.Id,
                 message.From,
                 payload["nick"],

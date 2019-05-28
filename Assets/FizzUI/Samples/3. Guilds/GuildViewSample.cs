@@ -30,7 +30,7 @@ namespace Fizz.Demo
             // Remove previous channel if any
             RemoveGuildChannel();
 
-            guildChannel = new FizzChannelMeta(string.Join("-", guild, "channel"), guild, "GUILD");
+            guildChannel = new FizzChannelMeta(guild + "-channel", guild, "GUILD");
 
             // Subscribe to channel (Note that it is compalsory to Subscribe a channel before adding to UI)
             FizzService.Instance.SubscribeChannel(guildChannel);

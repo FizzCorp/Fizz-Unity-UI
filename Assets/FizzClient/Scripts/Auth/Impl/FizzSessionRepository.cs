@@ -8,7 +8,7 @@ namespace Fizz.Common
         private string _locale;
         private IFizzSessionProvider _sessionProvider;
 
-        public FizzSession Session { get; private set; } = new FizzSession(null, null, 0);
+        public FizzSession Session { get; private set; }
 
         public Action OnSessionUpdate;
 
@@ -17,6 +17,8 @@ namespace Fizz.Common
             _userId = userId;
             _locale = locale;
             _sessionProvider = sessionProvider;
+
+            Session = new FizzSession (null, null, 0);
         }
 
         public void FetchToken (Action<FizzSession, FizzException> callback)

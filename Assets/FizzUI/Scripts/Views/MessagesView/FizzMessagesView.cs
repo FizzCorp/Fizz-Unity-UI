@@ -37,9 +37,9 @@ namespace Fizz.UI
         /// </summary>
         [SerializeField] Button ScrollIndicator;
 
-        public bool EnableHistoryFetch { get; set; } = false;
+        public bool EnableHistoryFetch { get; set; }
 
-        public bool ShowMessageTranslation { get; set; } = false;
+        public bool ShowMessageTranslation { get; set; }
 
         void Awake()
         {

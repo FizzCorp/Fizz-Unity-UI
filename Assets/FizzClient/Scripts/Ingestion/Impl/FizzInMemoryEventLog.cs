@@ -5,17 +5,21 @@ using Fizz.Common;
 
 namespace Fizz.Ingestion.Impl
 {
-    class FizzInMemoryEventComparer : IComparer<FizzEvent>
+    class FizzInMemoryEventComparer : IComparer<long>
     {
-        public int Compare(FizzEvent lhs, FizzEvent rhs) 
+        public int Compare (long lhs, long rhs)
         {
-            return (int)(lhs.Id - rhs.Id);
+            int result = (int)(lhs - rhs);
+            if (result == 0)
+                return 1;   // Handle equality as beeing greater
+            else
+                return result;
         }
     }
 
     public class FizzInMemoryEventLog : IFizzEventLog
     {
-        private readonly SortedSet<FizzEvent> log = new SortedSet<FizzEvent>(new FizzInMemoryEventComparer());
+        private SortedList<long, FizzEvent> log = new SortedList<long, FizzEvent> (new FizzInMemoryEventComparer ());
 
         public void Put(FizzEvent item)
         {
@@ -25,7 +29,7 @@ namespace Fizz.Ingestion.Impl
                 return;
             }
 
-            log.Add(item);
+            log.Add(item.Id, item);
         }
 
         public void Read(int count, Action<List<FizzEvent>> callback)
@@ -37,7 +41,7 @@ namespace Fizz.Ingestion.Impl
 
             List<FizzEvent> events = new List<FizzEvent>();
 
-            foreach (FizzEvent item in log) 
+            foreach (FizzEvent item in log.Values) 
             {
                 events.Add(item);
                 if (events.Count >= count) {
@@ -50,7 +54,18 @@ namespace Fizz.Ingestion.Impl
 
         public void RollTo(FizzEvent item)
         {
-            log.RemoveWhere((FizzEvent obj) => obj.Id <= item.Id);
+            try
+            {
+                int index = log.IndexOfValue (item);
+                for (int i = index; i >= 0; i--)
+                {
+                    log.RemoveAt (i);
+                }
+            }
+            catch (Exception e)
+            {
+                FizzLogger.E ("Fizz Event Log RollTo " + e);
+            }
         }
     }
 }
