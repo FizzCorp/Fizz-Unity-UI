@@ -4,7 +4,7 @@ namespace Fizz.Common
 {
     public class FizzConfig
     {
-#if UNITY_2018_3_OR_NEWER
+#if UNITY_2018_3_OR_NEWER && NET_4_6
         public static readonly string API_PROTOCOL = "https";
         public static readonly string API_ENDPOINT = "api.fizz.io";
 
