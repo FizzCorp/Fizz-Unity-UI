@@ -152,12 +152,13 @@ namespace Fizz.UI
                     { FizzMessageCellModel.KEY_CLIENT_ID, now + "" }
                 };
 
-                FizzMessageCellModel model = new FizzMessageCellModel(
+                FizzMessageCellModel model = new FizzMessageCellModel (
                     now,
                     FizzService.Instance.UserId,
                     FizzService.Instance.UserName,
                     _channel.Id,
                     message,
+                    string.Empty,
                     data,
                     null,
                     now)
@@ -447,7 +448,7 @@ namespace Fizz.UI
 
         private FizzMessageCellModel GetChatCellModelFromAction(FizzChannelMessage action)
         {
-            var model = new FizzMessageCellModel(action.Id, action.From, action.Nick, action.To, action.Body, action.Data, action.Translations, action.Created)
+            var model = new FizzMessageCellModel(action.Id, action.From, action.Nick, action.To, action.Body, action.Topic, action.Data, action.Translations, action.Created)
             {
                 Type = FizzChatCellType.ChatCell
             };

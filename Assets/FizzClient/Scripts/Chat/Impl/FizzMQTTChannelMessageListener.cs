@@ -56,14 +56,6 @@ namespace Fizz.Chat.Impl
             {
                 throw FizzException.ERROR_INVALID_SESSION_REPOSITORY;
             }
-            //if (string.IsNullOrEmpty(session._subscriberId))
-            //{
-            //    throw ERROR_INVALID_SUBSCRIBER_ID;
-            //}
-            //if (string.IsNullOrEmpty(session._token))
-            //{
-            //    throw ERROR_INVALID_SESSION_TOKEN;
-            //}
 
             _userId = userId;
             _sessionRepo = sessionRepository;
@@ -263,6 +255,7 @@ namespace Fizz.Chat.Impl
                 payload["nick"],
                 payload["to"],
                 payload["body"],
+                payload["topic"],
                 dataDict,
                 translations,
                 message.Created

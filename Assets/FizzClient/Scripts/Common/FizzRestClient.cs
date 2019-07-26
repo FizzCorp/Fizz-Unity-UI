@@ -79,7 +79,15 @@ namespace Fizz.Common
             }
 
             byte[] buffer = Encoding.UTF8.GetBytes(json);
-            SendRequestAsync(host, path, "DELETE", headers, CONTENT_TYPE, buffer.Length, buffer, (status, response, ex) =>
+            int bufferCount = buffer.Length;
+
+            if (string.IsNullOrEmpty (json))
+            {
+                buffer = null;
+                bufferCount = 0;
+            }
+
+            SendRequestAsync(host, path, "DELETE", headers, CONTENT_TYPE, bufferCount, buffer, (status, response, ex) =>
             {
                 if (ex != null)
                 {

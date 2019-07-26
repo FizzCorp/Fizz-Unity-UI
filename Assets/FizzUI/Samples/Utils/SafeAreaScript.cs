@@ -15,7 +15,7 @@ namespace Fizz.Demo
             Refresh();
         }
 
-        void Update()
+        void FixedUpdate()
         {
             Refresh();
         }
