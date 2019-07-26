@@ -57,6 +57,7 @@ GameObject:
   - component: {fileID: 224866981787049316}
   - component: {fileID: 222454569756487272}
   - component: {fileID: 114829173200170026}
+  - component: {fileID: 114150891843799928}
   m_Layer: 5
   m_Name: NotificationText
   m_TagString: Untagged
@@ -143,6 +144,18 @@ MonoBehaviour:
   MessageLabel: {fileID: 114829173200170026}
   CustomNode: {fileID: 0}
   TimeLabel: {fileID: 0}
+--- !u!114 &114150891843799928
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1559060577128088}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbaa6dea806ed03459503d9165978b26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Palette: 2
 --- !u!114 &114185150154752528
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -230,7 +243,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1268977995827306}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
   m_Name: 

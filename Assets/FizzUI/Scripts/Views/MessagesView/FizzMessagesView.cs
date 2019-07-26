@@ -232,10 +232,10 @@ namespace Fizz.UI
 
         private void LoadCellPrefabs()
         {
-            otherCellView = Utils.LoadPrefabs<FizzMessageOtherCellView>("Cells/OtherCell");
-            otherRepeatCellView = Utils.LoadPrefabs<FizzMessageOtherRepeatCellView>("Cells/OtherRepeatCell");
-            userCellView = Utils.LoadPrefabs<FizzMessageUserCellView>("Cells/UserCell");
-            dateHeaderCellView = Utils.LoadPrefabs<FizzMessageDateHeaderCellView>("Cells/DateHeaderCell");
+            otherCellView = Utils.LoadPrefabs<FizzMessageOtherCellView>("Cells_Style_2/OtherCell");
+            otherRepeatCellView = Utils.LoadPrefabs<FizzMessageOtherRepeatCellView>("Cells_Style_2/OtherRepeatCell");
+            userCellView = Utils.LoadPrefabs<FizzMessageUserCellView>("Cells_Style_2/UserCell");
+            dateHeaderCellView = Utils.LoadPrefabs<FizzMessageDateHeaderCellView>("Cells_Style_2/DateHeaderCell");
         }
 
         private void LoadChatAsync(bool scrollDown)

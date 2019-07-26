@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 222042151959396322}
   - component: {fileID: 114686507322273280}
   - component: {fileID: 114125516726588072}
+  - component: {fileID: 114421846861230892}
   m_Layer: 5
   m_Name: MessageLabel
   m_TagString: Untagged
@@ -93,6 +94,7 @@ GameObject:
   - component: {fileID: 224094871111863420}
   - component: {fileID: 222695157682134812}
   - component: {fileID: 114751478888766546}
+  - component: {fileID: 114357332539424626}
   m_Layer: 5
   m_Name: TimeLabel
   m_TagString: Untagged
@@ -301,6 +303,30 @@ MonoBehaviour:
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
+--- !u!114 &114357332539424626
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1460704889808008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbaa6dea806ed03459503d9165978b26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Palette: 3
+--- !u!114 &114421846861230892
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1160704794775764}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fbaa6dea806ed03459503d9165978b26, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Palette: 2
 --- !u!114 &114421943221011382
 MonoBehaviour:
   m_ObjectHideFlags: 1
