@@ -25,10 +25,11 @@ namespace Fizz.UI
 
         public void SetSelected (bool selected)
         {
-            Color color;
-            ColorUtility.TryParseHtmlString ("#EEEEEEFF", out color);
+            //Color color;
+            //ColorUtility.TryParseHtmlString ("#EEEEEEFF", out color);
 
-            BackgroundImage.color = selected ? color : Color.white;
+            //BackgroundImage.color = selected ? color : Color.white;
+            ActionButton.interactable = !selected;
         }
 
         public FizzChannel GetChannel ()

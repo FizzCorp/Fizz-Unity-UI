@@ -54,7 +54,7 @@ namespace Fizz.UI.Components
             base.SetData(model, appTranslationEnabled);
 
             NickLabel.text = _model.Nick;
-            NickLabel.color = Utils.GetUserNickColor(_model.From);
+            //NickLabel.color = Utils.GetUserNickColor(_model.From);
 
             LoadChatMessageAction();
         }

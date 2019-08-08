@@ -67,6 +67,9 @@ namespace Fizz.UI
 
             ScrollRect.onValueChanged.AddListener(OnScollValueChanged);
             ScrollRect.onPullToRefresh.AddListener(OnPullToRefresh);
+
+            ScrollRect.onPointerUp.AddListener(OnPointerUp);
+            ScrollRect.onPointerDown.AddListener(OnPointerDown);
         }
 
         protected override void OnDisable()
@@ -89,14 +92,25 @@ namespace Fizz.UI
 
             ScrollRect.onValueChanged.RemoveListener(OnScollValueChanged);
             ScrollRect.onPullToRefresh.RemoveListener(OnPullToRefresh);
+
+            ScrollRect.onPointerUp.RemoveListener (OnPointerUp);
+            ScrollRect.onPointerDown.RemoveListener (OnPointerDown);
         }
 
         void LateUpdate()
         {
-            if (_isDirty) ScrollRect.RefreshContent();
-            if (!_userScroll && _resetScroll && _chatCellModelList.Count > 0) ScrollRect.GoToScrollItem(_chatCellModelList.Count - 1);
-            _isDirty = false;
-            _resetScroll = false;
+            if (_isDirty)
+            {
+                ScrollRect.RefreshContent ();
+                _isDirty = false;
+                return;
+            }
+
+            if (!_userScroll && _resetScroll && _chatCellModelList.Count > 0)
+            {
+                ScrollRect.GoToScrollItem (_chatCellModelList.Count - 1);
+                _resetScroll = false;
+            }
         }
 
         #region Public Methods
@@ -233,10 +247,9 @@ namespace Fizz.UI
 
         private void LoadCellPrefabs()
         {
-            otherCellView = Utils.LoadPrefabs<FizzMessageOtherCellView>("Cells_Style_2/OtherCell");
-            otherRepeatCellView = Utils.LoadPrefabs<FizzMessageOtherRepeatCellView>("Cells_Style_2/OtherRepeatCell");
-            userCellView = Utils.LoadPrefabs<FizzMessageUserCellView>("Cells_Style_2/UserCell");
-            dateHeaderCellView = Utils.LoadPrefabs<FizzMessageDateHeaderCellView>("Cells_Style_2/DateHeaderCell");
+            otherCellView = Utils.LoadPrefabs<FizzMessageOtherCellView>("MessageCells/OtherCell");
+            userCellView = Utils.LoadPrefabs<FizzMessageUserCellView>("MessageCells/UserCell");
+            dateHeaderCellView = Utils.LoadPrefabs<FizzMessageDateHeaderCellView>("MessageCells/DateHeaderCell");
         }
 
         private void LoadChatAsync(bool scrollDown)
@@ -245,6 +258,7 @@ namespace Fizz.UI
 
             _isDirty = true;
             _resetScroll = true;
+            _userScroll = false;
         }
 
         private void LoadChat(bool scrollDown)
@@ -307,8 +321,20 @@ namespace Fizz.UI
             }
         }
 
+        private void OnPointerDown ()
+        {
+            _pointerDown = true;
+        }
+
+        private void OnPointerUp ()
+        {
+            _pointerDown = false;
+        }
+
         private void OnScollValueChanged(Vector2 val)
         {
+            if (!_pointerDown) return;
+
             if (OptionsMenu.isActiveAndEnabled)
             {
                 OptionsMenu.gameObject.SetActive(false);
@@ -550,9 +576,6 @@ namespace Fizz.UI
                     case (int)ChatCellViewType.TheirsMessageAction:
                         obj = Instantiate(otherCellView.gameObject);
                         break;
-                    case (int)ChatCellViewType.TheirsRepeatMessageAction:
-                        obj = Instantiate(otherRepeatCellView.gameObject);
-                        break;
                     case (int)ChatCellViewType.DateHeader:
                         obj = Instantiate(dateHeaderCellView.gameObject);
                         break;
@@ -631,11 +654,6 @@ namespace Fizz.UI
                 bool ownMessage = _userId.Equals(senderId);
 
                 actionType = ownMessage ? ChatCellViewType.YoursMessageAction : ChatCellViewType.TheirsMessageAction;
-
-                if (!ownMessage && lastAction != null && chatAction.From.Equals(lastAction.From))
-                {
-                    actionType = ChatCellViewType.TheirsRepeatMessageAction;
-                }
             }
             else
             {
@@ -657,10 +675,6 @@ namespace Fizz.UI
         /// The left cell view.
         /// </summary>
         private FizzMessageOtherCellView otherCellView;
-        /// <summary>
-        /// The left repeat cell view.
-        /// </summary>
-        private FizzMessageOtherRepeatCellView otherRepeatCellView;
         /// <summary>
         /// The right cell view.
         /// </summary>
@@ -695,6 +709,7 @@ namespace Fizz.UI
         private bool _isDirty = false;
         private bool _resetScroll = false;
         private bool _userScroll = false;
+        private bool _pointerDown = false;
         private bool _isInitialized = false;
         private bool _isFetchHistoryInProgress = false;
     }

@@ -223,19 +223,19 @@ namespace Fizz.UI
         private void HandleHeaderViewVisibility ()
         {
             HeaderView.SetVisibility (_showHeaderView);
-            MessagesView.RectTransform.offsetMax = _showHeaderView ? Vector2.down * 80 : Vector2.zero;
+            MessagesView.RectTransform.offsetMax = _showHeaderView ? Vector2.down * 88 : Vector2.zero;
         }
 
         private void UpdateChannelListVisibility ()
         {
             ChannelsView.SetVisibility (_showChannels);
-            MessagesView.RectTransform.offsetMax = _showChannels ? Vector2.down * 80 : Vector2.zero;
+            MessagesView.RectTransform.offsetMax = _showChannels ? Vector2.down * 88 : Vector2.zero;
         }
 
         private void UpdateInputViewVisibility ()
         {
             InputView.gameObject.SetActive (_showInputView);
-            MessagesView.RectTransform.offsetMin = _showInputView ? Vector2.up * 80 : Vector2.zero;
+            MessagesView.RectTransform.offsetMin = _showInputView ? Vector2.up * 109 : Vector2.zero;
         }
 
         private void SyncViewState ()

@@ -79,7 +79,7 @@ namespace Fizz.UI
             }
             else
             {
-                timeFormat = (todaysTime) ? string.Format("{0:h:mm tt}", dateTime) : "Today";
+                timeFormat = (todaysTime) ? string.Format("{0:h:mm tt}", dateTime) : Registry.Localization.GetText ("DateFormat_Today");
             }
             return timeFormat;
         }
