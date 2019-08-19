@@ -62,6 +62,8 @@ namespace Fizz.UI
                 CustomNode.DestroyChildren();
                 CustomNode.gameObject.SetActive(false);
             }
+
+            MessageLabel.gameObject.SetActive (true);
         }
 
         public virtual void SetCustomData(RectTransform customView)
@@ -69,6 +71,7 @@ namespace Fizz.UI
             if (CustomNode != null)
             {
                 CustomNode.gameObject.SetActive(true);
+                MessageLabel.gameObject.SetActive(false);
                 CustomNode.DestroyChildren();
                 if (customView != null)
                 {
