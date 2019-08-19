@@ -6,11 +6,12 @@ using UnityEngine.UI;
 
 namespace Fizz.UI.Components.Extentions {
     [ExecuteInEditMode]
-    public class CustomScrollRect : ScrollRect, IPointerDownHandler {
+    public class CustomScrollRect : ScrollRect, IPointerDownHandler, IPointerUpHandler {
         public PullDirection pullDirection = PullDirection.Up;
         public UnityEvent onPullToRefresh;
 
         public UnityEvent onPointerDown;
+        public UnityEvent onPointerUp;
 
         private bool initialized;
         private ICustomScrollRectDataSource dataSourceInterface;
@@ -761,6 +762,14 @@ namespace Fizz.UI.Components.Extentions {
             if (onPointerDown != null) {
 				onPointerDown.Invoke ();
 			}
+        }
+
+        public void OnPointerUp (PointerEventData eventData)
+        {
+            if (onPointerUp != null)
+            {
+                onPointerUp.Invoke ();
+            }
         }
 
         #endregion

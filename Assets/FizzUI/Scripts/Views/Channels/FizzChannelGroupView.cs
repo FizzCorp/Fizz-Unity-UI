@@ -1,4 +1,5 @@
-﻿using Fizz.UI.Core;
+﻿using Fizz.UI.Components;
+using Fizz.UI.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -9,6 +10,11 @@ namespace Fizz.UI
         [SerializeField] Text TitleLabel;
 
         public int ChannelCount { get; set; }
+
+        private void Awake ()
+        {
+            TitleLabel.SetLocalizedText ("Channels_Group"); 
+        }
 
         public void SetData (string title)
         {

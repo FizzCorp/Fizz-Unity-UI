@@ -1,4 +1,5 @@
 ﻿using Fizz.Common;
+using Fizz.UI.Components;
 using Fizz.UI.Core;
 using Fizz.UI.Model;
 using System;
@@ -6,13 +7,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace Fizz.UI
 {
     public class FizzChannelsView : FizzBaseComponent
     {
-        [SerializeField] FizzChannelView channelPrefab;
-        [SerializeField] FizzChannelGroupView channelGroupPrefab;
+        [SerializeField] Text TitleLabel; 
+        [SerializeField] FizzChannelView ChannelPrefab;
+        [SerializeField] FizzChannelGroupView ChannelGroupPrefab;
         [SerializeField] RectTransform Container;
 
         public FizzChannelItemSelectedEvent OnChannelSelected;
@@ -176,6 +179,8 @@ namespace Fizz.UI
         {
             if (_initialized) return;
 
+            TitleLabel.SetLocalizedText ("Channels_Title");
+
             _channelsLookup = new Dictionary<string, FizzChannelView> ();
             _groupsLookup = new Dictionary<string, FizzChannelGroupView> ();
 
@@ -267,7 +272,7 @@ namespace Fizz.UI
             bool _added = false;
             if (!_channelsLookup.ContainsKey (_item.Id))
             {
-                FizzChannelView _button = Instantiate (channelPrefab);
+                FizzChannelView _button = Instantiate (ChannelPrefab);
                 _button.gameObject.SetActive (true);
                 _button.transform.SetParent (GetChannelGroup (_item).transform, false);
                 _button.transform.SetAsLastSibling ();
@@ -337,7 +342,7 @@ namespace Fizz.UI
             RectTransform groupRect = null;
             if (!_groupsLookup.ContainsKey (channelGroup))
             {
-                FizzChannelGroupView channelGroupView = Instantiate (channelGroupPrefab);
+                FizzChannelGroupView channelGroupView = Instantiate (ChannelGroupPrefab);
                 channelGroupView.gameObject.SetActive (true);
                 channelGroupView.transform.SetParent (Container.transform, false);
                 channelGroupView.transform.localScale = Vector3.one;

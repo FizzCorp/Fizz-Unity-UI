@@ -1,4 +1,6 @@
 ﻿
+using Fizz.UI.Extentions;
+
 namespace Fizz.UI.Core
 {
     public static class Registry
