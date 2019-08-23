@@ -207,6 +207,61 @@ namespace Fizz.UI
             }
         }
 
+        public void AddNewData (Dictionary<string, string> data)
+        {
+            if (data == null)
+                return;
+
+            if (_channel == null)
+                return;
+
+            try
+            {
+                long now = FizzUtils.Now ();
+                data.Add (FizzMessageCellModel.KEY_CLIENT_ID, now + "");
+
+                FizzMessageCellModel model = new FizzMessageCellModel (
+                    now,
+                    FizzService.Instance.UserId,
+                    FizzService.Instance.UserName,
+                    _channel.Id,
+                    "test",
+                    string.Empty,
+                    data,
+                    null,
+                    now)
+                {
+                    DeliveryState = FizzChatCellDeliveryState.Pending
+                };
+
+                AddAction (model);
+
+                FizzService.Instance.Client.Chat.PublishMessage (
+                    _channel.Id,
+                    FizzService.Instance.UserName,
+                    "test",
+                    data,
+                    FizzService.Instance.IsTranslationEnabled,
+                    _channel.Meta.FilterContent,
+                    _channel.Meta.PersistMessages,
+                    exception =>
+                    {
+                        if (exception == null)
+                        {
+                            model.DeliveryState = FizzChatCellDeliveryState.Sent;
+                            AddAction (model);
+
+                            //TODO Handle Ingestion for Message
+                            //FizzService.Instance.Client.Ingestion.TextMessageSent (_channel.Id, message, FizzService.Instance.UserName);
+                        }
+                    });
+            }
+            catch
+            {
+                FizzLogger.E ("Something went wrong while calling PublishMessage of FizzService.");
+            }
+        }
+
         public void Reset()
         {
             if (!_isInitialized)

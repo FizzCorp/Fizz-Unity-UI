@@ -13,9 +13,9 @@ namespace Fizz.Demo
         [SerializeField] FizzChatView chatView;
 
         // Global Channel Id
-        private readonly string globalChannelId = "global-channel";
+        private readonly string globalChannelId = "global-channel-temp";
         // Local Channel Id
-        private readonly string localChannelId = "local-channel";
+        private readonly string localChannelId = "local-channel-temp";
 
         private void Awake()
         {

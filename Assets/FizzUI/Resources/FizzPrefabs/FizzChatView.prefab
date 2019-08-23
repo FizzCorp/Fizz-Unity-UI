@@ -654,7 +654,7 @@ GameObject:
   - component: {fileID: 224613248392522388}
   - component: {fileID: 222760155475920800}
   - component: {fileID: 225804833076014334}
-  - component: {fileID: 114429155110810954}
+  - component: {fileID: 114529831806848776}
   m_Layer: 5
   m_Name: InputView
   m_TagString: Untagged
@@ -1757,26 +1757,6 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
   m_LayoutPriority: 1
---- !u!114 &114429155110810954
-MonoBehaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1740699318092280}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52a239d810409bb429e4fd15e408cd0b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  ConnectionNode: {fileID: 224449336136803724}
-  BackgroundImage: {fileID: 114784376496871218}
-  MessageInputField: {fileID: 114091303565012962}
-  SendButton: {fileID: 114584025384249888}
-  OnSend:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: Fizz.UI.FizzInputView+SendEvent, Assembly-CSharp, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
 --- !u!114 &114429488829923438
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2015,7 +1995,7 @@ MonoBehaviour:
   HeaderView: {fileID: 114657331334548556}
   ChannelsView: {fileID: 114612032384731906}
   MessagesView: {fileID: 114209098649172390}
-  InputView: {fileID: 114429155110810954}
+  InputView: {fileID: 114529831806848776}
 --- !u!114 &114488209605628912
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -2173,6 +2153,31 @@ MonoBehaviour:
   m_ChildForceExpandHeight: 0
   m_ChildControlWidth: 1
   m_ChildControlHeight: 1
+--- !u!114 &114529831806848776
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1740699318092280}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dae443a8422ded4498473a2abead284d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ConnectionNode: {fileID: 224449336136803724}
+  OnSendMessage:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: Fizz.UI.FizzInputView+SendMessageEvent, Assembly-CSharp, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  OnSendData:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: Fizz.UI.FizzInputView+SendDataEvent, Assembly-CSharp, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
+  BackgroundImage: {fileID: 114439262030609230}
+  MessageInputField: {fileID: 114091303565012962}
+  SendButton: {fileID: 114584025384249888}
 --- !u!114 &114530643158338710
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -3554,10 +3559,10 @@ RectTransform:
   m_Father: {fileID: 224350164698009546}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 180, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 501.07416, y: -42}
-  m_SizeDelta: {x: 334.04944, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224031450109620930
 RectTransform:
@@ -3928,10 +3933,10 @@ RectTransform:
   m_Father: {fileID: 224350164698009546}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 167.02472, y: -42}
-  m_SizeDelta: {x: 334.04944, y: 84}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &224547866179662230
 RectTransform:

@@ -1,6 +1,7 @@
 ﻿using Fizz.Common;
 using Fizz.UI.Core;
 using Fizz.UI.Model;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -161,7 +162,8 @@ namespace Fizz.UI
         {
             base.OnEnable ();
 
-            InputView.OnSend.AddListener (HandleSend);
+            InputView.OnSendMessage.AddListener (HandleSendMessage);
+            InputView.OnSendData.AddListener (HandleSendData);
             ChannelsView.OnChannelSelected.AddListener (HandleChannelSelected);
             HeaderView.OnChannel.AddListener (HandleChannelsButton);
             HeaderView.OnClose.AddListener (HandleCloseButton);
@@ -173,7 +175,8 @@ namespace Fizz.UI
         {
             base.OnDisable ();
 
-            InputView.OnSend.RemoveListener (HandleSend);
+            InputView.OnSendMessage.RemoveListener (HandleSendMessage);
+            InputView.OnSendData.AddListener (HandleSendData);
             ChannelsView.OnChannelSelected.RemoveListener (HandleChannelSelected);
             HeaderView.OnChannel.RemoveListener (HandleChannelsButton);
             HeaderView.OnClose.RemoveListener (HandleCloseButton);
@@ -186,11 +189,18 @@ namespace Fizz.UI
             FizzLogger.D ("OnConnectionStateChange isConnected " + isConnected);
         }
 
-        private void HandleSend (string text)
+        private void HandleSendMessage (string text)
         {
             if (string.IsNullOrEmpty (text)) return;
 
             MessagesView.AddNewMessage (text);
+        }
+
+        private void HandleSendData (Dictionary<string, string> data)
+        {
+            if (data == null) return;
+
+            MessagesView.AddNewData (data);
         }
 
         private void HandleChannelSelected (FizzChannel channel)
@@ -235,7 +245,7 @@ namespace Fizz.UI
         private void UpdateInputViewVisibility ()
         {
             InputView.gameObject.SetActive (_showInputView);
-            MessagesView.RectTransform.offsetMin = _showInputView ? Vector2.up * 109 : Vector2.zero;
+            MessagesView.RectTransform.offsetMin = _showInputView ? Vector2.up * 405 : Vector2.zero;
         }
 
         private void SyncViewState ()

@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc3a1263a393582449d33db2a6094571, type: 3}
+  m_Name: FizzStaticPredefinedInputData
+  m_EditorClassIdentifier: 
+  Phrases:
+  - Id: p_greet_hello
+    Tag: greet
+    LocalizedPhrases:
+    - Content: Hello
+      Language: 10
+    - Content: Hola
+      Language: 34
+  Stickers:
+  - Id: sticker_laugh
+    Tag: happy
+    Content: {fileID: 21300000, guid: 633a254384af53e4baf073951976bd2c, type: 3}

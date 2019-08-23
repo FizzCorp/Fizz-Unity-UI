@@ -18,8 +18,8 @@ namespace Fizz.Demo
 
         [SerializeField] Button launchButton;
 
-        private readonly FizzChannelMeta globalChannel = new FizzChannelMeta("global-channel", "Global", "GROUP");
-        private readonly FizzChannelMeta localChannel = new FizzChannelMeta("local-channel", "Local", "GROUP");
+        private readonly FizzChannelMeta globalChannel = new FizzChannelMeta("global-channel-temp", "Global", "TEMP");
+        private readonly FizzChannelMeta localChannel = new FizzChannelMeta("local-channel-temp", "Local", "TEMP");
 
         private void Awake()
         {

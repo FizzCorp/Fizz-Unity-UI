@@ -10,7 +10,7 @@ namespace Fizz
     /// <summary>
     /// FizzService is an intermediate class(MonoBehaviour, DontDestroyOnLoad) designed to work like bridge 
     /// between FizzClient and FizzUI. It contains an instance of FizzClient which can be opened and closed 
-    /// according to game client need. It's also used to Subscribe and Unsubsribe channels when client is opened.
+    /// according to game client need. It's also used to Subscribe and Unsubscribe channels when client is opened.
     /// </summary>
     public class FizzService : Singleton<FizzService>
     {
@@ -108,7 +108,7 @@ namespace Fizz
 
             if (Client.State == FizzClientState.Closed)
             {
-                FizzLogger.W("FizzClient should be opnened before subscrirbing channel.");
+                FizzLogger.W("FizzClient should be opened before subscribing channel.");
                 return;
             }
 
