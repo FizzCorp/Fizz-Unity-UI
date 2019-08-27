@@ -42,6 +42,7 @@ MonoBehaviour:
     type: 3}
   MessageInputBackground: {fileID: 21300042, guid: 75198572bc53c3247a49cef4ad578c19,
     type: 3}
+  RecentIcon: {fileID: 21300012, guid: 75198572bc53c3247a49cef4ad578c19, type: 3}
   BoldFont: {fileID: 12800000, guid: d960ed63cf9104c6d9821b76023a61e0, type: 3}
   NormalFont: {fileID: 12800000, guid: c6cb1a51128cb4babaab5ac667878a17, type: 3}
   Primary: {r: 1, g: 1, b: 1, a: 1}

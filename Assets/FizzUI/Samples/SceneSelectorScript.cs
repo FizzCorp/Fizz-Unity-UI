@@ -30,6 +30,11 @@ namespace Fizz.Demo
             SceneManager.LoadScene("SlidingViewScene");
         }
 
+        public void HandlePredefinedInputView ()
+        {
+            SceneManager.LoadScene ("PredefinedInputView");
+        }
+
         public void HandleClearPrefs()
         {
             PlayerPrefs.DeleteAll();

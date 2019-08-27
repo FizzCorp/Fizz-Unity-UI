@@ -1,12 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 namespace Fizz.UI
 {
-    using Extentions;
     using Components;
-    using Fizz.Common.Json;
+    using Extentions;
+    using Fizz.UI.Core;
 
     public class FizzPredefinedInputView : FizzInputView
     {
@@ -25,7 +25,7 @@ namespace Fizz.UI
 
         private void Awake ()
         {
-            dataProvider = gameObject.GetComponent<FizzStaticPredefinedInputDataProvider> ();
+            dataProvider = Registry.PredefinedInputDataProvider;
             AdjustGridSize ();
         }
 
@@ -63,7 +63,6 @@ namespace Fizz.UI
 
             if (tags.Count == 0) return;
 
-
             bool selected = false;
             foreach (string tag in tags)
             {
@@ -89,6 +88,8 @@ namespace Fizz.UI
                 selectedTab.SetSelected (false);
             }
 
+            SetRecentSelected (false);
+
             selectedTab = tab;
             selectedTab.SetSelected (true);
 
@@ -96,16 +97,18 @@ namespace Fizz.UI
             LoadStickers ();
         }
 
-        private void LoadPhrases ()
+        private void LoadPhrases (bool loadRecent = false)
         {
             PhrasesContainer.DestroyChildren ();
-            if (selectedTab == null) return;
-            List<FizzPredefinedDataItem> phrases = dataProvider.GetAllPhrases (selectedTab.Tag);
+            if (!loadRecent && selectedTab == null) return;
+            List<string> phrases = loadRecent? dataProvider.GetRecentPhrases () : dataProvider.GetAllPhrases (selectedTab.Tag);
             if (phrases.Count == 0) return;
-
-
-            foreach (FizzPredefinedDataItem phraseItem in phrases)
+            
+            foreach (string id in phrases)
             {
+                FizzPredefinedDataItem phraseItem = dataProvider.GetPhrase (id);
+                if (phraseItem == null) continue; 
+
                 FizzPredefinedPhraseView phraseView = Instantiate (PhraseViewPrefab);
                 phraseView.gameObject.SetActive (true);
                 phraseView.transform.SetParent (PhrasesContainer, false);
@@ -119,6 +122,8 @@ namespace Fizz.UI
         {
             if (phraseView == null) return;
 
+            dataProvider.AddPhraseToRecent (phraseView.PhraseData.Id);
+
             if (OnSendData != null)
             {
                 Dictionary<string, string> phraseData = new Dictionary<string, string> ();
@@ -128,16 +133,19 @@ namespace Fizz.UI
             }
         }
 
-        private void LoadStickers ()
+        private void LoadStickers (bool loadRecent = false)
         {
             StickersContainer.DestroyChildren ();
-            if (selectedTab == null) return;
-            List<FizzPredefinedDataItem> stickers = dataProvider.GetAllStickers (selectedTab.Tag);
+            if (!loadRecent && selectedTab == null) return;
+            List<string> stickers = loadRecent? dataProvider.GetRecentStickers () : dataProvider.GetAllStickers (selectedTab.Tag);
             if (stickers.Count == 0) return;
 
 
-            foreach (FizzPredefinedDataItem stickerItem in stickers)
+            foreach (string id in stickers)
             {
+                FizzPredefinedDataItem stickerItem = dataProvider.GetSticker (id);
+                if (stickerItem == null) continue;
+
                 FizzPredefinedStickerView stickerView = Instantiate (StickerViewPrefab);
                 stickerView.gameObject.SetActive (true);
                 stickerView.transform.SetParent (StickersContainer, false);
@@ -151,6 +159,8 @@ namespace Fizz.UI
         {
             if (stickerView == null) return;
 
+            dataProvider.AddStickerToRecent (stickerView.StickerData.Id);
+
             if (OnSendData != null)
             {
                 Dictionary<string, string> stickerData = new Dictionary<string, string> ();
@@ -162,7 +172,21 @@ namespace Fizz.UI
 
         private void OnRecentButtonClicked ()
         {
+            if (selectedTab != null)
+            {
+                selectedTab.SetSelected (false);
+                selectedTab = null;
+            }
 
+            SetRecentSelected (true);
+
+            LoadPhrases (true);
+            LoadStickers (true);
+        }
+
+        private void SetRecentSelected (bool selected)
+        {
+            RecentButton.targetGraphic.enabled = selected;
         }
 
         private void AdjustGridSize ()

@@ -27,6 +27,7 @@ namespace Fizz.UI.Extentions
         public Sprite OtherChatBackground;
         public Sprite OwnChatCellBackground;
         public Sprite MessageInputBackground;
+        public Sprite RecentIcon;
 
         //Fonts
         public Font BoldFont;
@@ -61,7 +62,8 @@ namespace Fizz.UI.Extentions
         MessagesBackground,
         OtherChatBackground,
         OwnChatCellBackground,
-        MessageInputBackground
+        MessageInputBackground,
+        RecentIcon
     }
 
     public enum ThemeFont

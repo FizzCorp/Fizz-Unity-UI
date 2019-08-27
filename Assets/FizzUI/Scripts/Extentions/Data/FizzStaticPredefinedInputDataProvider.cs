@@ -3,28 +3,32 @@ using UnityEngine;
 
 namespace Fizz.UI.Extentions
 {
-    public class FizzStaticPredefinedInputDataProvider : MonoBehaviour, IFizzPredefinedInputDataProvider
+    public class FizzStaticPredefinedInputDataProvider : IFizzPredefinedInputDataProvider
     {
-        [SerializeField] FizzStaticPredefinedInputData InputData;
-
-        public List<FizzPredefinedDataItem> GetAllPhrases (string tag)
+        public List<string> GetAllPhrases (string tag)
         {
-            List<FizzPredefinedDataItem> phrases = new List<FizzPredefinedDataItem> ();
-            foreach (FizzPredefinedDataItem dataItem in InputData.Phrases)
+            List<string> phrases = new List<string> ();
+
+            if (FizzStaticPredefinedInputData.Instance == null) return phrases;
+
+            foreach (FizzPredefinedDataItem dataItem in FizzStaticPredefinedInputData.Instance.Phrases)
             {
                 if (dataItem.Tag.Equals (tag))
-                    phrases.Add (dataItem);
+                    phrases.Add (dataItem.Id);
             }
             return phrases;
         }
 
-        public List<FizzPredefinedDataItem> GetAllStickers (string tag)
+        public List<string> GetAllStickers (string tag)
         {
-            List<FizzPredefinedDataItem> stickers = new List<FizzPredefinedDataItem> ();
-            foreach (FizzPredefinedDataItem dataItem in InputData.Stickers)
+            List<string> stickers = new List<string> ();
+
+            if (FizzStaticPredefinedInputData.Instance == null) return stickers;
+
+            foreach (FizzPredefinedDataItem dataItem in FizzStaticPredefinedInputData.Instance.Stickers)
             {
                 if (dataItem.Tag.Equals (tag))
-                    stickers.Add (dataItem);
+                    stickers.Add (dataItem.Id);
             }
             return stickers;
         }
@@ -32,12 +36,15 @@ namespace Fizz.UI.Extentions
         public List<string> GetAllTags ()
         {
             List<string> tags = new List<string> ();
-            foreach (FizzPredefinedDataItem dataItem in InputData.Phrases)
+
+            if (FizzStaticPredefinedInputData.Instance == null) return tags;
+
+            foreach (FizzPredefinedDataItem dataItem in FizzStaticPredefinedInputData.Instance.Phrases)
             {
                 if (tags.Contains (dataItem.Tag)) continue;
                 tags.Add (dataItem.Tag);
             }
-            foreach (FizzPredefinedDataItem dataItem in InputData.Stickers)
+            foreach (FizzPredefinedDataItem dataItem in FizzStaticPredefinedInputData.Instance.Stickers)
             {
                 if (tags.Contains (dataItem.Tag)) continue;
                 tags.Add (dataItem.Tag);
@@ -47,7 +54,9 @@ namespace Fizz.UI.Extentions
 
         public FizzPredefinedPhraseDataItem GetPhrase (string id)
         {
-            foreach (FizzPredefinedPhraseDataItem dataItem in InputData.Phrases)
+            if (FizzStaticPredefinedInputData.Instance == null) return null;
+            
+            foreach (FizzPredefinedPhraseDataItem dataItem in FizzStaticPredefinedInputData.Instance.Phrases)
             {
                 if (dataItem.Id.Equals (id))
                     return dataItem;
@@ -57,12 +66,83 @@ namespace Fizz.UI.Extentions
 
         public FizzPredefinedStickerDataItem GetSticker (string id)
         {
-            foreach (FizzPredefinedStickerDataItem dataItem in InputData.Stickers)
+            if (FizzStaticPredefinedInputData.Instance == null) return null;
+
+            foreach (FizzPredefinedStickerDataItem dataItem in FizzStaticPredefinedInputData.Instance.Stickers)
             {
                 if (dataItem.Id.Equals (id))
                     return dataItem;
             }
             return null;
         }
+
+        public List<string> GetRecentPhrases ()
+        {
+#if UNITY_EDITOR
+            if (recentPhrases == null) recentPhrases = new List<string> ();
+            return recentPhrases;
+#else
+            if (FizzStaticPredefinedInputData.Instance == null) return new List<string> (); ;
+
+            return FizzStaticPredefinedInputData.Instance.RecentPhrases;
+#endif
+        }
+
+        public List<string> GetRecentStickers ()
+        {
+#if UNITY_EDITOR
+            if (recentStickers == null) recentStickers = new List<string> ();
+            return recentStickers;
+#else
+            if (FizzStaticPredefinedInputData.Instance == null) return new List<string> (); ;
+
+            return FizzStaticPredefinedInputData.Instance.RecentStickers;
+#endif
+        }
+
+        public void AddPhraseToRecent (string id)
+        {
+#if UNITY_EDITOR
+            if (recentPhrases == null) recentPhrases = new List<string> (9);
+            if (recentPhrases.Contains (id)) return;
+            if (recentPhrases.Count >= 9) recentPhrases.RemoveAt (recentPhrases.Count - 1);
+            recentPhrases.Insert (0, id);
+            return;
+#else
+            if (FizzStaticPredefinedInputData.Instance == null) return;
+
+            List<string> phrases = FizzStaticPredefinedInputData.Instance.RecentPhrases;
+            if (phrases.Contains (id)) return;
+            if (phrases.Count >= 9)
+                phrases.RemoveAt (phrases.Count - 1);
+
+            phrases.Insert (0, id);
+#endif
+        }
+
+        public void AddStickerToRecent (string id)
+        {
+#if UNITY_EDITOR
+            if (recentStickers == null) recentStickers = new List<string> (5);
+            if (recentStickers.Contains (id)) return;
+            if (recentStickers.Count >= 9) recentStickers.RemoveAt (recentStickers.Count - 1);
+            recentStickers.Insert (0, id);
+            return;
+#else
+            if (FizzStaticPredefinedInputData.Instance == null) return;
+
+            List<string> stickers = FizzStaticPredefinedInputData.Instance.RecentStickers;
+            if (stickers.Contains (id)) return;
+            if (stickers.Count >= 5)
+                stickers.RemoveAt (stickers.Count - 1);
+
+            stickers.Insert (0, id);
+#endif
+        }
+
+#if UNITY_EDITOR
+        private List<string> recentPhrases;
+        private List<string> recentStickers;
+#endif
     }
 }

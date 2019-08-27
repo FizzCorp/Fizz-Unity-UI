@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Fizz.Common;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -11,13 +12,28 @@ namespace Fizz.UI.Extentions
         public List<FizzPredefinedPhraseDataItem> Phrases;
         public List<FizzPredefinedStickerDataItem> Stickers;
 
+        public List<string> RecentPhrases;
+        public List<string> RecentStickers;
+
         static FizzStaticPredefinedInputData _instance = null;
         public static FizzStaticPredefinedInputData Instance
         {
             get
             {
                 if (!_instance)
-                    _instance = Resources.FindObjectsOfTypeAll<FizzStaticPredefinedInputData> ().FirstOrDefault ();
+                {
+                    FizzStaticPredefinedInputData[] list = Resources.FindObjectsOfTypeAll<FizzStaticPredefinedInputData> ();
+                    if (list.Length > 0)
+                    {
+                        _instance = list.FirstOrDefault ();
+                    }
+                    else
+                    {
+                        _instance = Resources.Load<FizzStaticPredefinedInputData> ("FizzPredefinedInputData");
+                    }
+
+                    if (_instance == null) FizzLogger.E ("Unable to find FizzStaticPredefinedInputData. It should be placed under Resource directory.");
+                }
                 return _instance;
             }
         }

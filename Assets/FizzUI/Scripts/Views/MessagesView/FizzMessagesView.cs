@@ -225,7 +225,7 @@ namespace Fizz.UI
                     FizzService.Instance.UserId,
                     FizzService.Instance.UserName,
                     _channel.Id,
-                    "test",
+                    string.Empty,
                     string.Empty,
                     data,
                     null,
@@ -239,7 +239,7 @@ namespace Fizz.UI
                 FizzService.Instance.Client.Chat.PublishMessage (
                     _channel.Id,
                     FizzService.Instance.UserName,
-                    "test",
+                    string.Empty,
                     data,
                     FizzService.Instance.IsTranslationEnabled,
                     _channel.Meta.FilterContent,
@@ -664,9 +664,8 @@ namespace Fizz.UI
                     if (_chatDataSource != null)
                     {
                         customView = _chatDataSource.GetCustomMessageCellViewNode(model);
-                        if (customView != null)
-                            chatCellView.SetCustomData(customView);
                     }
+                    chatCellView.SetCustomData(customView);
                 }
             }
             else if (model.Type == FizzChatCellType.DateCell)

@@ -4,7 +4,6 @@ using Fizz.UI.Model;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
 
 namespace Fizz.UI
 {
@@ -220,8 +219,8 @@ namespace Fizz.UI
         {
             _isChannelListVisible = !_isChannelListVisible;
             Tween.TweenRect.Begin (transform.GetChild (0).GetComponent<RectTransform> (),
-                _isChannelListVisible? Vector2.zero : Vector2.right * 400, 
-                _isChannelListVisible? Vector2.right * 400 : Vector2.zero, 
+                _isChannelListVisible? Vector2.zero : Vector2.right * ChannelsView.RectTransform.rect.width, 
+                _isChannelListVisible? Vector2.right * ChannelsView.RectTransform.rect.width : Vector2.zero, 
                 0.25f, 0);
         }
 
@@ -233,19 +232,19 @@ namespace Fizz.UI
         private void HandleHeaderViewVisibility ()
         {
             HeaderView.SetVisibility (_showHeaderView);
-            MessagesView.RectTransform.offsetMax = _showHeaderView ? Vector2.down * 88 : Vector2.zero;
+            MessagesView.RectTransform.offsetMax = _showHeaderView ? Vector2.down * HeaderView.RectTransform.rect.height : Vector2.zero;
         }
 
         private void UpdateChannelListVisibility ()
         {
             ChannelsView.SetVisibility (_showChannels);
-            MessagesView.RectTransform.offsetMax = _showChannels ? Vector2.down * 88 : Vector2.zero;
+            MessagesView.RectTransform.offsetMax = _showChannels ? Vector2.down * HeaderView.RectTransform.rect.height : Vector2.zero;
         }
 
         private void UpdateInputViewVisibility ()
         {
             InputView.gameObject.SetActive (_showInputView);
-            MessagesView.RectTransform.offsetMin = _showInputView ? Vector2.up * 405 : Vector2.zero;
+            MessagesView.RectTransform.offsetMin = _showInputView ? Vector2.up * InputView.RectTransform.rect.height : Vector2.zero;
         }
 
         private void SyncViewState ()

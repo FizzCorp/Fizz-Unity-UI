@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 namespace Fizz.Demo
 {
+    using Fizz.UI.Core;
     using UI.Extentions;
     using UnityEngine.SceneManagement;
 
@@ -15,7 +16,7 @@ namespace Fizz.Demo
         [SerializeField] Text PhrasePrefab;
         [SerializeField] Image StickerPrefab;
 
-        [SerializeField] FizzStaticPredefinedInputDataProvider dataProvider;
+        IFizzPredefinedInputDataProvider dataProvider;
 
         // Global Channel Id
         private readonly string globalChannelId = "global-channel-temp";
@@ -24,11 +25,9 @@ namespace Fizz.Demo
 
         private void Awake ()
         {
+            dataProvider = Registry.PredefinedInputDataProvider;
+
             SetupChatView ();
-
-
-
-            print ("@@@@@@@@@@@ Count " + FizzStaticPredefinedInputData.Instance.Phrases.Count );
         }
 
         private void OnEnable ()

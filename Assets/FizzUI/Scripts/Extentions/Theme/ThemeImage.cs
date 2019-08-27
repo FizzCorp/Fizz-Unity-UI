@@ -64,6 +64,8 @@ namespace Fizz.UI.Extentions
                     return FizzTheme.FizzThemeData.OwnChatCellBackground;
                 case ThemeSprite.MessageInputBackground:
                     return FizzTheme.FizzThemeData.MessageInputBackground;
+                case ThemeSprite.RecentIcon:
+                    return FizzTheme.FizzThemeData.RecentIcon;
                 default:
                     return FizzTheme.FizzThemeData.ChannelBackground;
             }
