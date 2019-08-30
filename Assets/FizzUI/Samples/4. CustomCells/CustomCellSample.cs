@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using Fizz.Chat;
+﻿using Fizz.Chat;
 using Fizz.Common;
 using Fizz.UI;
-using Fizz.UI.Model;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -17,8 +16,6 @@ namespace Fizz.Demo
     {
         [SerializeField] FizzChatView chatView;
         [SerializeField] Button sendStatusButton;
-
-        private FizzChannelMeta statusChannel;
 
         // Custom data keys
         public static string KEY_DATA_TYPE = "custom-type";
@@ -57,17 +54,13 @@ namespace Fizz.Demo
 
         private void AddStatusChannel()
         {
-            statusChannel = new FizzChannelMeta("status-channel", "Status");
-
-            FizzService.Instance.SubscribeChannel(statusChannel);
-
             //Add and Set channel
-            chatView.AddChannel(statusChannel.Id, true);
+            chatView.AddChannel("status-channel", true);
         }
 
         void RemoveStatusChannel()
         {
-            FizzService.Instance.UnsubscribeChannel(statusChannel.Id);
+            chatView.RemoveChannel ("status-channel");
         }
 
         private void OnSendStatusButtonPressed()
@@ -80,7 +73,7 @@ namespace Fizz.Demo
 
             // Publish a new message with custom data
             FizzService.Instance.Client.Chat.PublishMessage(
-                statusChannel.Id,
+                "status-channel",
                 FizzService.Instance.UserName,
                 string.Empty,
                 data,

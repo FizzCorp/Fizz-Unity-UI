@@ -117,6 +117,8 @@ namespace Fizz.UI.Extentions
                 phrases.RemoveAt (phrases.Count - 1);
 
             phrases.Insert (0, id);
+
+            UnityEngine.Debug.Log ("@@ Add Phrase " + id + " count " + phrases.Count);
 #endif
         }
 

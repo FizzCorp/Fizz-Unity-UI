@@ -18,32 +18,34 @@ namespace Fizz.Demo
 
         [SerializeField] Button launchButton;
 
-        private readonly FizzChannelMeta globalChannel = new FizzChannelMeta("global-channel-temp", "Global", "TEMP");
-        private readonly FizzChannelMeta localChannel = new FizzChannelMeta("local-channel-temp", "Local", "TEMP");
+        private readonly FizzChannelMeta globalChannel = new FizzChannelMeta ("global-channel-temp", "Global", "TEMP");
+        private readonly FizzChannelMeta localChannel = new FizzChannelMeta ("local-channel-temp", "Local", "TEMP");
+        private readonly FizzChannelMeta statusChannel = new FizzChannelMeta ("status-channel", "Status", "TEMP");
+        private readonly FizzChannelMeta predefinedInputChannel = new FizzChannelMeta ("predefine-channel", "Global", "TEMP");
 
-        private void Awake()
+        private void Awake ()
         {
-            SetupView();
+            SetupView ();
         }
 
-        void OnEnable()
-        { 
-            AddListeners();
-        }
-
-        void OnDisable()
+        void OnEnable ()
         {
-            RemoveListeners();
+            AddListeners ();
         }
 
-        public void HandleConnect()
+        void OnDisable ()
+        {
+            RemoveListeners ();
+        }
+
+        public void HandleConnect ()
         {
             try
             {
                 if (FizzService.Instance.IsConnected)
                     return;
 
-                FizzService.Instance.Open(
+                FizzService.Instance.Open (
                     userIdInputField.text,                                  //UserId
                     userNameInputField.text,                                //UserName
                     FizzLanguageCodes.AllLanguages[langCodeDropDown.value], //LanguageCode
@@ -52,67 +54,69 @@ namespace Fizz.Demo
                 {
                     if (success)
                     {
-                        FizzLogger.D("FizzClient Opened Successfully!!");
+                        FizzLogger.D ("FizzClient Opened Successfully!!");
 
-                        FizzService.Instance.SubscribeChannel(localChannel);
-                        FizzService.Instance.SubscribeChannel(globalChannel);
+                        FizzService.Instance.SubscribeChannel (localChannel);
+                        FizzService.Instance.SubscribeChannel (globalChannel);
+                        FizzService.Instance.SubscribeChannel (statusChannel);
+                        FizzService.Instance.SubscribeChannel (predefinedInputChannel);
                     }
                 });
             }
-            catch { FizzLogger.E("Unable to connect to Fizz!"); }
+            catch { FizzLogger.E ("Unable to connect to Fizz!"); }
         }
 
-        public void HandleDisconnect()
+        public void HandleDisconnect ()
         {
             try
             {
-                FizzService.Instance.Close();
+                FizzService.Instance.Close ();
             }
-            catch { FizzLogger.E("Unable to disconnect to Fizz!"); }
+            catch { FizzLogger.E ("Unable to disconnect to Fizz!"); }
         }
 
-        private void SetupView()
+        private void SetupView ()
         {
-            connectButton.gameObject.SetActive(!FizzService.Instance.IsConnected);
-            disconnectButton.gameObject.SetActive(FizzService.Instance.IsConnected);
+            connectButton.gameObject.SetActive (!FizzService.Instance.IsConnected);
+            disconnectButton.gameObject.SetActive (FizzService.Instance.IsConnected);
 
             launchButton.interactable = FizzService.Instance.IsConnected;
 
-            SetupIdAndNameInputField();
-            SetupLanguageDropDown();
-            SetupTranslationToggle();
+            SetupIdAndNameInputField ();
+            SetupLanguageDropDown ();
+            SetupTranslationToggle ();
         }
 
-        private void SetupIdAndNameInputField()
+        private void SetupIdAndNameInputField ()
         {
-            string userId = PlayerPrefs.GetString(USER_ID_KEY, System.Guid.NewGuid().ToString());
-            string userName = PlayerPrefs.GetString(USER_NAME_KEY, "User");
+            string userId = PlayerPrefs.GetString (USER_ID_KEY, System.Guid.NewGuid ().ToString ());
+            string userName = PlayerPrefs.GetString (USER_NAME_KEY, "User");
 
             userIdInputField.text = userId;
             userNameInputField.text = userName;
 
-            HandleUserCradChange(string.Empty);
+            HandleUserCradChange (string.Empty);
         }
 
-        private void SetupLanguageDropDown()
+        private void SetupLanguageDropDown ()
         {
-            langCodeDropDown.ClearOptions();
-            List<Dropdown.OptionData> optionsData = new List<Dropdown.OptionData>();
+            langCodeDropDown.ClearOptions ();
+            List<Dropdown.OptionData> optionsData = new List<Dropdown.OptionData> ();
             foreach (IFizzLanguageCode langCode in FizzLanguageCodes.AllLanguages)
             {
-                optionsData.Add(new Dropdown.OptionData(langCode.Language));
+                optionsData.Add (new Dropdown.OptionData (langCode.Language));
             }
-            langCodeDropDown.AddOptions(optionsData);
+            langCodeDropDown.AddOptions (optionsData);
 
-            langCodeDropDown.value = PlayerPrefs.GetInt(USER_LANG_CODE_KEY, 0);
+            langCodeDropDown.value = PlayerPrefs.GetInt (USER_LANG_CODE_KEY, 0);
         }
 
-        private void SetupTranslationToggle()
+        private void SetupTranslationToggle ()
         {
-            translationToggle.isOn = PlayerPrefs.GetInt(USER_TRANSLATION_KEY, 1) == 1;
+            translationToggle.isOn = PlayerPrefs.GetInt (USER_TRANSLATION_KEY, 1) == 1;
         }
 
-        private void AddListeners()
+        private void AddListeners ()
         {
             try
             {
@@ -121,17 +125,17 @@ namespace Fizz.Demo
             }
             catch
             {
-                FizzLogger.E("Someting went wrong with binding events with FizzService.");
+                FizzLogger.E ("Someting went wrong with binding events with FizzService.");
             }
 
-            userNameInputField.onEndEdit.AddListener(HandleUserCradChange);
-            userNameInputField.onEndEdit.AddListener(HandleUserCradChange);
+            userNameInputField.onEndEdit.AddListener (HandleUserCradChange);
+            userNameInputField.onEndEdit.AddListener (HandleUserCradChange);
 
-            langCodeDropDown.onValueChanged.AddListener(HandleLangCodeChange);
-            translationToggle.onValueChanged.AddListener(HandleTranslationToggleChange);
+            langCodeDropDown.onValueChanged.AddListener (HandleLangCodeChange);
+            translationToggle.onValueChanged.AddListener (HandleTranslationToggleChange);
         }
 
-        private void RemoveListeners()
+        private void RemoveListeners ()
         {
             try
             {
@@ -140,49 +144,49 @@ namespace Fizz.Demo
             }
             catch
             {
-                FizzLogger.E("Someting went wrong with binding events with FizzService.");
+                FizzLogger.E ("Someting went wrong with binding events with FizzService.");
             }
 
-            userNameInputField.onEndEdit.RemoveListener(HandleUserCradChange);
-            userNameInputField.onEndEdit.RemoveListener(HandleUserCradChange);
+            userNameInputField.onEndEdit.RemoveListener (HandleUserCradChange);
+            userNameInputField.onEndEdit.RemoveListener (HandleUserCradChange);
 
-            langCodeDropDown.onValueChanged.RemoveListener(HandleLangCodeChange);
-            translationToggle.onValueChanged.RemoveListener(HandleTranslationToggleChange);
+            langCodeDropDown.onValueChanged.RemoveListener (HandleLangCodeChange);
+            translationToggle.onValueChanged.RemoveListener (HandleTranslationToggleChange);
         }
 
-        private void OnConnected(bool sync)
+        private void OnConnected (bool sync)
         {
-            connectButton.gameObject.SetActive(false);
-            disconnectButton.gameObject.SetActive(true);
+            connectButton.gameObject.SetActive (false);
+            disconnectButton.gameObject.SetActive (true);
 
             launchButton.interactable = true;
         }
 
-        private void OnDisconnected(FizzException ex)
+        private void OnDisconnected (FizzException ex)
         {
-            connectButton.gameObject.SetActive(true);
-            disconnectButton.gameObject.SetActive(false);
+            connectButton.gameObject.SetActive (true);
+            disconnectButton.gameObject.SetActive (false);
 
             launchButton.interactable = false;
         }
 
-        private void HandleUserCradChange(string str)
+        private void HandleUserCradChange (string str)
         {
-            PlayerPrefs.SetString(USER_ID_KEY, userIdInputField.text);
-            PlayerPrefs.SetString(USER_NAME_KEY, userNameInputField.text);
-            PlayerPrefs.Save();
+            PlayerPrefs.SetString (USER_ID_KEY, userIdInputField.text);
+            PlayerPrefs.SetString (USER_NAME_KEY, userNameInputField.text);
+            PlayerPrefs.Save ();
         }
 
-        private void HandleLangCodeChange(int index)
+        private void HandleLangCodeChange (int index)
         {
-            PlayerPrefs.SetInt(USER_LANG_CODE_KEY, index);
-            PlayerPrefs.Save();
+            PlayerPrefs.SetInt (USER_LANG_CODE_KEY, index);
+            PlayerPrefs.Save ();
         }
 
-        private void HandleTranslationToggleChange(bool isOn)
+        private void HandleTranslationToggleChange (bool isOn)
         {
-            PlayerPrefs.SetInt(USER_TRANSLATION_KEY, isOn ? 1 : 0);
-            PlayerPrefs.Save();
+            PlayerPrefs.SetInt (USER_TRANSLATION_KEY, isOn ? 1 : 0);
+            PlayerPrefs.Save ();
         }
 
         private readonly string USER_ID_KEY = "FIZZ_USER_ID";

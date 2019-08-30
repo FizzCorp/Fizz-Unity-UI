@@ -15,6 +15,10 @@ namespace Fizz.UI
         [SerializeField] RectTransform TabsContainer;
 
         [SerializeField] Button RecentButton;
+        [SerializeField] Slider TimerSlider;
+
+        [SerializeField] RectTransform PhrasePool;
+        [SerializeField] RectTransform StickerPool;
 
         [SerializeField] FizzPredefinedPhraseView PhraseViewPrefab;
         [SerializeField] FizzPredefinedStickerView StickerViewPrefab;
@@ -23,10 +27,25 @@ namespace Fizz.UI
         private IFizzPredefinedInputDataProvider dataProvider;
         private FizzPredefinedTagTabView selectedTab;
 
+        private const float RESEND_TIMER = 1f;
+        private float timeSinceLastSend = 0f;
+
         private void Awake ()
         {
             dataProvider = Registry.PredefinedInputDataProvider;
             AdjustGridSize ();
+        }
+
+        private void Update ()
+        {
+            if (Time.realtimeSinceStartup < timeSinceLastSend + RESEND_TIMER)
+            {
+                if (!TimerSlider.isActiveAndEnabled) TimerSlider.gameObject.SetActive (true);
+                TimerSlider.value = 1 - ((timeSinceLastSend + RESEND_TIMER) - Time.realtimeSinceStartup) / RESEND_TIMER;
+            }
+            else if (TimerSlider.isActiveAndEnabled) {
+                TimerSlider.gameObject.SetActive (false);
+            }
         }
 
         protected override void OnEnable ()
@@ -52,8 +71,6 @@ namespace Fizz.UI
         private void LoadView ()
         {
             LoadTagTabs ();
-            LoadPhrases ();
-            LoadStickers ();
         }
 
         private void LoadTagTabs ()
@@ -99,7 +116,8 @@ namespace Fizz.UI
 
         private void LoadPhrases (bool loadRecent = false)
         {
-            PhrasesContainer.DestroyChildren ();
+            //PhrasesContainer.DestroyChildren ();
+            ReturnPhraseViewToPool ();
             if (!loadRecent && selectedTab == null) return;
             List<string> phrases = loadRecent? dataProvider.GetRecentPhrases () : dataProvider.GetAllPhrases (selectedTab.Tag);
             if (phrases.Count == 0) return;
@@ -109,7 +127,7 @@ namespace Fizz.UI
                 FizzPredefinedDataItem phraseItem = dataProvider.GetPhrase (id);
                 if (phraseItem == null) continue; 
 
-                FizzPredefinedPhraseView phraseView = Instantiate (PhraseViewPrefab);
+                FizzPredefinedPhraseView phraseView = GetPhraseViewFromPool ();
                 phraseView.gameObject.SetActive (true);
                 phraseView.transform.SetParent (PhrasesContainer, false);
                 phraseView.transform.localScale = Vector3.one;
@@ -121,8 +139,10 @@ namespace Fizz.UI
         private void OnPhraseClicked (FizzPredefinedPhraseView phraseView)
         {
             if (phraseView == null) return;
+            if (Time.realtimeSinceStartup < timeSinceLastSend + RESEND_TIMER) return;
 
             dataProvider.AddPhraseToRecent (phraseView.PhraseData.Id);
+            timeSinceLastSend = Time.realtimeSinceStartup;
 
             if (OnSendData != null)
             {
@@ -135,7 +155,7 @@ namespace Fizz.UI
 
         private void LoadStickers (bool loadRecent = false)
         {
-            StickersContainer.DestroyChildren ();
+            ReturnStickerViewToPool ();
             if (!loadRecent && selectedTab == null) return;
             List<string> stickers = loadRecent? dataProvider.GetRecentStickers () : dataProvider.GetAllStickers (selectedTab.Tag);
             if (stickers.Count == 0) return;
@@ -146,7 +166,7 @@ namespace Fizz.UI
                 FizzPredefinedDataItem stickerItem = dataProvider.GetSticker (id);
                 if (stickerItem == null) continue;
 
-                FizzPredefinedStickerView stickerView = Instantiate (StickerViewPrefab);
+                FizzPredefinedStickerView stickerView = GetStickerViewFromPool ();
                 stickerView.gameObject.SetActive (true);
                 stickerView.transform.SetParent (StickersContainer, false);
                 stickerView.transform.localScale = Vector3.one;
@@ -158,8 +178,10 @@ namespace Fizz.UI
         private void OnStickerClicked (FizzPredefinedStickerView stickerView)
         {
             if (stickerView == null) return;
+            if (Time.realtimeSinceStartup < timeSinceLastSend + RESEND_TIMER) return;
 
             dataProvider.AddStickerToRecent (stickerView.StickerData.Id);
+            timeSinceLastSend = Time.realtimeSinceStartup;
 
             if (OnSendData != null)
             {
@@ -187,6 +209,50 @@ namespace Fizz.UI
         private void SetRecentSelected (bool selected)
         {
             RecentButton.targetGraphic.enabled = selected;
+        }
+
+        private FizzPredefinedStickerView GetStickerViewFromPool ()
+        {
+            if (StickerPool.childCount > 0)
+            {
+                return StickerPool.GetChild (0).GetComponent<FizzPredefinedStickerView> ();
+            }
+
+            FizzPredefinedStickerView stickerView = Instantiate (StickerViewPrefab);
+            stickerView.transform.SetParent (StickerPool, false);
+            
+            return stickerView;
+        }
+
+        private void ReturnStickerViewToPool ()
+        {
+            int childCount = StickersContainer.childCount;
+            for (int index = 0; index < childCount; index++)
+            {
+                StickersContainer.GetChild (0).SetParent (StickerPool, false);
+            }
+        }
+
+        private FizzPredefinedPhraseView GetPhraseViewFromPool ()
+        {
+            if (PhrasePool.childCount > 0)
+            {
+                return PhrasePool.GetChild (0).GetComponent<FizzPredefinedPhraseView> ();
+            }
+
+            FizzPredefinedPhraseView phraseView = Instantiate (PhraseViewPrefab);
+            phraseView.transform.SetParent (PhrasePool, false);
+
+            return phraseView;
+        }
+
+        private void ReturnPhraseViewToPool ()
+        {
+            int childCount = PhrasesContainer.childCount;
+            for (int index = 0; index < childCount; index ++)
+            {
+                PhrasesContainer.GetChild (0).SetParent (PhrasePool, false);
+            }
         }
 
         private void AdjustGridSize ()

@@ -898,6 +898,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Orientation: 1
+  data: {fileID: 4900000, guid: 838096ccd9cb7b5429ccc573f3b38aa5, type: 3}
 --- !u!1 &445043929
 GameObject:
   m_ObjectHideFlags: 0
