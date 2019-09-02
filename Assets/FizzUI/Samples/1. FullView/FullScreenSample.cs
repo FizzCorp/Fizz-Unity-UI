@@ -37,6 +37,12 @@ namespace Fizz.Demo
             // Show channel list
             chatView.ShowChannelsButton = true;
 
+            // Show header view
+            chatView.ShowHeaderView = true;
+
+            // Show close button
+            chatView.ShowCloseButton = true;
+
             // Show chat input 
             chatView.ShowInput = true;
 

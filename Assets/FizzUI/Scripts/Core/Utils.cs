@@ -47,6 +47,18 @@ namespace Fizz.UI
             return System.IO.Path.Combine(Application.persistentDataPath, "fizzAssets");
         }
 
+        public static string GetDictionaryToString (Dictionary<string, string> data, string skipKey = "")
+        {
+            string str = string.Empty;
+            if (data == null) return str;
+            foreach (KeyValuePair<string, string> pair in data)
+            {
+                if (pair.Key.Equals (skipKey)) continue;
+                str += pair.Key + ": " + pair.Value + ", ";
+            }
+            return str;
+        }
+
         public static string GetFormattedTimeForUnixTimeStamp(long unixTimeStamp, bool todaysTime = true, bool fullDate = false)
         {
             DateTime dateTime = GetDateTimeToUnixTime(unixTimeStamp);

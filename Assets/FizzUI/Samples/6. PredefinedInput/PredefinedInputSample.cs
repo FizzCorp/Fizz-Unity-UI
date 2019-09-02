@@ -5,6 +5,9 @@ namespace Fizz.Demo
 {
     using UI;
 
+    // Predefined Input sample is designed to demonstrate the usage of FizzChatView with Predefined Input View. 
+    // FizzPredefinedInputView is used as a static keyboard which will show predefined phrases and sticker. 
+    
     public class PredefinedInputSample : MonoBehaviour
     {
         [SerializeField] FizzChatView ChatView;
@@ -34,7 +37,6 @@ namespace Fizz.Demo
 
         private void AddPredefineInputChannel ()
         {
-            //Add and Set channel
             ChatView.AddChannel ("predefine-channel", true);
         }
 

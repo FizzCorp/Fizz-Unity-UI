@@ -28,7 +28,7 @@ namespace Fizz.UI
         private bool _enableFetchHistory = true;
 
         private bool _isChannelListVisible = false;
-        
+
         public UnityEvent onClose
         {
             get { return HeaderView.OnClose; }
@@ -188,18 +188,119 @@ namespace Fizz.UI
             FizzLogger.D ("OnConnectionStateChange isConnected " + isConnected);
         }
 
-        private void HandleSendMessage (string text)
+        private void HandleSendMessage (string message)
         {
-            if (string.IsNullOrEmpty (text)) return;
+            if (string.IsNullOrEmpty (message)) return;
 
-            MessagesView.AddNewMessage (text);
+            FizzChannel channel = ChannelsView.CurrentSelectedChannel;
+
+            if (channel == null)
+                return;
+
+            try
+            {
+                long now = FizzUtils.Now ();
+                Dictionary<string, string> data = new Dictionary<string, string>
+                {
+                    { FizzMessageCellModel.KEY_CLIENT_ID, now + "" }
+                };
+
+                FizzMessageCellModel model = new FizzMessageCellModel (
+                    now,
+                    FizzService.Instance.UserId,
+                    FizzService.Instance.UserName,
+                    channel.Id,
+                    message,
+                    string.Empty,
+                    data,
+                    null,
+                    now)
+                {
+                    DeliveryState = FizzChatCellDeliveryState.Pending
+                };
+
+                MessagesView.AddMessage (model);
+
+                FizzService.Instance.Client.Chat.PublishMessage (
+                    channel.Id,
+                    FizzService.Instance.UserName,
+                    message,
+                    data,
+                    FizzService.Instance.IsTranslationEnabled,
+                    channel.Meta.FilterContent,
+                    channel.Meta.PersistMessages,
+                    exception =>
+                    {
+                        if (exception == null)
+                        {
+                            model.DeliveryState = FizzChatCellDeliveryState.Sent;
+                            MessagesView.AddMessage (model);
+
+                            FizzService.Instance.Client.Ingestion.TextMessageSent (channel.Id, message, FizzService.Instance.UserName);
+                        }
+                    });
+            }
+            catch
+            {
+                FizzLogger.E ("Something went wrong while calling PublishMessage of FizzService.");
+            }
         }
 
         private void HandleSendData (Dictionary<string, string> data)
         {
             if (data == null) return;
 
-            MessagesView.AddNewData (data);
+            if (ChannelsView.CurrentSelectedChannel == null)
+                return;
+
+            FizzChannel channel = ChannelsView.CurrentSelectedChannel;
+
+            try
+            {
+                long now = FizzUtils.Now ();
+                data.Add (FizzMessageCellModel.KEY_CLIENT_ID, now + "");
+
+                FizzMessageCellModel model = new FizzMessageCellModel (
+                    now,
+                    FizzService.Instance.UserId,
+                    FizzService.Instance.UserName,
+                    channel.Id,
+                    string.Empty,
+                    string.Empty,
+                    data,
+                    null,
+                    now)
+                {
+                    DeliveryState = FizzChatCellDeliveryState.Pending
+                };
+
+                MessagesView.AddMessage (model);
+
+                FizzService.Instance.Client.Chat.PublishMessage (
+                    channel.Id,
+                    FizzService.Instance.UserName,
+                    string.Empty,
+                    data,
+                    FizzService.Instance.IsTranslationEnabled,
+                    channel.Meta.FilterContent,
+                    channel.Meta.PersistMessages,
+                    exception =>
+                    {
+                        if (exception == null)
+                        {
+                            model.DeliveryState = FizzChatCellDeliveryState.Sent;
+                            MessagesView.AddMessage (model);
+
+
+                            string dataStr = Utils.GetDictionaryToString (data, FizzMessageCellModel.KEY_CLIENT_ID);
+                            FizzService.Instance.Client.Ingestion.TextMessageSent (channel.Id, dataStr, FizzService.Instance.UserName);
+                        }
+                    });
+            }
+            catch
+            {
+                FizzLogger.E ("Something went wrong while calling PublishMessage of FizzService.");
+            }
         }
 
         private void HandleChannelSelected (FizzChannel channel)
@@ -219,8 +320,8 @@ namespace Fizz.UI
         {
             _isChannelListVisible = !_isChannelListVisible;
             Tween.TweenRect.Begin (transform.GetChild (0).GetComponent<RectTransform> (),
-                _isChannelListVisible? Vector2.zero : Vector2.right * ChannelsView.RectTransform.rect.width, 
-                _isChannelListVisible? Vector2.right * ChannelsView.RectTransform.rect.width : Vector2.zero, 
+                _isChannelListVisible ? Vector2.zero : Vector2.right * ChannelsView.RectTransform.rect.width,
+                _isChannelListVisible ? Vector2.right * ChannelsView.RectTransform.rect.width : Vector2.zero,
                 0.25f, 0);
         }
 

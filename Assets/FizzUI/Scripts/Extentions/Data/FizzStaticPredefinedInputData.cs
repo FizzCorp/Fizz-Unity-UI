@@ -12,9 +12,6 @@ namespace Fizz.UI.Extentions
         public List<FizzPredefinedPhraseDataItem> Phrases;
         public List<FizzPredefinedStickerDataItem> Stickers;
 
-        public List<string> RecentPhrases;
-        public List<string> RecentStickers;
-
         static FizzStaticPredefinedInputData _instance = null;
         public static FizzStaticPredefinedInputData Instance
         {
