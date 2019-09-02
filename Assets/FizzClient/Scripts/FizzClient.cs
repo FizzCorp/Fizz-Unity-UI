@@ -169,7 +169,7 @@ namespace Fizz
 
         public FizzClientState State { get; private set; }
 
-        public string Version { get { return "v1.5.0"; } }
+        public string Version { get { return "v1.5.3"; } }
 
         private void Close(Action callback)
         {
