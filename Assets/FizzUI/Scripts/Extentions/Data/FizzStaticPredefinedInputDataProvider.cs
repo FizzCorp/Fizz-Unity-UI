@@ -82,9 +82,8 @@ namespace Fizz.UI.Extentions
             if (recentPhrases == null) recentPhrases = new List<string> ();
             return recentPhrases;
 #else
-            if (FizzStaticPredefinedInputData.Instance == null) return new List<string> (); ;
-
-            return FizzStaticPredefinedInputData.Instance.RecentPhrases;
+            string ids = PlayerPrefs.GetString ("fizz_cached_recent_phrases", string.Empty);
+            return new List<string> (ids.Split (';'));
 #endif
         }
 
@@ -94,9 +93,8 @@ namespace Fizz.UI.Extentions
             if (recentStickers == null) recentStickers = new List<string> ();
             return recentStickers;
 #else
-            if (FizzStaticPredefinedInputData.Instance == null) return new List<string> (); ;
-
-            return FizzStaticPredefinedInputData.Instance.RecentStickers;
+            string ids = PlayerPrefs.GetString ("fizz_cached_recent_stickers", string.Empty);
+            return new List<string> (ids.Split (';'));
 #endif
         }
 
@@ -107,18 +105,15 @@ namespace Fizz.UI.Extentions
             if (recentPhrases.Contains (id)) return;
             if (recentPhrases.Count >= 9) recentPhrases.RemoveAt (recentPhrases.Count - 1);
             recentPhrases.Insert (0, id);
-            return;
 #else
-            if (FizzStaticPredefinedInputData.Instance == null) return;
+            string ids = PlayerPrefs.GetString ("fizz_cached_recent_phrases", string.Empty);
+            if (ids.Contains (id)) return;
+            if (ids.Split (';').Length >= 9) ids = ids.Substring (0, ids.LastIndexOf (';') + 1);
 
-            List<string> phrases = FizzStaticPredefinedInputData.Instance.RecentPhrases;
-            if (phrases.Contains (id)) return;
-            if (phrases.Count >= 9)
-                phrases.RemoveAt (phrases.Count - 1);
-
-            phrases.Insert (0, id);
-
-            UnityEngine.Debug.Log ("@@ Add Phrase " + id + " count " + phrases.Count);
+            ids = id + ";" + ids;
+            
+            PlayerPrefs.SetString ("fizz_cached_recent_phrases", ids);
+            PlayerPrefs.Save ();
 #endif
         }
 
@@ -127,18 +122,17 @@ namespace Fizz.UI.Extentions
 #if UNITY_EDITOR
             if (recentStickers == null) recentStickers = new List<string> (5);
             if (recentStickers.Contains (id)) return;
-            if (recentStickers.Count >= 9) recentStickers.RemoveAt (recentStickers.Count - 1);
+            if (recentStickers.Count >= 5) recentStickers.RemoveAt (recentStickers.Count - 1);
             recentStickers.Insert (0, id);
-            return;
 #else
-            if (FizzStaticPredefinedInputData.Instance == null) return;
+            string ids = PlayerPrefs.GetString ("fizz_cached_recent_stickers", string.Empty);
+            if (ids.Contains (id)) return;
+            if (ids.Split (';').Length >= 5) ids = ids.Substring (0, ids.LastIndexOf (';') + 1);
 
-            List<string> stickers = FizzStaticPredefinedInputData.Instance.RecentStickers;
-            if (stickers.Contains (id)) return;
-            if (stickers.Count >= 5)
-                stickers.RemoveAt (stickers.Count - 1);
-
-            stickers.Insert (0, id);
+            ids = id + ";" + ids;
+            
+            PlayerPrefs.SetString ("fizz_cached_recent_stickers", ids);
+            PlayerPrefs.Save ();
 #endif
         }
 

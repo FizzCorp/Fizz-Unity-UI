@@ -2,15 +2,14 @@
 using Fizz.UI.Core;
 using Fizz.UI.Extentions;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace Fizz.UI
 {
     public class FizzPredefinedInputCustomViewProvider : MonoBehaviour, IFizzCustomMessageCellViewDataSource
     {
         [SerializeField] FizzChatView ChatView;
-        [SerializeField] Text PhrasePrefab;
-        [SerializeField] Image StickerPrefab;
+        [SerializeField] FizzCustomPhraseView PhrasePrefab;
+        [SerializeField] FizzCustomStickerView StickerPrefab;
 
         IFizzPredefinedInputDataProvider dataProvider;
 
@@ -31,10 +30,10 @@ namespace Fizz.UI
                     FizzPredefinedPhraseDataItem phraseData = dataProvider.GetPhrase (id);
                     if (phraseData != null)
                     {
-                        Text phraseView = Instantiate (PhrasePrefab);
+                        FizzCustomPhraseView phraseView = Instantiate (PhrasePrefab);
                         phraseView.gameObject.SetActive (true);
-                        phraseView.text = phraseData.GetLocalizedContent (Application.systemLanguage);
-                        return phraseView.rectTransform;
+                        phraseView.SetPhrase (phraseData.GetLocalizedContent (Application.systemLanguage));
+                        return phraseView.GetComponent<RectTransform> ();
                     }
 
                 }
@@ -44,10 +43,10 @@ namespace Fizz.UI
                     FizzPredefinedStickerDataItem stickerData = dataProvider.GetSticker (id);
                     if (stickerData != null)
                     {
-                        Image sticker = Instantiate (StickerPrefab);
+                        FizzCustomStickerView sticker = Instantiate (StickerPrefab);
                         sticker.gameObject.SetActive (true);
-                        sticker.sprite = stickerData.Content;
-                        return sticker.rectTransform;
+                        sticker.SetSticker (stickerData.Content);
+                        return sticker.GetComponent<RectTransform> ();
                     }
 
                 }

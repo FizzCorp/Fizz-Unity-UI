@@ -43,7 +43,8 @@ namespace Fizz.UI
                 if (!TimerSlider.isActiveAndEnabled) TimerSlider.gameObject.SetActive (true);
                 TimerSlider.value = 1 - ((timeSinceLastSend + RESEND_TIMER) - Time.realtimeSinceStartup) / RESEND_TIMER;
             }
-            else if (TimerSlider.isActiveAndEnabled) {
+            else if (TimerSlider.isActiveAndEnabled)
+            {
                 TimerSlider.gameObject.SetActive (false);
             }
         }
@@ -116,16 +117,15 @@ namespace Fizz.UI
 
         private void LoadPhrases (bool loadRecent = false)
         {
-            //PhrasesContainer.DestroyChildren ();
             ReturnPhraseViewToPool ();
             if (!loadRecent && selectedTab == null) return;
-            List<string> phrases = loadRecent? dataProvider.GetRecentPhrases () : dataProvider.GetAllPhrases (selectedTab.Tag);
+            List<string> phrases = loadRecent ? dataProvider.GetRecentPhrases () : dataProvider.GetAllPhrases (selectedTab.Tag);
             if (phrases.Count == 0) return;
             
             foreach (string id in phrases)
             {
                 FizzPredefinedDataItem phraseItem = dataProvider.GetPhrase (id);
-                if (phraseItem == null) continue; 
+                if (phraseItem == null) continue;
 
                 FizzPredefinedPhraseView phraseView = GetPhraseViewFromPool ();
                 phraseView.gameObject.SetActive (true);
@@ -157,9 +157,8 @@ namespace Fizz.UI
         {
             ReturnStickerViewToPool ();
             if (!loadRecent && selectedTab == null) return;
-            List<string> stickers = loadRecent? dataProvider.GetRecentStickers () : dataProvider.GetAllStickers (selectedTab.Tag);
+            List<string> stickers = loadRecent ? dataProvider.GetRecentStickers () : dataProvider.GetAllStickers (selectedTab.Tag);
             if (stickers.Count == 0) return;
-
 
             foreach (string id in stickers)
             {
@@ -220,7 +219,7 @@ namespace Fizz.UI
 
             FizzPredefinedStickerView stickerView = Instantiate (StickerViewPrefab);
             stickerView.transform.SetParent (StickerPool, false);
-            
+
             return stickerView;
         }
 
@@ -249,7 +248,7 @@ namespace Fizz.UI
         private void ReturnPhraseViewToPool ()
         {
             int childCount = PhrasesContainer.childCount;
-            for (int index = 0; index < childCount; index ++)
+            for (int index = 0; index < childCount; index++)
             {
                 PhrasesContainer.GetChild (0).SetParent (PhrasePool, false);
             }
@@ -259,8 +258,8 @@ namespace Fizz.UI
         {
             //Tags
             GridLayoutGroup TabGrid = TabsContainer.GetComponent<GridLayoutGroup> ();
-            TabGrid.cellSize = new Vector2(
-                (TabsContainer.rect.width - TabGrid.padding.left - TabGrid.padding.right - (TabGrid.spacing.x * 3))/4,
+            TabGrid.cellSize = new Vector2 (
+                (TabsContainer.rect.width - TabGrid.padding.left - TabGrid.padding.right - (TabGrid.spacing.x * 3)) / 4,
                 TabGrid.cellSize.y);
             //Phrases
             GridLayoutGroup PhrasesGrid = PhrasesContainer.GetComponent<GridLayoutGroup> ();

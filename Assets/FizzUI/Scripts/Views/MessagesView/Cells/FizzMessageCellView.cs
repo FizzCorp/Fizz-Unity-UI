@@ -76,6 +76,12 @@ namespace Fizz.UI
                 if (customView != null)
                 {
                     customView.SetParent(CustomNode, false);
+
+                    IFizzCustomMessageCellView customCellView = customView.GetComponent<IFizzCustomMessageCellView> ();
+                    if (customCellView != null)
+                    {
+                        customCellView.LoadView ();
+                    }
                 }
             }
         }

@@ -663,9 +663,13 @@ namespace Fizz.UI
                     RectTransform customView = null;
                     if (_chatDataSource != null)
                     {
-                        customView = _chatDataSource.GetCustomMessageCellViewNode(model);
+                        customView = _chatDataSource.GetCustomMessageCellViewNode (model);
+                        chatCellView.SetCustomData (customView);
                     }
-                    chatCellView.SetCustomData(customView);
+                    else if (_chatDataSource == null && string.IsNullOrEmpty (model.Body))
+                    {
+                        chatCellView.SetCustomData (customView);
+                    }
                 }
             }
             else if (model.Type == FizzChatCellType.DateCell)
