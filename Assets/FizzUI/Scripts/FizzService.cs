@@ -22,7 +22,7 @@ namespace Fizz
         #region Properties
         public IFizzClient Client { get; private set; }
 
-        public bool IsConnected { get; private set; }
+        public bool IsConnected { get { return (Client == null) ? false : ((Client.Chat == null) ? false : Client.Chat.IsConnected); } }
 
         public bool IsTranslationEnabled { get; private set; }
 
@@ -30,7 +30,7 @@ namespace Fizz
 
         public string UserName { get; private set; }
 
-        public IFizzLanguageCode LanguageCode { get; private set; }
+        public IFizzLanguageCode Language { get; private set; }
 
         public List<FizzChannel> Channels { get; private set; }
         #endregion
@@ -48,7 +48,7 @@ namespace Fizz
         public Action<string> OnChannelMessagesAvailable { get; set; }
         #endregion
 
-        public void Open(string userId, string userName, IFizzLanguageCode langCode, bool tranlation, Action<bool> onDone)
+        public void Open(string userId, string userName, IFizzLanguageCode lang, FizzServices services, bool tranlation, Action<bool> onDone)
         {
             if (!_isIntialized) Initialize();
 
@@ -64,7 +64,7 @@ namespace Fizz
                 return;
             }
 
-            if (langCode == null)
+            if (lang == null)
             {
                 FizzLogger.E("FizzService can not open client with null language code.");
                 return;
@@ -72,16 +72,16 @@ namespace Fizz
 
             UserId = userId;
             UserName = userName;
-            LanguageCode = langCode;
+            Language = lang;
             IsTranslationEnabled = tranlation;
-            Client.Open(userId, langCode.Code, FizzServices.All, ex =>
+            Client.Open(userId, lang, services, ex =>
             {
                 if (onDone != null)
                     onDone(ex == null);
 
                 if (ex != null)
                 {
-                    FizzLogger.E("Someting went wrong while connecting to FizzClient. " + ex);
+                    FizzLogger.E("Something went wrong while connecting to FizzClient. " + ex);
                 }
             });
         }
@@ -92,10 +92,7 @@ namespace Fizz
 
             if (Client != null)
             {
-                Client.Close(ex =>
-                {
-                    IsConnected = false;
-                });
+                Client.Close(null);
             }
 
             if (Channels != null) Channels.Clear();
@@ -138,7 +135,7 @@ namespace Fizz
 
             if (Client.State == FizzClientState.Closed)
             {
-                FizzLogger.W("FizzClient should be opnened before unsubscrirbing channel.");
+                FizzLogger.W("FizzClient should be opened before unsubscribing channel.");
                 return;
             }
 
@@ -159,7 +156,7 @@ namespace Fizz
                 }
                 else
                 {
-                    FizzLogger.W("FizzService unable to unsibscribe, channel [" + channelId + "] does not exist. ");
+                    FizzLogger.W("FizzService unable to unsubscribe, channel [" + channelId + "] does not exist. ");
                 }
             }
             catch (Exception e)
@@ -178,13 +175,6 @@ namespace Fizz
             return null;
         }
 
-        void Awake()
-        {
-            if (!_isIntialized) Initialize();
-
-            AddInternalListeners();
-        }
-
         void Update()
         {
             if (Client != null)
@@ -193,20 +183,21 @@ namespace Fizz
             }
         }
 
-        void Initialize ()
+        void Initialize()
         {
             if (_isIntialized) return;
 
             UserId = "fizz_user";
             UserName = "Fizz User";
-            IsConnected = false;
             IsTranslationEnabled = true;
-            LanguageCode = FizzLanguageCodes.English;
+            Language = FizzLanguageCodes.English;
 
             Client = new FizzClient(APP_ID, APP_SECRET);
             Channels = new List<FizzChannel>();
 
             channelLoopup = new Dictionary<string, FizzChannel>();
+
+            AddInternalListeners();
 
             _isIntialized = true;
         }
@@ -225,15 +216,39 @@ namespace Fizz
         void OnDestroy()
         {
             Close();
+            RemoveInternalListeners();
         }
 
         void AddInternalListeners()
         {
-            Client.Chat.Listener.OnConnected += Listener_OnConnected;
-            Client.Chat.Listener.OnDisconnected += Listener_OnDisconnected;
-            Client.Chat.Listener.OnMessageUpdated += Listener_OnMessageUpdated;
-            Client.Chat.Listener.OnMessageDeleted += Listener_OnMessageDeleted;
-            Client.Chat.Listener.OnMessagePublished += Listener_OnMessagePublished;
+            try
+            {
+                Client.Chat.Listener.OnConnected += Listener_OnConnected;
+                Client.Chat.Listener.OnDisconnected += Listener_OnDisconnected;
+                Client.Chat.Listener.OnMessageUpdated += Listener_OnMessageUpdated;
+                Client.Chat.Listener.OnMessageDeleted += Listener_OnMessageDeleted;
+                Client.Chat.Listener.OnMessagePublished += Listener_OnMessagePublished;
+            }
+            catch (FizzException ex)
+            {
+                FizzLogger.E("Unable to bind chat listeners. " + ex.Message);
+            }
+        }
+
+        void RemoveInternalListeners()
+        {
+            try
+            {
+                Client.Chat.Listener.OnConnected -= Listener_OnConnected;
+                Client.Chat.Listener.OnDisconnected -= Listener_OnDisconnected;
+                Client.Chat.Listener.OnMessageUpdated -= Listener_OnMessageUpdated;
+                Client.Chat.Listener.OnMessageDeleted -= Listener_OnMessageDeleted;
+                Client.Chat.Listener.OnMessagePublished -= Listener_OnMessagePublished;
+            }
+            catch (FizzException ex)
+            {
+                FizzLogger.E("Unable to unbind chat listeners. " + ex.Message);
+            }
         }
 
         void Listener_OnMessagePublished(FizzChannelMessage msg)
@@ -277,8 +292,6 @@ namespace Fizz
 
         void Listener_OnDisconnected(FizzException obj)
         {
-            IsConnected = false;
-
             if (OnDisconnected != null)
             {
                 OnDisconnected.Invoke(obj);
@@ -287,8 +300,6 @@ namespace Fizz
 
         void Listener_OnConnected(bool syncRequired)
         {
-            IsConnected = true;
-
             if (OnConnected != null)
             {
                 OnConnected.Invoke(syncRequired);

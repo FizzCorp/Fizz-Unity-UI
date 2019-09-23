@@ -18,11 +18,10 @@ namespace Fizz.UI.Model
                                   string nick,
                                   string to,
                                   string body,
-                                  string topic,
                                   Dictionary<string, string> data,
                                   IDictionary<string, string> translations,
                                   long created)
-            : base(id, from, nick, to, body, topic, data, translations, created)
+            : base(id, from, nick, to, body, data, translations, created)
         {
             TranslationState = FizzChatCellTranslationState.Translated;
             DeliveryState = FizzChatCellDeliveryState.Pending;
@@ -87,7 +86,7 @@ namespace Fizz.UI.Model
             string langCode = FizzLanguageCodes.English.Code;
             try
             {
-                langCode = FizzService.Instance.LanguageCode.Code;
+                langCode = FizzService.Instance.Language.Code;
             }
             catch (Exception)
             {

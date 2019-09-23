@@ -60,7 +60,7 @@ namespace Fizz.UI.Core
         {
             if (ConnectionNode != null)
             {
-                ConnectionNode.gameObject.SetActive(FizzService.Instance.IsConnected);
+                ConnectionNode.gameObject.SetActive(!FizzService.Instance.IsConnected);
             }
         }
         #endregion
@@ -68,22 +68,16 @@ namespace Fizz.UI.Core
         #region EventHandle
         private void HandleOnConnected(bool sync)
         {
-            if (ConnectionNode != null)
-            {
-                ConnectionNode.gameObject.SetActive(false);
-            }
+            SetupConnectionBanner();
 
-            OnConnectionStateChange(true);
+            OnConnectionStateChange(FizzService.Instance.IsConnected);
         }
 
         private void HandleOnDisconnected(FizzException ex)
         {
-            if (ConnectionNode != null)
-            {
-                ConnectionNode.gameObject.SetActive(true);
-            }
+            SetupConnectionBanner();
 
-            OnConnectionStateChange(false);
+            OnConnectionStateChange(FizzService.Instance.IsConnected);
         }
         #endregion
     }

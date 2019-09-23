@@ -8,10 +8,10 @@ using UnityEngine.Events;
 namespace Fizz.UI
 {
     /// <summary>
-    /// FizzChatView is the core UI compoment which contains channel list, messages and input. 
+    /// FizzChatView is the core UI component which contains channel list, messages and input. 
     /// Channels are added and removed from it in order to show or hide them from view. But note
-    /// that a channel should be Subsribed first by using FizzService. It can be configured to 
-    /// show/hide channel list and input. It can be added to any container like, Tabs and Popup etc.
+    /// that a channel should be Subscribed first by using FizzService. It can be configured to 
+    /// show/hide channel list and input. It can be added to any container like, Tabs and Po-pup etc.
     /// </summary>
     public class FizzChatView : FizzBaseComponent
     {
@@ -211,7 +211,6 @@ namespace Fizz.UI
                     FizzService.Instance.UserName,
                     channel.Id,
                     message,
-                    string.Empty,
                     data,
                     null,
                     now)
@@ -266,7 +265,6 @@ namespace Fizz.UI
                     FizzService.Instance.UserName,
                     channel.Id,
                     string.Empty,
-                    string.Empty,
                     data,
                     null,
                     now)
@@ -309,6 +307,8 @@ namespace Fizz.UI
             {
                 MessagesView.SetChannel (channel.Id);
                 HeaderView.SetTitleText (channel.Name);
+
+                if (_isChannelListVisible) HandleChannelsButton();
             }
             else
             {

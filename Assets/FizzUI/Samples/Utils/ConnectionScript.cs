@@ -49,6 +49,7 @@ namespace Fizz.Demo
                     userIdInputField.text,                                  //UserId
                     userNameInputField.text,                                //UserName
                     FizzLanguageCodes.AllLanguages[langCodeDropDown.value], //LanguageCode
+                    FizzServices.All,
                     translationToggle.isOn,                                 //Translation
                     (success) =>
                 {
@@ -125,7 +126,7 @@ namespace Fizz.Demo
             }
             catch
             {
-                FizzLogger.E ("Someting went wrong with binding events with FizzService.");
+                FizzLogger.E ("Something went wrong with binding events with FizzService.");
             }
 
             userNameInputField.onEndEdit.AddListener (HandleUserCradChange);
@@ -144,7 +145,7 @@ namespace Fizz.Demo
             }
             catch
             {
-                FizzLogger.E ("Someting went wrong with binding events with FizzService.");
+                FizzLogger.E ("Something went wrong with binding events with FizzService.");
             }
 
             userNameInputField.onEndEdit.RemoveListener (HandleUserCradChange);
@@ -156,16 +157,16 @@ namespace Fizz.Demo
 
         private void OnConnected (bool sync)
         {
-            connectButton.gameObject.SetActive (false);
-            disconnectButton.gameObject.SetActive (true);
+            connectButton.gameObject.SetActive (!FizzService.Instance.IsConnected);
+            disconnectButton.gameObject.SetActive (FizzService.Instance.IsConnected);
 
             launchButton.interactable = true;
         }
 
         private void OnDisconnected (FizzException ex)
         {
-            connectButton.gameObject.SetActive (true);
-            disconnectButton.gameObject.SetActive (false);
+            connectButton.gameObject.SetActive (!FizzService.Instance.IsConnected);
+            disconnectButton.gameObject.SetActive (FizzService.Instance.IsConnected);
 
             launchButton.interactable = false;
         }

@@ -10,13 +10,6 @@ namespace Fizz.UI.Core
             set { _localizationService = value; }
         }
 
-        public static IFizzPredefinedInputDataProvider PredefinedInputDataProvider
-        {
-            get { return _predefinedInputDataProvider; }
-            set { _predefinedInputDataProvider = value; }
-        }
-
         private static IServiceLocalization _localizationService = new LocalizationService ();
-        private static IFizzPredefinedInputDataProvider _predefinedInputDataProvider = new FizzStaticPredefinedInputDataProvider ();
     }
 }

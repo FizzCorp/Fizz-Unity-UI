@@ -424,7 +424,7 @@ namespace Fizz.UI
 
         private FizzMessageCellModel GetChatCellModelFromAction(FizzChannelMessage action)
         {
-            var model = new FizzMessageCellModel(action.Id, action.From, action.Nick, action.To, action.Body, action.Topic, action.Data, action.Translations, action.Created)
+            var model = new FizzMessageCellModel(action.Id, action.From, action.Nick, action.To, action.Body, action.Data, action.Translations, action.Created)
             {
                 Type = FizzChatCellType.ChatCell
             };
