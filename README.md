@@ -1,5 +1,5 @@
 ## Introduction
-This repository contains the Fizz UI made in UGUI Unity3d. The UI implements a basic multi-linugal chat system with profanity filtering.
+This repository contains the Fizz UI made in UGUI Unity3d. The UI implements a basic multi-linugal unity chat system with profanity filtering.
 
 ## Instructions
 1. Clone the repository.
