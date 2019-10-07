@@ -41,8 +41,6 @@ namespace Fizz.Chat
 
         public string Body { get; protected set; }
 
-        public string Topic { get; protected set; }
-
         public Dictionary<string, string> Data { get; protected set; }
 
         public IDictionary<string, string> Translations { get; protected set; }

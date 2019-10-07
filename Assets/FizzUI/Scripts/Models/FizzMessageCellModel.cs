@@ -71,7 +71,6 @@ namespace Fizz.UI.Model
             To = model.To;
             Nick = model.Nick;
             Body = model.Body;
-            Topic = model.Topic;
             Data = model.Data;
             Translations = model.Translations;
             Created = model.Created;
