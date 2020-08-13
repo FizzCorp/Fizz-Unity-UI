@@ -6,7 +6,7 @@ using Fizz.Common.Json;
 
 namespace Fizz.Chat.Impl
 {
-    public class FizzMQTTChannelMessageListener : IFizzChannelMessageListener
+    public class FizzMQTTChannelMessageListener : IFizzChannelMessageListener, IFizzGroupListener
     {
         private static readonly FizzException ERROR_INVALID_APP_ID = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_app_id");
         private static readonly FizzException ERROR_INVALID_DISPATCHER = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_dispatcher");
@@ -19,6 +19,10 @@ namespace Fizz.Chat.Impl
         public Action<FizzChannelMessage> OnMessagePublished { get; set; }
         public Action<FizzChannelMessage> OnMessageUpdated { get; set; }
         public Action<FizzChannelMessage> OnMessageDeleted { get; set; }
+        public Action<FizzGroupUpdate> OnGroupUpdated { get; set; }
+        public Action<IFizzGroupMember> OnGroupMemberAdded { get; set; }
+        public Action<IFizzGroupMember> OnGroupMemberRemoved { get; set; }
+        public Action<IFizzGroupMember> OnGroupMemberUpdated { get; set; }
 
         protected string _userId;
         protected IFizzMqttConnection _connection;
@@ -210,6 +214,30 @@ namespace Fizz.Chat.Impl
                             OnMessageDeleted.Invoke (AdaptTo (message));
                         }
                         break;
+                    case "GRPMA":
+                        if (OnGroupMemberAdded != null)
+                        {
+                            OnGroupMemberAdded.Invoke(ParseMember(message));
+                        }
+                        break;
+                    case "GRPMU":
+                        if (OnGroupMemberUpdated != null)
+                        {
+                            OnGroupMemberUpdated.Invoke(ParseMember(message));
+                        }
+                        break;
+                    case "GRPMR":
+                        if (OnGroupMemberRemoved != null)
+                        {
+                            OnGroupMemberRemoved.Invoke(ParseMember(message));
+                        }
+                        break;
+                    case "GRPU":
+                        if (OnGroupUpdated != null)
+                        {
+                            OnGroupUpdated.Invoke(ParseGroupUpdate(message));
+                        }
+                        break;
                     default:
                         FizzLogger.W ("unrecognized packet received: " + payload);
                         break;
@@ -260,6 +288,31 @@ namespace Fizz.Chat.Impl
                 translations,
                 message.Created
             );
+        }
+        
+        private IFizzGroupMember ParseMember(FizzTopicMessage message) {
+            JSONClass payload = JSONNode.Parse(message.Data).AsObject;
+            string userId = payload["id"];
+            string state = payload["state"];
+            string role = payload["role"];
+
+            return new FizzJsonGroupMember(userId, message.From, role, state);
+        }
+
+        private FizzGroupUpdate ParseGroupUpdate(FizzTopicMessage message) {
+            JSONClass payload = JSONNode.Parse(message.Data).AsObject;
+            FizzGroupUpdate update = new FizzGroupUpdate();
+            string reason = payload["reason"];
+
+            if (reason == "profile") {
+                update.Reason = FizzGroupUpdate.UpdateReason.Profile;
+                update.Title = payload["title"];
+                update.ImageURL = payload["image_url"];
+                update.Description = payload["description"];
+                update.Type = payload["type"];
+            }
+
+            return update;
         }
     }
 }
