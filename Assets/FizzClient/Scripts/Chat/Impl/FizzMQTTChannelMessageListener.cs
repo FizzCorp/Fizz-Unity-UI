@@ -19,10 +19,10 @@ namespace Fizz.Chat.Impl
         public Action<FizzChannelMessage> OnMessagePublished { get; set; }
         public Action<FizzChannelMessage> OnMessageUpdated { get; set; }
         public Action<FizzChannelMessage> OnMessageDeleted { get; set; }
-        public Action<FizzGroupUpdate> OnGroupUpdated { get; set; }
-        public Action<IFizzGroupMember> OnGroupMemberAdded { get; set; }
-        public Action<IFizzGroupMember> OnGroupMemberRemoved { get; set; }
-        public Action<IFizzGroupMember> OnGroupMemberUpdated { get; set; }
+        public Action<FizzGroupUpdateEventData> OnGroupUpdated { get; set; }
+        public Action<FizzGroupMemberEventData> OnGroupMemberAdded { get; set; }
+        public Action<FizzGroupMemberEventData> OnGroupMemberRemoved { get; set; }
+        public Action<FizzGroupMemberEventData> OnGroupMemberUpdated { get; set; }
 
         protected string _userId;
         protected IFizzMqttConnection _connection;
@@ -217,25 +217,25 @@ namespace Fizz.Chat.Impl
                     case "GRPMA":
                         if (OnGroupMemberAdded != null)
                         {
-                            OnGroupMemberAdded.Invoke(ParseMember(message));
+                            OnGroupMemberAdded.Invoke(ParseMemberEventData(message));
                         }
                         break;
                     case "GRPMU":
                         if (OnGroupMemberUpdated != null)
                         {
-                            OnGroupMemberUpdated.Invoke(ParseMember(message));
+                            OnGroupMemberUpdated.Invoke(ParseMemberEventData(message));
                         }
                         break;
                     case "GRPMR":
                         if (OnGroupMemberRemoved != null)
                         {
-                            OnGroupMemberRemoved.Invoke(ParseMember(message));
+                            OnGroupMemberRemoved.Invoke(ParseMemberEventData(message));
                         }
                         break;
                     case "GRPU":
                         if (OnGroupUpdated != null)
                         {
-                            OnGroupUpdated.Invoke(ParseGroupUpdate(message));
+                            OnGroupUpdated.Invoke(ParseGroupUpdateEventData(message));
                         }
                         break;
                     default:
@@ -290,22 +290,25 @@ namespace Fizz.Chat.Impl
             );
         }
         
-        private IFizzGroupMember ParseMember(FizzTopicMessage message) {
+        private FizzGroupMemberEventData ParseMemberEventData(FizzTopicMessage message) {
             JSONClass payload = JSONNode.Parse(message.Data).AsObject;
-            string userId = payload["id"];
-            string state = payload["state"];
-            string role = payload["role"];
+            FizzGroupMemberEventData data = new FizzGroupMemberEventData();
+            data.MemberId = payload["id"];
+            data.GroupId = message.From;
+            data.State = FizzUtils.ParseState(payload["state"]);
+            data.Role = FizzUtils.ParseRole(payload["role"]);
 
-            return new FizzJsonGroupMember(userId, message.From, role, state);
+            return data;
         }
 
-        private FizzGroupUpdate ParseGroupUpdate(FizzTopicMessage message) {
+        private FizzGroupUpdateEventData ParseGroupUpdateEventData(FizzTopicMessage message) {
             JSONClass payload = JSONNode.Parse(message.Data).AsObject;
-            FizzGroupUpdate update = new FizzGroupUpdate();
+            FizzGroupUpdateEventData update = new FizzGroupUpdateEventData();
             string reason = payload["reason"];
+            FizzLogger.D(message.Data);
 
             if (reason == "profile") {
-                update.Reason = FizzGroupUpdate.UpdateReason.Profile;
+                update.Reason = FizzGroupUpdateEventData.UpdateReason.Profile;
                 update.Title = payload["title"];
                 update.ImageURL = payload["image_url"];
                 update.Description = payload["description"];
