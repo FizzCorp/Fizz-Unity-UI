@@ -5,7 +5,7 @@ namespace Fizz.Chat.Impl
 {
     public class FizzJsonUser : IFizzUser
     {
-        private static readonly string KEY_ONLINE = "channel_id";
+        private static readonly string KEY_ONLINE = "is_online";
 
         public FizzJsonUser(string userId, string json) : this(userId, JSONNode.Parse(json))
         {
