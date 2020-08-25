@@ -46,6 +46,10 @@ namespace Fizz
         public Action<string> OnChannelSubscribed { get; set; }
         public Action<string> OnChannelUnsubscribed { get; set; }
         public Action<string> OnChannelMessagesAvailable { get; set; }
+
+        public Action<FizzUserNotificationData> OnUserNotification { get; set; }
+        public Action OnUserNotificationsSubscribed { get; set; }
+        public Action OnUserNotificationsUnsubscribed { get; set; }
         #endregion
 
         public void Open(string userId, string userName, IFizzLanguageCode lang, FizzServices services, bool tranlation, Action<bool> onDone)
@@ -165,6 +169,65 @@ namespace Fizz
             }
         }
 
+        public void SubscribeUserNotifications(Action<FizzException> cb)
+        {
+            if (!_isIntialized) Initialize();
+
+            if (Client.State == FizzClientState.Closed)
+            {
+                FizzLogger.W("FizzClient should be opened before subscribing user.");
+                return;
+            }
+
+            if (IsConnected)
+            {
+                FizzService.Instance.Client.Chat.UserNotifications.Subscribe(ex =>
+                {
+                    if (ex == null)
+                    {
+                        if (FizzService.Instance.OnUserNotificationsSubscribed != null)
+                        {
+                            FizzService.Instance.OnUserNotificationsSubscribed.Invoke();
+                        }
+                    }
+
+                    FizzUtils.DoCallback(ex, cb);
+                });
+            }
+
+        }
+
+        public void UnsubscribeUserNotifications(Action<FizzException> cb)
+        {
+            if (!_isIntialized) Initialize();
+
+            if (Client.State == FizzClientState.Closed)
+            {
+                FizzLogger.W("FizzClient should be opened before unsubscribing user.");
+                return;
+            }
+
+            try
+            {
+                FizzService.Instance.Client.Chat.UserNotifications.Unsubscribe(ex =>
+                {
+                    if (ex == null)
+                    {
+                        if (FizzService.Instance.OnUserNotificationsUnsubscribed != null)
+                        {
+                            FizzService.Instance.OnUserNotificationsUnsubscribed.Invoke();
+                        }
+                    }
+
+                    FizzUtils.DoCallback(ex, cb);
+                });
+            }
+            catch (Exception e)
+            {
+                FizzLogger.E(e);
+            }
+        }
+
         public FizzChannel GetChannel(string id)
         {
             if (!_isIntialized) Initialize();
@@ -228,6 +291,7 @@ namespace Fizz
                 Client.Chat.Listener.OnMessageUpdated += Listener_OnMessageUpdated;
                 Client.Chat.Listener.OnMessageDeleted += Listener_OnMessageDeleted;
                 Client.Chat.Listener.OnMessagePublished += Listener_OnMessagePublished;
+                Client.Chat.UserNotificationListener.OnUserNotification += Listener_OnUserNotification;
             }
             catch (FizzException ex)
             {
@@ -244,6 +308,7 @@ namespace Fizz
                 Client.Chat.Listener.OnMessageUpdated -= Listener_OnMessageUpdated;
                 Client.Chat.Listener.OnMessageDeleted -= Listener_OnMessageDeleted;
                 Client.Chat.Listener.OnMessagePublished -= Listener_OnMessagePublished;
+                Client.Chat.UserNotificationListener.OnUserNotification -= Listener_OnUserNotification;
             }
             catch (FizzException ex)
             {
@@ -311,6 +376,14 @@ namespace Fizz
             foreach (FizzChannel channel in Channels)
             {
                 channel.SubscribeAndQuery();
+            }
+        }
+
+        void Listener_OnUserNotification(FizzUserNotificationData eventData)
+        {
+            if (OnUserNotification != null)
+            {
+                OnUserNotification.Invoke(eventData);
             }
         }
 

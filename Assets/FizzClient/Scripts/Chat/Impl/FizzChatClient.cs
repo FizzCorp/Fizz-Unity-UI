@@ -19,6 +19,8 @@ namespace Fizz.Chat.Impl
         private readonly IFizzActionDispatcher _dispatcher;
         private readonly FizzMQTTChannelMessageListener _messageListener;
 
+        private readonly FizzUserNotifications _userNotifications;
+
         private string _userId;
         private IFizzAuthRestClient _restClient;
         private readonly FizzSessionRepository sessionRepository;
@@ -31,7 +33,23 @@ namespace Fizz.Chat.Impl
             }
         }
 
-		public bool IsConnected 
+        public IFizzUserNotificationListener UserNotificationListener
+        {
+            get
+            {
+                return _messageListener;
+            }
+        }
+
+        public IFizzUserNotifications UserNotifications
+        {
+            get
+            {
+                return _userNotifications;
+            }
+        }
+
+        public bool IsConnected 
         {
             get 
             {
@@ -49,6 +67,7 @@ namespace Fizz.Chat.Impl
             _dispatcher = dispatcher;
 
             _messageListener = CreateListener (appId, _dispatcher);
+            _userNotifications = new FizzUserNotifications();
         }
 
         public void Open (string userId, IFizzAuthRestClient client, FizzSessionRepository sessionRepository)
@@ -77,6 +96,7 @@ namespace Fizz.Chat.Impl
                 _restClient = client;
 
                 _messageListener.Open (userId, sessionRepository);
+                _userNotifications.Open(_restClient);
             });
         }
 
@@ -87,6 +107,7 @@ namespace Fizz.Chat.Impl
                 _userId = null;
                 _restClient = null;
 
+                _userNotifications.Close();
                 _messageListener.Close (cb);
             });
         }

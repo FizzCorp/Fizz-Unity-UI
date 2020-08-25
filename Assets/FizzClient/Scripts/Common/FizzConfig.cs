@@ -29,6 +29,7 @@ namespace Fizz.Common
         public static readonly string API_PATH_MESSAGE_ACTION = "/channels/{0}/messages/{1}";
         public static readonly string API_PATH_BAN = "/channels/{0}/bans";
         public static readonly string API_PATH_MUTE = "/channels/{0}/mutes";
-        public static readonly string API_HEADER_SESSION_TOKEN = "Session-Token"; 
+        public static readonly string API_HEADER_SESSION_TOKEN = "Session-Token";
+        public static readonly string API_PATH_USER_NOTIFICATIONS = "/notifications";
     }
 }
