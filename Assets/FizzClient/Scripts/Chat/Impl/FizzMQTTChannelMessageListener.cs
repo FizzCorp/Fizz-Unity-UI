@@ -6,7 +6,7 @@ using Fizz.Common.Json;
 
 namespace Fizz.Chat.Impl
 {
-    public class FizzMQTTChannelMessageListener : IFizzChannelMessageListener, IFizzGroupListener
+    public class FizzMQTTChannelMessageListener : IFizzChannelMessageListener, IFizzGroupListener, IFizzUserNotificationListener
     {
         private static readonly FizzException ERROR_INVALID_APP_ID = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_app_id");
         private static readonly FizzException ERROR_INVALID_DISPATCHER = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_dispatcher");
@@ -23,6 +23,7 @@ namespace Fizz.Chat.Impl
         public Action<FizzGroupMemberEventData> OnGroupMemberAdded { get; set; }
         public Action<FizzGroupMemberEventData> OnGroupMemberRemoved { get; set; }
         public Action<FizzGroupMemberEventData> OnGroupMemberUpdated { get; set; }
+        public Action<FizzUserNotificationData> OnUserNotification { get; set; }
 
         protected string _userId;
         protected IFizzMqttConnection _connection;
@@ -238,6 +239,12 @@ namespace Fizz.Chat.Impl
                             OnGroupUpdated.Invoke(ParseGroupUpdateEventData(message));
                         }
                         break;
+                    case "USRNO":
+                        if (OnUserNotification != null)
+                        {
+                            OnUserNotification.Invoke(ParseUserNotificationData(message));
+                        }
+                        break;
                     default:
                         FizzLogger.W ("unrecognized packet received: " + payload);
                         break;
@@ -316,6 +323,18 @@ namespace Fizz.Chat.Impl
             }
 
             return update;
+        }
+
+        private FizzUserNotificationData ParseUserNotificationData(FizzTopicMessage message)
+        {
+            JSONClass payload = JSONNode.Parse(message.Data).AsObject;
+            FizzUserNotificationData notification = new FizzUserNotificationData();
+            FizzLogger.D(message.Data);
+
+            notification.Reason = FizzUserNotificationData.UpdateReason.Group;
+            notification.Name = payload["name"];
+
+            return notification;
         }
     }
 }

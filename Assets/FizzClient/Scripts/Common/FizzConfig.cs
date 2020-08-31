@@ -37,5 +37,6 @@ namespace Fizz.Common
         public static readonly string API_PATH_GROUP_MESSAGES = "/groups/{0}/messages";
         public static readonly string API_PATH_USER_GROUPS = "/users/{0}/groups";
         public static readonly string API_PATH_USER_GROUP = "/users/{0}/groups/{1}";
+        public static readonly string API_PATH_USER_NOTIFICATIONS = "/notifications";
     }
 }

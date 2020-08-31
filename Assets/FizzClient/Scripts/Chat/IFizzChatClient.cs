@@ -15,6 +15,10 @@ namespace Fizz.Chat
 
         IFizzUsers Users { get; }
 
+        IFizzUserNotifications UserNotifications { get; }
+
+        IFizzUserNotificationListener UserNotificationListener { get; }
+
         void Subscribe(string channel, Action<FizzException> callback);
 
         void Unsubscribe(string channel, Action<FizzException> callback);
