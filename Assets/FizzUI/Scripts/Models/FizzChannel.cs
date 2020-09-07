@@ -13,7 +13,7 @@ namespace Fizz.UI.Model
         public string Name { get { return _channelMeta.Name; } }
 
         public FizzChannelMeta Meta { get { return _channelMeta; } }
-        private FizzChannelMeta _channelMeta = null;
+        protected FizzChannelMeta _channelMeta = null;
 
         public IList<FizzChannelMessage> Messages
         {
@@ -68,7 +68,7 @@ namespace Fizz.UI.Model
             }
         }
 
-        public void Subscribe(Action<FizzException> cb)
+        public virtual void Subscribe(Action<FizzException> cb)
         {
             FizzService.Instance.Client.Chat.Subscribe(Id, ex =>
             {
@@ -84,7 +84,7 @@ namespace Fizz.UI.Model
             });
         }
 
-        public void Unsubscribe(Action<FizzException> cb)
+        public virtual void Unsubscribe(Action<FizzException> cb)
         {
             try
             {
@@ -109,7 +109,7 @@ namespace Fizz.UI.Model
             }
         }
 
-        public void SubscribeAndQuery()
+        public virtual void SubscribeAndQueryLatest()
         {
             try
             {
@@ -153,7 +153,7 @@ namespace Fizz.UI.Model
             }
         }
 
-        public bool FetchHistory(Action complete)
+        public virtual bool FetchHistory(Action complete)
         {
             long beforeId = -1;
             if (_messageList.Count > 0)
@@ -191,6 +191,26 @@ namespace Fizz.UI.Model
             return true;
         }
 
+        public virtual void PublishMessage(string nick,
+                                    string body,
+                                    Dictionary<string, string> data,
+                                    bool translate,
+                                    Action<FizzException> callback)
+        {
+            FizzService.Instance.Client.Chat.PublishMessage(
+                    Id,
+                    nick,
+                    body,
+                    data,
+                    translate,
+                    Meta.FilterContent,
+                    Meta.PersistMessages,
+                    ex =>
+                    {
+                        FizzUtils.DoCallback(ex, callback);
+                    });
+        }
+
         public void Reset()
         {
             _messageList.Clear();
@@ -199,7 +219,7 @@ namespace Fizz.UI.Model
 
         private bool cached = false;
         IList<FizzChannelMessage> cachedMessageList = null;
-        private SortedList<long, FizzChannelMessage> _messageList = new SortedList<long, FizzChannelMessage>(new FizzChannelMessageComparer());
+        protected SortedList<long, FizzChannelMessage> _messageList = new SortedList<long, FizzChannelMessage>(new FizzChannelMessageComparer());
     }
 
     class FizzChannelMessageComparer : IComparer<long>

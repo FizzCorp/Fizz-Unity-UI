@@ -118,12 +118,31 @@ namespace Fizz.UI
         }
 
         /// <summary>
+        /// Add Channel to UI. Note that Channel should be added to FizzService first.
+        /// </summary>
+        /// <param name="channel">Channel to be added in UI</param>
+        /// <param name="select">Select channel</param>
+        public void AddChannel(FizzChannel channel, bool select = false)
+        {
+            ChannelsView.AddChannel(channel, select);
+        }
+
+        /// <summary>
         /// Remove channel from UI
         /// </summary>
         /// <param name="channelId">Id of channel to be removed from UI</param>
         public void RemoveChannel (string channelId)
         {
             ChannelsView.RemoveChannel (channelId);
+        }
+
+        /// <summary>
+        /// Remove channel from UI
+        /// </summary>
+        /// <param name="channel">Channel to be removed from UI</param>
+        public void RemoveChannel(FizzChannel channel)
+        {
+            ChannelsView.RemoveChannel(channel);
         }
 
         /// <summary>
@@ -220,14 +239,11 @@ namespace Fizz.UI
 
                 MessagesView.AddMessage (model);
 
-                FizzService.Instance.Client.Chat.PublishMessage (
-                    channel.Id,
+                channel.PublishMessage(
                     FizzService.Instance.UserName,
                     message,
                     data,
                     FizzService.Instance.IsTranslationEnabled,
-                    channel.Meta.FilterContent,
-                    channel.Meta.PersistMessages,
                     exception =>
                     {
                         if (exception == null)
@@ -274,14 +290,11 @@ namespace Fizz.UI
 
                 MessagesView.AddMessage (model);
 
-                FizzService.Instance.Client.Chat.PublishMessage (
-                    channel.Id,
+                channel.PublishMessage (
                     FizzService.Instance.UserName,
                     string.Empty,
                     data,
                     FizzService.Instance.IsTranslationEnabled,
-                    channel.Meta.FilterContent,
-                    channel.Meta.PersistMessages,
                     exception =>
                     {
                         if (exception == null)

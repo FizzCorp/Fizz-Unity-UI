@@ -66,6 +66,30 @@ namespace Fizz.UI
             }
         }
 
+        public void AddChannel(FizzChannel channel, bool select = false)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            if (channel == null)
+            {
+                FizzLogger.W("Unable to add channel. Channel is null");
+                return;
+            }
+
+            if (!_channelsLookup.ContainsKey(channel.Id))
+            {
+                AddChannelInternal(channel);
+            }
+
+            if (_channelsLookup.ContainsKey(channel.Id) && select)
+            {
+                HandleChannelSelected(channel);
+            }
+        }
+
         public void RemoveChannel (string channelId)
         {
             if (!_initialized)
@@ -78,6 +102,27 @@ namespace Fizz.UI
             if (RemoveChannelInternal (channelId) && CurrentSelectedChannel == null && _channelsLookup.Count > 0)
             {
                 HandleChannelSelected (_channelsLookup.Values.First ().GetChannel ());
+            }
+        }
+
+        public void RemoveChannel(FizzChannel channel)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            if (channel == null)
+            {
+                FizzLogger.W("Unable to remove channel. Channel is null");
+                return;
+            }
+
+            _channelWatchList.Remove(channel.Id);
+
+            if (RemoveChannelInternal(channel.Id) && CurrentSelectedChannel == null && _channelsLookup.Count > 0)
+            {
+                HandleChannelSelected(_channelsLookup.Values.First().GetChannel());
             }
         }
 

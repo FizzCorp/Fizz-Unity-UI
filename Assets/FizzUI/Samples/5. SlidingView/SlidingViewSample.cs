@@ -1,6 +1,7 @@
 ﻿using Fizz.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Fizz.UI.Model;
 
 namespace Fizz.Demo
 {
@@ -21,6 +22,11 @@ namespace Fizz.Demo
 
             chatView.AddChannel (globalChannelId);
             chatView.AddChannel (localChannelId);
+
+            foreach (FizzGroup group in FizzService.Instance.Groups)
+            {
+                chatView.AddChannel(group.Channel.Id);
+            }
         }
 
         private void SetupChatViews ()

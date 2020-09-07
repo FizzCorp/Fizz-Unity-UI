@@ -1,6 +1,8 @@
 ﻿using Fizz.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Fizz.Common;
+using Fizz.UI.Model;
 
 namespace Fizz.Demo
 {
@@ -25,11 +27,13 @@ namespace Fizz.Demo
         private void OnEnable()
         {
             AddChannels();
+            AddGroups();
         }
 
         private void OnDisable()
         {
             RemoveChannels();
+            RemoveGroups();
         }
 
         private void SetupChatView()
@@ -68,6 +72,29 @@ namespace Fizz.Demo
             // Remove channel from chatview
             chatView.RemoveChannel(globalChannelId);
             chatView.RemoveChannel(localChannelId);
+        }
+
+        private void AddGroups()
+        {
+            foreach (FizzGroup group in FizzService.Instance.Groups)
+            {
+                chatView.AddChannel(group.Channel.Id);
+            }
+        }
+
+        private void RemoveGroups()
+        {
+            try
+            {
+                foreach (FizzGroup group in FizzService.Instance.Groups)
+                {
+                    chatView.RemoveChannel(group.Channel.Id);
+                }
+            }
+            catch
+            {
+                FizzLogger.E("Something went wrong while removing group channel.");
+            }
         }
 
         public void HandleClose()
