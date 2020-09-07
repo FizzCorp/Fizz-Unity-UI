@@ -78,7 +78,7 @@ namespace Fizz.Demo
         {
             foreach (FizzGroup group in FizzService.Instance.Groups)
             {
-                chatView.AddChannel(group.Channel.Id);
+                chatView.AddGroup(group.Id);
             }
         }
 
@@ -88,7 +88,7 @@ namespace Fizz.Demo
             {
                 foreach (FizzGroup group in FizzService.Instance.Groups)
                 {
-                    chatView.RemoveChannel(group.Channel.Id);
+                    chatView.RemoveGroup(group.Id);
                 }
             }
             catch

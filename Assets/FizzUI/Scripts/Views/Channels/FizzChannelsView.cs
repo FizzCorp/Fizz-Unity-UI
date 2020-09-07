@@ -27,6 +27,7 @@ namespace Fizz.UI
         private Dictionary<string, FizzChannelView> _channelsLookup;
         private Dictionary<string, FizzChannelGroupView> _groupsLookup;
         private List<string> _channelWatchList;
+        private List<string> _groupWatchList;
 
         private bool _initialized = false;
 
@@ -66,30 +67,6 @@ namespace Fizz.UI
             }
         }
 
-        public void AddChannel(FizzChannel channel, bool select = false)
-        {
-            if (!_initialized)
-            {
-                Initialize();
-            }
-
-            if (channel == null)
-            {
-                FizzLogger.W("Unable to add channel. Channel is null");
-                return;
-            }
-
-            if (!_channelsLookup.ContainsKey(channel.Id))
-            {
-                AddChannelInternal(channel);
-            }
-
-            if (_channelsLookup.ContainsKey(channel.Id) && select)
-            {
-                HandleChannelSelected(channel);
-            }
-        }
-
         public void RemoveChannel (string channelId)
         {
             if (!_initialized)
@@ -102,27 +79,6 @@ namespace Fizz.UI
             if (RemoveChannelInternal (channelId) && CurrentSelectedChannel == null && _channelsLookup.Count > 0)
             {
                 HandleChannelSelected (_channelsLookup.Values.First ().GetChannel ());
-            }
-        }
-
-        public void RemoveChannel(FizzChannel channel)
-        {
-            if (!_initialized)
-            {
-                Initialize();
-            }
-
-            if (channel == null)
-            {
-                FizzLogger.W("Unable to remove channel. Channel is null");
-                return;
-            }
-
-            _channelWatchList.Remove(channel.Id);
-
-            if (RemoveChannelInternal(channel.Id) && CurrentSelectedChannel == null && _channelsLookup.Count > 0)
-            {
-                HandleChannelSelected(_channelsLookup.Values.First().GetChannel());
             }
         }
 
@@ -146,6 +102,74 @@ namespace Fizz.UI
             else
             {
                 FizzLogger.W ("FizzChatView: Unable to set channel, add channel first");
+                return false;
+            }
+        }
+
+        public void AddGroup(string groupId, bool select = false)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            FizzGroup group = GetGroupById(groupId);
+
+            if (group == null)
+            {
+                if (!_groupWatchList.Contains(groupId)) _groupWatchList.Add(groupId);
+                FizzLogger.W("Group not found, please add group [" + groupId + "] to FizzService first.");
+                return;
+            }
+
+            if (!_channelsLookup.ContainsKey(group.Channel.Id))
+            {
+                AddChannelInternal(group.Channel);
+            }
+
+            if (_channelsLookup.ContainsKey(group.Channel.Id) && select)
+            {
+                HandleChannelSelected(group.Channel);
+            }
+        }
+
+        public void RemoveGroup(string groupId)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            _groupWatchList.Remove(groupId);
+
+            FizzGroup group = GetGroupById(groupId);
+
+            if (group != null && RemoveChannelInternal(group.Channel.Id) && CurrentSelectedChannel == null && _channelsLookup.Count > 0)
+            {
+                HandleChannelSelected(_channelsLookup.Values.First().GetChannel());
+            }
+        }
+
+        public bool SetGroup(string groupId)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            FizzGroup group = GetGroupById(groupId);
+
+            if (group == null)
+                return false;
+
+            if (_channelsLookup.ContainsKey(group.Channel.Id))
+            {
+                HandleChannelSelected(group.Channel);
+                return true;
+            }
+            else
+            {
+                FizzLogger.W("FizzChatView: Unable to set channel, add channel first");
                 return false;
             }
         }
@@ -180,6 +204,7 @@ namespace Fizz.UI
             _channelsLookup.Clear ();
             _groupsLookup.Clear ();
             _channelWatchList.Clear ();
+            _groupWatchList.Clear ();
         }
 
         protected override void OnEnable ()
@@ -230,6 +255,7 @@ namespace Fizz.UI
             _groupsLookup = new Dictionary<string, FizzChannelGroupView> ();
 
             _channelWatchList = new List<string> ();
+            _groupWatchList = new List<string> ();
 
             _initialized = true;
         }
@@ -244,6 +270,15 @@ namespace Fizz.UI
                     {
                         AddChannelInternal (channel);
                         _channelWatchList.Remove (channel.Id);
+                    }
+                }
+
+                foreach (FizzGroup group in FizzService.Instance.Groups)
+                {
+                    if (_groupWatchList.Contains(group.Id) && !_channelsLookup.ContainsKey(group.Channel.Id))
+                    {
+                        AddChannelInternal(group.Channel);
+                        _groupWatchList.Remove(group.Id);
                     }
                 }
 
@@ -429,6 +464,19 @@ namespace Fizz.UI
             catch (Exception)
             {
                 FizzLogger.W ("ChannelList unable to get channel with id " + channelId);
+            }
+            return null;
+        }
+
+        FizzGroup GetGroupById(string groupId)
+        {
+            try
+            {
+                return FizzService.Instance.GetGroup(groupId);
+            }
+            catch (Exception)
+            {
+                FizzLogger.W("GroupList unable to get group with id " + groupId);
             }
             return null;
         }
