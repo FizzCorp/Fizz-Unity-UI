@@ -55,5 +55,29 @@
             FilterContent = true;
             Readonly = false;
         }
+
+        public FizzChannelMeta (string id, string name, bool persist, bool filter, bool readOnly)
+        {
+            Id = id;
+            Name = name;
+            PersistMessages = persist;
+            FilterContent = filter;
+            Readonly = readOnly;
+
+            InitialQueryMessageCount = 50;
+            HistoryQueryMessageCount = 50;
+        }
+
+        public FizzChannelMeta(string id, string name, bool persist, bool filter, bool readOnly, int initialMessages, int historyMessages)
+        {
+            Id = id;
+            Name = name;
+            PersistMessages = persist;
+            FilterContent = filter;
+            Readonly = readOnly;
+
+            InitialQueryMessageCount = initialMessages;
+            HistoryQueryMessageCount = historyMessages;
+        }
     }
 }
