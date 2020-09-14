@@ -298,6 +298,11 @@ namespace Fizz
             }
         }
 
+        public FizzService ()
+        {
+            if (_isIntialized) Initialize();
+        }
+
         void Initialize()
         {
             if (_isIntialized) return;
