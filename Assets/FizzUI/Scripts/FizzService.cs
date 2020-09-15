@@ -45,6 +45,7 @@ namespace Fizz
             }
         }
         public List<FizzGroup> Groups { get; private set; }
+        public List<IFizzUserGroup> GroupInvites { get; private set; }
         #endregion
 
         #region Events
@@ -115,6 +116,8 @@ namespace Fizz
 
             if (Groups != null) Groups.Clear();
             if (groupLookup != null) groupLookup.Clear();
+
+            if (GroupInvites != null) GroupInvites.Clear();
         }
 
         public void AddGroup(FizzGroup group)
@@ -309,6 +312,10 @@ namespace Fizz
                             {
                                 userGroups.Add(group);
                             }
+                            else
+                            {
+                                GroupInvites.Add(group);
+                            }
                         }
                         FetchUserGroups(groupFetchQuery, userGroups);
                     }
@@ -354,6 +361,7 @@ namespace Fizz
             Client = new FizzClient(APP_ID, APP_SECRET);
             channels = new List<FizzChannel>();
             Groups = new List<FizzGroup>();
+            GroupInvites = new List<IFizzUserGroup>();
 
             channelLookup = new Dictionary<string, FizzChannel>();
             groupLookup = new Dictionary<string, FizzGroup>();

@@ -132,7 +132,7 @@ namespace Fizz.Common
 
         public static FizzGroupMemberRole ParseRole(string value) {
             if (value == null) {
-                throw new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_member_state");
+                throw new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_member_role");
             }
 
             switch(value) {
