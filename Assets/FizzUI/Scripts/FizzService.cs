@@ -189,7 +189,6 @@ namespace Fizz
             FizzService.Instance.Client.Chat.Users.GetUser(userId, (user, ex) =>
             {
                 FizzUtils.DoCallback(user, ex, cb);
-                FizzLogger.W(userId + " Get User Online = " + user.Online);
             });
         }
 
