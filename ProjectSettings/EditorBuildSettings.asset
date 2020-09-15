@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/FizzUI/Samples/6. Presence/PrecenseScene.unity
+    guid: 6208a01b28feb47268a7dd40627531e5
+  - enabled: 1
     path: Assets/FizzUI/Samples/SceneSelector.unity
     guid: 1d0102a7ac1b6a14cb6370ecfd8388a4
   - enabled: 1

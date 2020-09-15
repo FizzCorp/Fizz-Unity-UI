@@ -6,7 +6,7 @@ using Fizz.Common.Json;
 
 namespace Fizz.Chat.Impl
 {
-    public class FizzMQTTChannelMessageListener : IFizzChannelMessageListener
+    public class FizzMQTTChannelMessageListener : IFizzChannelMessageListener, IFizzUserListener
     {
         private static readonly FizzException ERROR_INVALID_APP_ID = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_app_id");
         private static readonly FizzException ERROR_INVALID_DISPATCHER = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_dispatcher");
@@ -19,6 +19,7 @@ namespace Fizz.Chat.Impl
         public Action<FizzChannelMessage> OnMessagePublished { get; set; }
         public Action<FizzChannelMessage> OnMessageUpdated { get; set; }
         public Action<FizzChannelMessage> OnMessageDeleted { get; set; }
+        public Action<FizzUserUpdateEventData> OnUserUpdated { get; set; }
 
         protected string _userId;
         protected IFizzMqttConnection _connection;
@@ -210,6 +211,12 @@ namespace Fizz.Chat.Impl
                             OnMessageDeleted.Invoke (AdaptTo (message));
                         }
                         break;
+                    case "USRPU":
+                        if (OnUserUpdated != null)
+                        {
+                            OnUserUpdated.Invoke(ParseUserUpdateEventData(message));
+                        }
+                        break;
                     default:
                         FizzLogger.W ("unrecognized packet received: " + payload);
                         break;
@@ -260,6 +267,19 @@ namespace Fizz.Chat.Impl
                 translations,
                 message.Created
             );
+        }
+
+        private FizzUserUpdateEventData ParseUserUpdateEventData(FizzTopicMessage message)
+        {
+            JSONClass payload = JSONNode.Parse(message.Data).AsObject;
+            FizzUserUpdateEventData update = new FizzUserUpdateEventData();
+            FizzLogger.D(message.Data);
+
+            update.Reason = FizzUserUpdateEventData.UpdateReason.Profile;
+            update.UserId = message.From;
+            update.Online = payload["is_online"].AsBool;
+
+            return update;
         }
     }
 }
