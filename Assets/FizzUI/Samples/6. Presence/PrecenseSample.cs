@@ -51,11 +51,9 @@ public class PrecenseSample : MonoBehaviour
 	{
 		FizzService.Instance.Open (userId, userId, FizzLanguageCodes.English, FizzServices.All, false, isDone => 
 		{
-
 			if (isDone)
 			{
 				FizzLogger.D ("HandleOpenButton " + isDone);
-
 			}
 		});
 	}
@@ -132,7 +130,6 @@ public class PrecenseSample : MonoBehaviour
 
 	private void SetPresenceStatus(string userId, bool online)
 	{
-		FizzLogger.D(userId + " is " + (online ? "Online" : "Offline"));
 		Color color = (online) ? Color.green : Color.white;
 		if (userId.EndsWith("01"))
 		{
