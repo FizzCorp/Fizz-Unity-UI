@@ -48,6 +48,11 @@ public class PresenceSample : MonoBehaviour
 		FizzService.Instance.OnUserUpdated -= OnUserUpdate;
 	}
 
+	void OnDestroy()
+	{
+		FizzService.Instance.Close();
+	}
+
 	void HandleOpenButton ()
 	{
 		FizzService.Instance.Open (userId, userId, FizzLanguageCodes.English, FizzServices.All, false, isDone => 
