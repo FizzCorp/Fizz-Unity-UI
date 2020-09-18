@@ -40,44 +40,14 @@ namespace Fizz.Chat
 
     public interface IFizzGroups 
     {
-        void CreateGroup(
-            string title, 
-            string imageURL, 
-            string description, 
-            string type,
-            IList<string> memberIds,
-            Action<IFizzGroup, FizzException> callback
-        );
-
         void FetchGroup(
             string groupId, 
             Action<IFizzGroup, FizzException> callback
         );
 
-        void UpdateGroup(
-            string groupId,
-            string title, 
-            string imageURL, 
-            string description, 
-            string type, 
-            Action<FizzException> callback
-        );
-
         void GetGroupMembers(
             string groupId, 
             Action<IList<IFizzGroupMember>, FizzException> callback
-        );
-
-        void AddGroupMembers(
-            string grouId,
-            IList<string> memberIds, 
-            Action<FizzException> callback
-        );
-
-        void RemoveGroupMember(
-            string groupId,
-            string memberId, 
-            Action<FizzException> callback
         );
 
         void PublishMessage(
