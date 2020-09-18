@@ -6,7 +6,7 @@ using Fizz.Common.Json;
 
 namespace Fizz.Chat.Impl
 {
-    public class FizzMQTTChannelMessageListener : IFizzChannelMessageListener, IFizzGroupListener
+    public class FizzMQTTChannelMessageListener : IFizzChannelMessageListener, IFizzUserListener, IFizzGroupListener
     {
         private static readonly FizzException ERROR_INVALID_APP_ID = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_app_id");
         private static readonly FizzException ERROR_INVALID_DISPATCHER = new FizzException (FizzError.ERROR_BAD_ARGUMENT, "invalid_dispatcher");
@@ -23,6 +23,7 @@ namespace Fizz.Chat.Impl
         public Action<FizzGroupMemberEventData> OnGroupMemberAdded { get; set; }
         public Action<FizzGroupMemberEventData> OnGroupMemberRemoved { get; set; }
         public Action<FizzGroupMemberEventData> OnGroupMemberUpdated { get; set; }
+        public Action<FizzUserUpdateEventData> OnUserUpdated { get; set; }
 
         protected string _userId;
         protected IFizzMqttConnection _connection;
@@ -238,6 +239,12 @@ namespace Fizz.Chat.Impl
                             OnGroupUpdated.Invoke(ParseGroupUpdateEventData(message));
                         }
                         break;
+                    case "USRPU":
+                        if (OnUserUpdated != null)
+                        {
+                            OnUserUpdated.Invoke(ParseUserUpdateEventData(message));
+                        }
+                        break;
                     default:
                         FizzLogger.W ("unrecognized packet received: " + payload);
                         break;
@@ -314,6 +321,18 @@ namespace Fizz.Chat.Impl
                 update.Description = payload["description"];
                 update.Type = payload["type"];
             }
+            return update;
+        }
+
+        private FizzUserUpdateEventData ParseUserUpdateEventData(FizzTopicMessage message)
+        {
+            JSONClass payload = JSONNode.Parse(message.Data).AsObject;
+            FizzUserUpdateEventData update = new FizzUserUpdateEventData();
+            FizzLogger.D(message.Data);
+
+            update.Reason = FizzUserUpdateEventData.UpdateReason.Profile;
+            update.UserId = message.From;
+            update.Online = payload["is_online"].AsBool;
 
             return update;
         }

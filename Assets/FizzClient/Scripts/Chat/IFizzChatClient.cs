@@ -11,6 +11,8 @@ namespace Fizz.Chat
 
         IFizzGroupListener GroupListener { get; }
 
+        IFizzUserListener UserListener { get; }
+
         IFizzGroups Groups { get; }
 
         IFizzUsers Users { get; }

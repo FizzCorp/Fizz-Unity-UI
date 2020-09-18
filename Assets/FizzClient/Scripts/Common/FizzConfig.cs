@@ -4,19 +4,11 @@ namespace Fizz.Common
 {
     public class FizzConfig
     {
-#if UNITY_2018_3_OR_NEWER && NET_4_6
         public static readonly string API_PROTOCOL = "https";
         public static readonly string API_ENDPOINT = "api.fizz.io";
 
-        public static bool MQTT_USE_TLS = true;
-        public static string MQTT_HOST_ENDPOINT = "mqtt.fizz.io";
-#else
-        public static readonly string API_PROTOCOL = "http";
-        public static readonly string API_ENDPOINT = "api.fizz.io:3000";
-
         public static bool MQTT_USE_TLS = false;
         public static string MQTT_HOST_ENDPOINT = "mqtt.fizz.io";
-#endif
 
         public static readonly string API_VERSION = "v1";
         public static readonly string API_BASE_URL = string.Format("{0}://{1}/{2}", API_PROTOCOL, API_ENDPOINT, API_VERSION);
@@ -38,5 +30,7 @@ namespace Fizz.Common
         public static readonly string API_PATH_USER_GROUPS = "/users/{0}/groups";
         public static readonly string API_PATH_USER_GROUP = "/users/{0}/groups/{1}";
         public static readonly string API_PATH_USER_NOTIFICATIONS = "/notifications";
+        public static readonly string API_PATH_USER = "/users/{0}";
+        public static readonly string API_PATH_USER_SUBCRIBERS = "/users/{0}/subscribers";
     }
 }
