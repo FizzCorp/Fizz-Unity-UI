@@ -15,7 +15,7 @@ namespace Fizz.UI.Model
         public FizzChannelMeta Meta { get { return _channelMeta; } }
         protected FizzChannelMeta _channelMeta = null;
 
-        public IList<FizzChannelMessage> Messages
+        public virtual IList<FizzChannelMessage> Messages
         {
             get
             {

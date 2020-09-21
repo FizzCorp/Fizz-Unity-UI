@@ -1,4 +1,5 @@
 ﻿using Fizz.Common;
+using Fizz.Chat;
 using Fizz.UI.Core;
 using Fizz.UI.Model;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace Fizz.UI
         [SerializeField] FizzInputView InputView;
 
         private bool _showChannels = true;
+        private bool _showGroups = false;
         private bool _showInputView = true;
         private bool _showHeaderView = true;
         private bool _showTranslation = true;
@@ -44,7 +46,20 @@ namespace Fizz.UI
             set
             {
                 _showChannels = value;
-                HeaderView.SetChannelButtonVisibility (_showChannels);
+                HeaderView.SetChannelButtonVisibility(_showChannels);
+            }
+        }
+
+        /// <summary>
+        /// Show/Hide Group list
+        /// </summary>
+        public bool ShowGroups
+        {
+            get { return _showGroups; }
+            set
+            {
+                _showGroups = value;
+                UpdateGroupsVisibility();
             }
         }
 
@@ -57,7 +72,7 @@ namespace Fizz.UI
             set
             {
                 _showInputView = value;
-                UpdateInputViewVisibility ();
+                UpdateInputViewVisibility();
             }
         }
 
@@ -93,7 +108,7 @@ namespace Fizz.UI
             set
             {
                 _showHeaderView = value;
-                HandleHeaderViewVisibility ();
+                HandleHeaderViewVisibility();
             }
         }
 
@@ -103,7 +118,7 @@ namespace Fizz.UI
             set
             {
                 _showCloseButton = value;
-                HeaderView.SetCloseButtonVisibility (_showCloseButton);
+                HeaderView.SetCloseButtonVisibility(_showCloseButton);
             }
         }
 
@@ -112,18 +127,18 @@ namespace Fizz.UI
         /// </summary>
         /// <param name="channelId">Id of channel to be added in UI</param>
         /// <param name="select">Select channel</param>
-        public void AddChannel (string channelId, bool select = false)
+        public void AddChannel(string channelId, bool select = false)
         {
-            ChannelsView.AddChannel (channelId, select);
+            ChannelsView.AddChannel(channelId, select);
         }
 
         /// <summary>
         /// Remove channel from UI
         /// </summary>
         /// <param name="channelId">Id of channel to be removed from UI</param>
-        public void RemoveChannel (string channelId)
+        public void RemoveChannel(string channelId)
         {
-            ChannelsView.RemoveChannel (channelId);
+            ChannelsView.RemoveChannel(channelId);
         }
 
         /// <summary>
@@ -136,89 +151,69 @@ namespace Fizz.UI
         }
 
         /// <summary>
-        /// Add Group to UI. Note that Group should be added to FizzService first.
-        /// </summary>
-        /// <param name="groupId">Id of group to be added in UI</param>
-        /// <param name="select">Select group</param>
-        public void AddGroup(string groupId, bool select = false)
-        {
-            ChannelsView.AddGroup(groupId, select);
-        }
-
-        /// <summary>
-        /// Remove channel from UI
-        /// </summary>
-        /// <param name="groupId">Id of Group to be removed from UI</param>
-        public void RemoveGroup(string groupId)
-        {
-            ChannelsView.RemoveGroup(groupId);
-        }
-
-        /// <summary>
-        /// Set the current group which is already added to UI.
-        /// </summary>
-        /// <param name="groupId">Id of the Group to select</param>
-        public bool SetCurrentGroup(string groupId)
-        {
-            return ChannelsView.SetGroup (groupId);
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="source"></param>
-        public void SetCustomDataViewSource (IFizzCustomMessageCellViewDataSource source)
+        public void SetCustomDataViewSource(IFizzCustomMessageCellViewDataSource source)
         {
-            MessagesView.SetCustomDataSource (source);
+            MessagesView.SetCustomDataSource(source);
         }
 
         /// <summary>
         /// Reset all the content which includes channel list, messages and input. 
         /// </summary>
-        public void Reset ()
+        public void Reset()
         {
-            HeaderView.Reset ();
-            ChannelsView.Reset ();
-            MessagesView.Reset ();
-            InputView.Reset ();
+            HeaderView.Reset();
+            ChannelsView.Reset();
+            MessagesView.Reset();
+            InputView.Reset();
 
-            ResetChannelsVisibility ();
+            ResetChannelsVisibility();
         }
 
-        protected override void OnEnable ()
+        protected override void OnEnable()
         {
-            base.OnEnable ();
+            base.OnEnable();
 
-            InputView.OnSendMessage.AddListener (HandleSendMessage);
-            InputView.OnSendData.AddListener (HandleSendData);
-            ChannelsView.OnChannelSelected.AddListener (HandleChannelSelected);
-            HeaderView.OnChannel.AddListener (HandleChannelsButton);
-            HeaderView.OnClose.AddListener (HandleCloseButton);
+            InputView.OnSendMessage.AddListener(HandleSendMessage);
+            InputView.OnSendData.AddListener(HandleSendData);
+            ChannelsView.OnChannelSelected.AddListener(HandleChannelSelected);
+            HeaderView.OnChannel.AddListener(HandleChannelsButton);
+            HeaderView.OnClose.AddListener(HandleCloseButton);
 
-            SyncViewState ();
+            FizzService.Instance.GroupRepository.OnGroupAdded += OnGroupAdded;
+            FizzService.Instance.GroupRepository.OnGroupRemoved += OnGroupRemoved;
+            FizzService.Instance.GroupRepository.OnGroupMembersUpdated += OnGroupMembersUpdated;
+
+            SyncViewState();
         }
 
-        protected override void OnDisable ()
+        protected override void OnDisable()
         {
-            base.OnDisable ();
+            base.OnDisable();
 
-            InputView.OnSendMessage.RemoveListener (HandleSendMessage);
-            InputView.OnSendData.AddListener (HandleSendData);
-            ChannelsView.OnChannelSelected.RemoveListener (HandleChannelSelected);
-            HeaderView.OnChannel.RemoveListener (HandleChannelsButton);
-            HeaderView.OnClose.RemoveListener (HandleCloseButton);
+            InputView.OnSendMessage.RemoveListener(HandleSendMessage);
+            InputView.OnSendData.AddListener(HandleSendData);
+            ChannelsView.OnChannelSelected.RemoveListener(HandleChannelSelected);
+            HeaderView.OnChannel.RemoveListener(HandleChannelsButton);
+            HeaderView.OnClose.RemoveListener(HandleCloseButton);
+
+            FizzService.Instance.GroupRepository.OnGroupAdded -= OnGroupAdded;
+            FizzService.Instance.GroupRepository.OnGroupRemoved -= OnGroupRemoved;
+            FizzService.Instance.GroupRepository.OnGroupMembersUpdated -= OnGroupMembersUpdated;
         }
 
-        protected override void OnConnectionStateChange (bool isConnected)
+        protected override void OnConnectionStateChange(bool isConnected)
         {
-            base.OnConnectionStateChange (isConnected);
+            base.OnConnectionStateChange(isConnected);
 
-            FizzLogger.D ("OnConnectionStateChange isConnected " + isConnected);
+            FizzLogger.D("OnConnectionStateChange isConnected " + isConnected);
         }
 
-        private void HandleSendMessage (string message)
+        private void HandleSendMessage(string message)
         {
-            if (string.IsNullOrEmpty (message)) return;
+            if (string.IsNullOrEmpty(message)) return;
 
             FizzChannel channel = ChannelsView.CurrentSelectedChannel;
 
@@ -227,13 +222,13 @@ namespace Fizz.UI
 
             try
             {
-                long now = FizzUtils.Now ();
+                long now = FizzUtils.Now();
                 Dictionary<string, string> data = new Dictionary<string, string>
                 {
                     { FizzMessageCellModel.KEY_CLIENT_ID, now + "" }
                 };
 
-                FizzMessageCellModel model = new FizzMessageCellModel (
+                FizzMessageCellModel model = new FizzMessageCellModel(
                     now,
                     FizzService.Instance.UserId,
                     FizzService.Instance.UserName,
@@ -246,7 +241,7 @@ namespace Fizz.UI
                     DeliveryState = FizzChatCellDeliveryState.Pending
                 };
 
-                MessagesView.AddMessage (model);
+                MessagesView.AddMessage(model);
 
                 channel.PublishMessage(
                     FizzService.Instance.UserName,
@@ -258,19 +253,19 @@ namespace Fizz.UI
                         if (exception == null)
                         {
                             model.DeliveryState = FizzChatCellDeliveryState.Sent;
-                            MessagesView.AddMessage (model);
+                            MessagesView.AddMessage(model);
 
-                            FizzService.Instance.Client.Ingestion.TextMessageSent (channel.Id, message, FizzService.Instance.UserName);
+                            FizzService.Instance.Client.Ingestion.TextMessageSent(channel.Id, message, FizzService.Instance.UserName);
                         }
                     });
             }
             catch
             {
-                FizzLogger.E ("Something went wrong while calling PublishMessage of FizzService.");
+                FizzLogger.E("Something went wrong while calling PublishMessage of FizzService.");
             }
         }
 
-        private void HandleSendData (Dictionary<string, string> data)
+        private void HandleSendData(Dictionary<string, string> data)
         {
             if (data == null) return;
 
@@ -281,10 +276,10 @@ namespace Fizz.UI
 
             try
             {
-                long now = FizzUtils.Now ();
-                data.Add (FizzMessageCellModel.KEY_CLIENT_ID, now + "");
+                long now = FizzUtils.Now();
+                data.Add(FizzMessageCellModel.KEY_CLIENT_ID, now + "");
 
-                FizzMessageCellModel model = new FizzMessageCellModel (
+                FizzMessageCellModel model = new FizzMessageCellModel(
                     now,
                     FizzService.Instance.UserId,
                     FizzService.Instance.UserName,
@@ -297,9 +292,9 @@ namespace Fizz.UI
                     DeliveryState = FizzChatCellDeliveryState.Pending
                 };
 
-                MessagesView.AddMessage (model);
+                MessagesView.AddMessage(model);
 
-                channel.PublishMessage (
+                channel.PublishMessage(
                     FizzService.Instance.UserName,
                     string.Empty,
                     data,
@@ -309,78 +304,124 @@ namespace Fizz.UI
                         if (exception == null)
                         {
                             model.DeliveryState = FizzChatCellDeliveryState.Sent;
-                            MessagesView.AddMessage (model);
+                            MessagesView.AddMessage(model);
 
 
-                            string dataStr = Utils.GetDictionaryToString (data, FizzMessageCellModel.KEY_CLIENT_ID);
-                            FizzService.Instance.Client.Ingestion.TextMessageSent (channel.Id, dataStr, FizzService.Instance.UserName);
+                            string dataStr = Utils.GetDictionaryToString(data, FizzMessageCellModel.KEY_CLIENT_ID);
+                            FizzService.Instance.Client.Ingestion.TextMessageSent(channel.Id, dataStr, FizzService.Instance.UserName);
                         }
                     });
             }
             catch
             {
-                FizzLogger.E ("Something went wrong while calling PublishMessage of FizzService.");
+                FizzLogger.E("Something went wrong while calling PublishMessage of FizzService.");
             }
         }
 
-        private void HandleChannelSelected (FizzChannel channel)
+        private void HandleChannelSelected(FizzChannel channel)
         {
             if (channel != null)
             {
-                MessagesView.SetChannel (channel.Id);
-                HeaderView.SetTitleText (channel.Name);
+                MessagesView.SetChannel(channel.Id);
+                HeaderView.SetTitleText(channel.Name);
+
+                ShowInput = true;
+                if (channel.GetType() == typeof(FizzGroupChannel))
+                {
+                    FizzGroupChannel groupChannel = (FizzGroupChannel)channel;
+                    if (FizzService.Instance.GroupRepository.GroupInvites.ContainsKey(groupChannel.GroupId))
+                    {
+                        ShowInput = false;
+                    }
+                }
 
                 if (_isChannelListVisible) HandleChannelsButton();
             }
             else
             {
-                MessagesView.Reset ();
+                MessagesView.Reset();
             }
         }
 
-        private void HandleChannelsButton ()
+        private void HandleChannelsButton()
         {
             _isChannelListVisible = !_isChannelListVisible;
-            Tween.TweenRect.Begin (transform.GetChild (0).GetComponent<RectTransform> (),
+            Tween.TweenRect.Begin(transform.GetChild(0).GetComponent<RectTransform>(),
                 _isChannelListVisible ? Vector2.zero : Vector2.right * ChannelsView.RectTransform.rect.width,
                 _isChannelListVisible ? Vector2.right * ChannelsView.RectTransform.rect.width : Vector2.zero,
                 0.25f, 0);
         }
 
-        private void HandleCloseButton ()
+        private void HandleCloseButton()
         {
-            ResetChannelsVisibility ();
+            ResetChannelsVisibility();
         }
 
-        private void HandleHeaderViewVisibility ()
+        private void HandleHeaderViewVisibility()
         {
-            HeaderView.SetVisibility (_showHeaderView);
+            HeaderView.SetVisibility(_showHeaderView);
             MessagesView.RectTransform.offsetMax = _showHeaderView ? Vector2.down * HeaderView.RectTransform.rect.height : Vector2.zero;
         }
 
-        private void UpdateChannelListVisibility ()
+        private void UpdateChannelListVisibility()
         {
-            ChannelsView.SetVisibility (_showChannels);
+            ChannelsView.SetVisibility(_showChannels);
             MessagesView.RectTransform.offsetMax = _showChannels ? Vector2.down * HeaderView.RectTransform.rect.height : Vector2.zero;
         }
 
-        private void UpdateInputViewVisibility ()
+        private void UpdateInputViewVisibility()
         {
-            InputView.gameObject.SetActive (_showInputView);
+            InputView.gameObject.SetActive(_showInputView);
             MessagesView.RectTransform.offsetMin = _showInputView ? Vector2.up * InputView.RectTransform.rect.height : Vector2.zero;
         }
 
-        private void SyncViewState ()
+        private void SyncViewState()
         {
-            HandleChannelSelected (ChannelsView.CurrentSelectedChannel);
+            HandleChannelSelected(ChannelsView.CurrentSelectedChannel);
 
-            InputView.Reset ();
+            InputView.Reset();
         }
 
-        private void ResetChannelsVisibility ()
+        private void ResetChannelsVisibility()
         {
             _isChannelListVisible = false;
-            transform.GetChild (0).GetComponent<RectTransform> ().anchoredPosition = Vector2.zero;
+            transform.GetChild(0).GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
+        }
+
+        void UpdateGroupsVisibility()
+        {
+            foreach (FizzGroup group in FizzService.Instance.GroupRepository.Groups)
+            {
+                if (_showGroups)
+                {
+                    ChannelsView.AddGroup(group);
+                }
+                else
+                {
+                    ChannelsView.RemoveGroup(group);
+                }
+            }
+        }
+
+        void OnGroupAdded(FizzGroup group)
+        {
+            ChannelsView.AddGroup(group);
+        }
+
+        void OnGroupRemoved(FizzGroup group)
+        {
+            ChannelsView.RemoveGroup(group);
+        }
+
+        void OnGroupMembersUpdated(FizzGroup group)
+        {
+            if (group.Channel.Id == ChannelsView.CurrentSelectedChannel.Id)
+            {
+                if (!FizzService.Instance.GroupRepository.GroupInvites.ContainsKey(group.Id))
+                {
+                    ShowInput = true;
+                }
+            }
         }
     }
 }

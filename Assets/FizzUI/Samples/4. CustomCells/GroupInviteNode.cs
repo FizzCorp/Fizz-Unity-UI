@@ -53,7 +53,7 @@ namespace Fizz.Demo
             // Accept Group Invite
             try
             {
-                FizzService.Instance.JoinGroup(_groupId, ex =>
+                FizzService.Instance.GroupRepository.JoinGroup(_groupId, ex =>
                 {
                     if (ex == null)
                     {
@@ -72,7 +72,7 @@ namespace Fizz.Demo
             // Reject Group Invite
             try
             {
-                FizzService.Instance.RemoveGroup(_groupId, ex =>
+                FizzService.Instance.GroupRepository.RemoveGroup(_groupId, ex =>
                 {
                     if (ex == null)
                     {

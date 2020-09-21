@@ -32,20 +32,16 @@ namespace Fizz
 
         public IFizzLanguageCode Language { get; private set; }
 
+        public FizzGroupRepository GroupRepository { get { if (!_isIntialized) Initialize(); return _groupRepository; }  }
+
         public List<FizzChannel> Channels {
             get
             {
                 List<FizzChannel> fizzChannels = new List<FizzChannel>();
                 fizzChannels.AddRange(channels);
-                foreach (FizzGroup group in Groups)
-                {
-                    fizzChannels.Add(group.Channel);
-                }
                 return channels;
             }
         }
-        public List<FizzGroup> Groups { get; private set; }
-        public List<IFizzUserGroup> GroupInvites { get; private set; }
         #endregion
 
         #region Events
@@ -94,6 +90,7 @@ namespace Fizz
             UserName = userName;
             Language = lang;
             IsTranslationEnabled = tranlation;
+            _groupRepository.Open();
             Client.Open(userId, lang, services, ex =>
             {
                 if (onDone != null)
@@ -110,46 +107,17 @@ namespace Fizz
         {
             if (!_isIntialized) Initialize();
 
+            if (channels != null) channels.Clear();
+            if (channelLookup != null) channelLookup.Clear();
+
+            if (_groupRepository != null) _groupRepository.Close();
+            
+            if (userSubcriptionLookup != null) userSubcriptionLookup.Clear();
+
             if (Client != null)
             {
                 Client.Close(null);
             }
-
-            if (channels != null) channels.Clear();
-            if (channelLookup != null) channelLookup.Clear();
-
-            if (Groups != null) Groups.Clear();
-            if (groupLookup != null) groupLookup.Clear();
-
-            if (GroupInvites != null) GroupInvites.Clear();
-            
-            if (userSubcriptionLookup != null) userSubcriptionLookup.Clear();
-        }
-
-        public void AddGroup(FizzGroup group)
-        {
-            if (!_isIntialized) Initialize();
-
-            if (Client.State == FizzClientState.Closed)
-            {
-                FizzLogger.W("FizzClient should be opened before adding group.");
-                return;
-            }
-
-            if (group == null)
-            {
-                FizzLogger.E("FizzClient unable to add group, group is null.");
-                return;
-            }
-
-            if (!groupLookup.ContainsKey(group.Id))
-            {
-                Groups.Add(group);
-                groupLookup.Add(group.Id, group);
-            }
-
-            group = groupLookup[group.Id];
-            group.Channel.SubscribeAndQueryLatest();
         }
 
         public void SubscribeChannel(FizzChannel channel)
@@ -382,78 +350,13 @@ namespace Fizz
             if (channelLookup.ContainsKey(id))
                 return channelLookup[id];
 
-            foreach (FizzGroup group in Groups)
+            foreach (FizzGroup group in GroupRepository.Groups)
             {
                 if (group.Channel.Id.Equals(id))
                     return group.Channel;
             }
 
             return null;
-        }
-
-        public FizzGroup GetGroup(string id)
-        {
-            if (!_isIntialized) Initialize();
-
-            if (groupLookup.ContainsKey(id))
-                return groupLookup[id];
-
-            return null;
-        }
-
-        private void SubscribeNotificationsAndFetchGroups()
-        {
-            SubscribeUserNotifications(ex =>
-            {
-                if (ex == null)
-                {
-                    IFizzFetchUserGroupsQuery groupFetchQuery = FizzService.Instance.Client.Chat.Users.BuildFetchUserGroupsQuery(FizzService.Instance.UserId);
-                    FetchUserGroups(groupFetchQuery, new List<IFizzUserGroup>());
-                }
-            });
-        }
-
-        private void FetchUserGroups(IFizzFetchUserGroupsQuery groupFetchQuery, List<IFizzUserGroup> userGroups)
-        {
-            if (groupFetchQuery.HasNext)
-            {
-                groupFetchQuery.Next((groupList, ex) =>
-                {
-                    if (ex == null)
-                    {
-                        foreach (IFizzUserGroup group in groupList)
-                        {
-                            if (group.State == FizzGroupMemberState.Joined)
-                            {
-                                userGroups.Add(group);
-                            }
-                            else
-                            {
-                                GroupInvites.Add(group);
-                            }
-                        }
-                        FetchUserGroups(groupFetchQuery, userGroups);
-                    }
-                });
-            }
-            else
-            {
-                FetchGroups(userGroups);
-            }
-        }
-
-        private void FetchGroups(List<IFizzUserGroup> userGroups)
-        {
-            foreach (IFizzUserGroup userGroup in userGroups)
-            {
-                Client.Chat.Groups.FetchGroup(userGroup.GroupId, (group, ex) =>
-                {
-                    if (ex == null)
-                    {
-                        AddGroup(new FizzGroup(group));
-                    }
-                });
-            }
         }
 
         void Update()
@@ -479,12 +382,13 @@ namespace Fizz
             Language = FizzLanguageCodes.English;
 
             Client = new FizzClient(APP_ID, APP_SECRET);
-            channels = new List<FizzChannel>();
-            Groups = new List<FizzGroup>();
-            GroupInvites = new List<IFizzUserGroup>();
 
+            channels = new List<FizzChannel>();
             channelLookup = new Dictionary<string, FizzChannel>();
-            groupLookup = new Dictionary<string, FizzGroup>();
+
+            _groupRepository = new FizzGroupRepository();
+            
+
             userSubcriptionLookup = new Dictionary<string, string>();
 
             AddInternalListeners();
@@ -607,8 +511,6 @@ namespace Fizz
                 {
                     channel.SubscribeAndQueryLatest();
                 }
-
-                SubscribeNotificationsAndFetchGroups();
             }
 
             if (OnConnected != null)
@@ -628,7 +530,7 @@ namespace Fizz
         private bool _isIntialized = false;
         private List<FizzChannel> channels;
         private Dictionary<string, FizzChannel> channelLookup;
-        private Dictionary<string, FizzGroup> groupLookup;
+        private FizzGroupRepository _groupRepository;
         private Dictionary<string, string> userSubcriptionLookup;
     }
 }

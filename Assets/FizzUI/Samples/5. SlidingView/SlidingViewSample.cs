@@ -22,11 +22,6 @@ namespace Fizz.Demo
 
             chatView.AddChannel (globalChannelId);
             chatView.AddChannel (localChannelId);
-
-            foreach (FizzGroup group in FizzService.Instance.Groups)
-            {
-                chatView.AddChannel(group.Channel.Id);
-            }
         }
 
         private void SetupChatViews ()

@@ -3,12 +3,43 @@ using System.Collections.Generic;
 using System.Linq;
 using Fizz.Chat;
 using Fizz.Common;
+using Fizz.Chat.Impl;
+using Fizz.Common.Json;
 
 namespace Fizz.UI.Model
 {
     public class FizzGroupChannel : FizzChannel
     {
         public string GroupId { get; private set; }
+
+        public override IList<FizzChannelMessage> Messages
+        {
+            get
+            {
+                if (FizzService.Instance.GroupRepository.GroupInvites.ContainsKey(GroupId))
+                {
+                    // Show Group invite cell for pending invite group
+                    JSONClass invite = new JSONClass();
+                    invite.Add("id", "1");
+                    invite.Add("from", GroupId);
+                    invite.Add("to", _channelMeta.Id);
+                    invite.Add("topic", _channelMeta.Id);
+                    invite.Add("created", "1598356062714");
+                    invite.Add("nick", _channelMeta.Name);
+                    invite.Add("body", "");
+                    JSONClass data = new JSONClass();
+                    data.Add("custom-type", "invite");
+                    data.Add("group-id", GroupId);
+                    data.Add("title", _channelMeta.Name);
+                    invite.Add("data", data.ToString());
+
+                    IList<FizzChannelMessage> inviteMessage = new List<FizzChannelMessage>();
+                    inviteMessage.Add(new FizzJsonChannelMessage(invite.ToString()));
+                    return inviteMessage;
+                }
+                return base.Messages;
+            }
+        }
 
         public FizzGroupChannel(string groupId, FizzChannelMeta channelMeta) : base(channelMeta)
         {
@@ -29,6 +60,12 @@ namespace Fizz.UI.Model
         {
             try
             {
+                if (FizzService.Instance.GroupRepository.GroupInvites.ContainsKey(GroupId))
+                {
+                    // Can't fetch messages of group with pending membership
+                    return;
+                }
+
                 Subscribe(subEx =>
                 {
                     if (subEx != null)
@@ -113,6 +150,12 @@ namespace Fizz.UI.Model
                                     bool translate,
                                     Action<FizzException> callback)
         {
+            if (FizzService.Instance.GroupRepository.GroupInvites.ContainsKey(GroupId))
+            {
+                // Can't send messages in group with pending membership
+                return;
+            }
+
             FizzService.Instance.Client.Chat.Groups.PublishMessage(
                     GroupId,
                     nick,
