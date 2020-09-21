@@ -43,6 +43,14 @@ namespace Fizz.Chat.Impl
             }
         }
 
+        public IFizzUserListener UserListener
+        {
+            get
+            {
+                return _messageListener;
+            }
+        }
+
         public IFizzGroups Groups
         {
             get

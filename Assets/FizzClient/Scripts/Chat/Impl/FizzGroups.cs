@@ -29,36 +29,6 @@ namespace Fizz.Chat.Impl
             });
         }
 
-        public void CreateGroup(
-            string title, 
-            string imageURL, 
-            string description, 
-            string type,
-            IList<string> memberIds,
-            Action<IFizzGroup, FizzException> callback) 
-        {
-            IfOpened(() => 
-            {
-                JSONClass body = new JSONClass ();
-                body[FizzJsonGroup.KEY_TITLE] = title;
-                body[FizzJsonGroup.KEY_IMAGE_URL] = imageURL;
-                body[FizzJsonGroup.KEY_DESCRIPTION] = description;
-                body[FizzJsonGroup.KEY_TYPE] = type;
-                body[FizzJsonGroup.KEY_MEMBERS] = Serialize(memberIds);
-
-                string path = FizzConfig.API_PATH_GROUPS;
-                string bodyStr = body.ToString();
-                _restClient.Post(FizzConfig.API_BASE_URL, path, bodyStr, (response, ex) => {
-                    if (ex != null) {
-                        FizzUtils.DoCallback<IFizzGroup> (null, ex, callback);
-                    }
-                    else {
-                        FizzUtils.DoCallback<IFizzGroup>(new FizzJsonGroup(response), null, callback);
-                    }
-                });
-            });
-        }
-
         public void FetchGroup(string groupId, Action<IFizzGroup, FizzException> callback) 
         {
             IfOpened(() => 
@@ -71,29 +41,6 @@ namespace Fizz.Chat.Impl
                     else {
                         FizzUtils.DoCallback<IFizzGroup>(new FizzJsonGroup(response), null, callback);
                     }
-                });
-            });
-        }
-
-        public void UpdateGroup(
-            string groupId,
-            string title, 
-            string imageURL, 
-            string description, 
-            string type, 
-            Action<FizzException> callback) 
-        {
-            IfOpened(() => 
-            {
-                string path = string.Format(FizzConfig.API_PATH_GROUP, groupId);
-                JSONClass body = new JSONClass();
-                body[FizzJsonGroup.KEY_TITLE] = title;
-                body[FizzJsonGroup.KEY_IMAGE_URL] = imageURL;
-                body[FizzJsonGroup.KEY_DESCRIPTION] = description;
-                body[FizzJsonGroup.KEY_TYPE] = type;
-
-                _restClient.Post(FizzConfig.API_BASE_URL, path, body.ToString(), (response, ex) => {
-                    FizzUtils.DoCallback(ex, callback);
                 });
             });
         }
@@ -117,31 +64,6 @@ namespace Fizz.Chat.Impl
 
                         FizzUtils.DoCallback<IList<IFizzGroupMember>> (members, null, callback);
                     }
-                });
-            });
-        }
-
-        public void AddGroupMembers(string groupId, IList<string> memberIds, Action<FizzException> callback) 
-        {
-            IfOpened(() => 
-            {
-                string path = string.Format(FizzConfig.API_PATH_GROUP_MEMBERS, groupId);
-                JSONArray body = Serialize(memberIds);
-
-                _restClient.Post(FizzConfig.API_BASE_URL, path, body.ToString(), (response, ex) => {
-                    FizzUtils.DoCallback(ex, callback);
-                });
-            });
-        } 
-
-        public void RemoveGroupMember(string groupId, string memberId, Action<FizzException> callback) 
-        {
-            IfOpened(() => 
-            {
-                string path = string.Format(FizzConfig.API_PATH_GROUP_MEMBER, groupId, memberId);
-
-                _restClient.Delete(FizzConfig.API_BASE_URL, path, string.Empty, (response, ex) => {
-                    FizzUtils.DoCallback(ex, callback);
                 });
             });
         }
@@ -268,26 +190,6 @@ namespace Fizz.Chat.Impl
             {
                 FizzLogger.W ("Client should have been closed.");
             }
-        }
-
-        private JSONArray Serialize(IList<string> memberIds) 
-        {
-            JSONArray members = new JSONArray();
-
-            if (memberIds == null) {
-                return members;
-            }
-            
-            foreach(var memberId in memberIds) {
-                JSONClass member = new JSONClass();
-                member["id"] = memberId;
-                member["state"] = "pending";
-                member["role"] = "member";
-
-                members.Add(memberId, member); 
-            }
-
-            return members;
-        }   
+        } 
     }
 }
