@@ -19,22 +19,8 @@ namespace Fizz.UI.Model
                 if (FizzService.Instance.GroupRepository.GroupInvites.ContainsKey(GroupId))
                 {
                     // Show Group invite cell for pending invite group
-                    JSONClass invite = new JSONClass();
-                    invite.Add("id", "1");
-                    invite.Add("from", GroupId);
-                    invite.Add("to", _channelMeta.Id);
-                    invite.Add("topic", _channelMeta.Id);
-                    invite.Add("created", "1598356062714");
-                    invite.Add("nick", _channelMeta.Name);
-                    invite.Add("body", "");
-                    JSONClass data = new JSONClass();
-                    data.Add("custom-type", "invite");
-                    data.Add("group-id", GroupId);
-                    data.Add("title", _channelMeta.Name);
-                    invite.Add("data", data.ToString());
-
                     IList<FizzChannelMessage> inviteMessage = new List<FizzChannelMessage>();
-                    inviteMessage.Add(new FizzJsonChannelMessage(invite.ToString()));
+                    inviteMessage.Add(CreateGroupInviteMessage(FizzService.Instance.GroupRepository.GroupInvites[GroupId]));
                     return inviteMessage;
                 }
                 return base.Messages;
@@ -168,6 +154,26 @@ namespace Fizz.UI.Model
                     {
                         FizzUtils.DoCallback(ex, callback);
                     });
+        }
+
+        private FizzChannelMessage CreateGroupInviteMessage(IFizzUserGroup userGroup)
+        {
+            // Show Group invite cell for pending invite group
+            JSONClass invite = new JSONClass();
+            invite.Add(FizzJsonChannelMessage.KEY_ID, "1");
+            invite.Add(FizzJsonChannelMessage.KEY_FROM, GroupId);
+            invite.Add(FizzJsonChannelMessage.KEY_TO, _channelMeta.Id);
+            //invite.Add("topic", _channelMeta.Id);
+            invite.Add(FizzJsonChannelMessage.KEY_CREATED, userGroup.Created.ToString());
+            invite.Add(FizzJsonChannelMessage.KEY_NICK, _channelMeta.Name);
+            invite.Add(FizzJsonChannelMessage.KEY_BODY, "");
+            JSONClass data = new JSONClass();
+            data.Add("custom-type", "invite");
+            data.Add("group-id", GroupId);
+            data.Add("title", _channelMeta.Name);
+            invite.Add(FizzJsonChannelMessage.KEY_DATA, data.ToString());
+
+            return new FizzJsonChannelMessage(invite.ToString());
         }
 
     }

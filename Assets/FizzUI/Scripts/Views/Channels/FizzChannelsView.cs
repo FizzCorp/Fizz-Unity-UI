@@ -446,19 +446,6 @@ namespace Fizz.UI
             return null;
         }
 
-        FizzGroup GetGroupById(string groupId)
-        {
-            try
-            {
-                return FizzService.Instance.GroupRepository.GetGroup(groupId);
-            }
-            catch (Exception)
-            {
-                FizzLogger.W("GroupList unable to get group with id " + groupId);
-            }
-            return null;
-        }
-
         [Serializable]
         public class FizzChannelItemSelectedEvent : UnityEvent<FizzChannel>
         { }

@@ -15,10 +15,10 @@ namespace Fizz.UI.Model
 
         public FizzGroupChannel Channel { get; private set; }
        
-        public FizzGroup(IFizzGroup groupMeta)
+        public FizzGroup(IFizzGroup groupMeta, string groupUITag)
         {
             Meta = groupMeta;
-            Channel = new FizzGroupChannel(groupMeta.Id, new FizzChannelMeta(groupMeta.ChannelId, groupMeta.Title, "Groups"));
+            Channel = new FizzGroupChannel(groupMeta.Id, new FizzChannelMeta(groupMeta.ChannelId, groupMeta.Title, groupUITag));
         }
     }
 }

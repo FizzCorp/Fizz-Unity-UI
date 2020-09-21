@@ -19,6 +19,10 @@ namespace Fizz
         private static readonly string APP_SECRET = "5c963d03-64e6-439a-b2a9-31db60dd0b34";
         #endregion
 
+        #region UI
+        private static readonly string UI_GROUP_TAG = "Groups";
+        #endregion
+
         #region Properties
         public IFizzClient Client { get; private set; }
 
@@ -90,7 +94,7 @@ namespace Fizz
             UserName = userName;
             Language = lang;
             IsTranslationEnabled = tranlation;
-            _groupRepository.Open();
+            _groupRepository.Open(userId);
             Client.Open(userId, lang, services, ex =>
             {
                 if (onDone != null)
@@ -386,7 +390,7 @@ namespace Fizz
             channels = new List<FizzChannel>();
             channelLookup = new Dictionary<string, FizzChannel>();
 
-            _groupRepository = new FizzGroupRepository();
+            _groupRepository = new FizzGroupRepository(Client, UI_GROUP_TAG);
             
 
             userSubcriptionLookup = new Dictionary<string, string>();

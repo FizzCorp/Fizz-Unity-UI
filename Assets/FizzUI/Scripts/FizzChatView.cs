@@ -405,16 +405,25 @@ namespace Fizz.UI
 
         void OnGroupAdded(FizzGroup group)
         {
+            if (!_showGroups)
+                return;
+
             ChannelsView.AddGroup(group);
         }
 
         void OnGroupRemoved(FizzGroup group)
         {
+            if (!_showGroups)
+                return;
+
             ChannelsView.RemoveGroup(group);
         }
 
         void OnGroupMembersUpdated(FizzGroup group)
         {
+            if (!_showGroups)
+                return;
+
             if (group.Channel.Id == ChannelsView.CurrentSelectedChannel.Id)
             {
                 if (!FizzService.Instance.GroupRepository.GroupInvites.ContainsKey(group.Id))

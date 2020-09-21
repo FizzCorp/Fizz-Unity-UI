@@ -3,15 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Fizz;
+using Fizz.UI;
 using Fizz.Chat;
+using Fizz.Chat.Impl;
 using Fizz.Common;
+using Fizz.Common.Json;
 using Fizz.UI.Model;
 
 public class FizzGroupRepository : IFizzGroupRepository
 {
     private Dictionary<string, FizzGroup> groupLookup;
+    private IFizzClient Client { get; set; }
+    private string UserId { get; set; }
+    private string GroupTag { get; set; }
+
     public List<FizzGroup> Groups { get; private set; }
-    public Dictionary<string, string> GroupInvites { get; private set; }
+    public Dictionary<string, IFizzUserGroup> GroupInvites { get; private set; }
 
     #region Events
     public Action<FizzGroup> OnGroupAdded { get; set; }
@@ -20,15 +27,19 @@ public class FizzGroupRepository : IFizzGroupRepository
     public Action<FizzGroup> OnGroupMembersUpdated { get; set; }
     #endregion
 
-    public FizzGroupRepository()
+    public FizzGroupRepository(IFizzClient client, string groupTag)
     {
+        Client = client;
+        GroupTag = groupTag;
+
         Groups = new List<FizzGroup>();
-        GroupInvites = new Dictionary<string, string>();
+        GroupInvites = new Dictionary<string, IFizzUserGroup>();
         groupLookup = new Dictionary<string, FizzGroup>();
     }
 
-    public void Open()
+    public void Open(string userId)
     {
+        UserId = userId;
         AddInternalListeners();
     }
 
@@ -45,15 +56,12 @@ public class FizzGroupRepository : IFizzGroupRepository
     {
         try
         {
-            FizzService.Instance.Client.Chat.Listener.OnConnected += Listener_OnConnected;
-            FizzService.Instance.Client.Chat.Listener.OnDisconnected += Listener_OnDisconnected;
-            FizzService.Instance.Client.Chat.Listener.OnMessageUpdated += Listener_OnMessageUpdated;
-            FizzService.Instance.Client.Chat.Listener.OnMessageDeleted += Listener_OnMessageDeleted;
-            FizzService.Instance.Client.Chat.Listener.OnMessagePublished += Listener_OnMessagePublished;
-            FizzService.Instance.Client.Chat.GroupListener.OnGroupUpdated += Listener_OnGroupUpdated;
-            FizzService.Instance.Client.Chat.GroupListener.OnGroupMemberAdded += Listener_OnGroupMemberAdded;
-            FizzService.Instance.Client.Chat.GroupListener.OnGroupMemberRemoved += Listener_OnGroupMemberRemoved;
-            FizzService.Instance.Client.Chat.GroupListener.OnGroupMemberUpdated += Listener_OnGroupMemberUpdated;
+            Client.Chat.Listener.OnConnected += Listener_OnConnected;
+            Client.Chat.Listener.OnDisconnected += Listener_OnDisconnected;
+            Client.Chat.GroupListener.OnGroupUpdated += Listener_OnGroupUpdated;
+            Client.Chat.GroupListener.OnGroupMemberAdded += Listener_OnGroupMemberAdded;
+            Client.Chat.GroupListener.OnGroupMemberRemoved += Listener_OnGroupMemberRemoved;
+            Client.Chat.GroupListener.OnGroupMemberUpdated += Listener_OnGroupMemberUpdated;
         }
         catch (FizzException ex)
         {
@@ -65,73 +73,16 @@ public class FizzGroupRepository : IFizzGroupRepository
     {
         try
         {
-            FizzService.Instance.Client.Chat.Listener.OnConnected -= Listener_OnConnected;
-            FizzService.Instance.Client.Chat.Listener.OnDisconnected -= Listener_OnDisconnected;
-            FizzService.Instance.Client.Chat.Listener.OnMessageUpdated -= Listener_OnMessageUpdated;
-            FizzService.Instance.Client.Chat.Listener.OnMessageDeleted -= Listener_OnMessageDeleted;
-            FizzService.Instance.Client.Chat.Listener.OnMessagePublished -= Listener_OnMessagePublished;
-            FizzService.Instance.Client.Chat.GroupListener.OnGroupUpdated -= Listener_OnGroupUpdated;
-            FizzService.Instance.Client.Chat.GroupListener.OnGroupMemberAdded -= Listener_OnGroupMemberAdded;
-            FizzService.Instance.Client.Chat.GroupListener.OnGroupMemberRemoved -= Listener_OnGroupMemberRemoved;
-            FizzService.Instance.Client.Chat.GroupListener.OnGroupMemberUpdated -= Listener_OnGroupMemberUpdated;
+            Client.Chat.Listener.OnConnected -= Listener_OnConnected;
+            Client.Chat.Listener.OnDisconnected -= Listener_OnDisconnected;
+            Client.Chat.GroupListener.OnGroupUpdated -= Listener_OnGroupUpdated;
+            Client.Chat.GroupListener.OnGroupMemberAdded -= Listener_OnGroupMemberAdded;
+            Client.Chat.GroupListener.OnGroupMemberRemoved -= Listener_OnGroupMemberRemoved;
+            Client.Chat.GroupListener.OnGroupMemberUpdated -= Listener_OnGroupMemberUpdated;
         }
         catch (FizzException ex)
         {
             FizzLogger.E("Unable to unbind group listeners. " + ex.Message);
-        }
-    }
-
-    private FizzChannel GetChannel(string id)
-    {
-        foreach (FizzGroup group in Groups)
-        {
-            if (group.Channel.Id.Equals(id))
-                return group.Channel;
-        }
-
-        return null;
-    }
-
-
-    void Listener_OnMessagePublished(FizzChannelMessage msg)
-    {
-        FizzChannel channel = GetChannel(msg.To);
-        if (channel != null)
-        {
-            channel.AddMessage(msg);
-
-            if (FizzService.Instance.OnChannelMessagePublish != null)
-            {
-                FizzService.Instance.OnChannelMessagePublish.Invoke(msg.To, msg);
-            }
-        }
-    }
-
-    void Listener_OnMessageDeleted(FizzChannelMessage msg)
-    {
-        FizzChannel channel = GetChannel(msg.To);
-        if (channel != null)
-        {
-            channel.RemoveMessage(msg);
-
-            if (FizzService.Instance.OnChannelMessageDelete != null)
-            {
-                FizzService.Instance.OnChannelMessageDelete.Invoke(msg.To, msg);
-            }
-        }
-    }
-
-    void Listener_OnMessageUpdated(FizzChannelMessage msg)
-    {
-        FizzChannel channel = GetChannel(msg.To);
-        if (channel != null)
-        {
-            channel.UpdateMessage(msg);
-
-            if (FizzService.Instance.OnChannelMessageUpdate != null)
-            {
-                FizzService.Instance.OnChannelMessageUpdate.Invoke(msg.To, msg);
-            }
         }
     }
 
@@ -146,17 +97,17 @@ public class FizzGroupRepository : IFizzGroupRepository
 
     void Listener_OnGroupMemberAdded(FizzGroupMemberEventData eventData)
     {
-        if (FizzService.Instance.UserId.Equals(eventData.MemberId))
+        if (UserId.Equals(eventData.MemberId))
         {
-            FizzService.Instance.Client.Chat.Groups.FetchGroup(eventData.GroupId, (groupMeta, ex) =>
+            Client.Chat.Groups.FetchGroup(eventData.GroupId, (groupMeta, ex) =>
             {
                 if (ex == null)
                 {
-                    AddGroup(new FizzGroup(groupMeta));
+                    AddGroup(new FizzGroup(groupMeta, GroupTag));
                     FizzGroup group = GetGroup(groupMeta.Id);
                     if (eventData.State == FizzGroupMemberState.Pending)
                     {
-                        GroupInvites.Add(group.Id, group.Id);
+                        GroupInvites.Add(group.Id, CreateUserGroup(eventData));
                     }
                     if (OnGroupAdded != null)
                     {
@@ -177,7 +128,7 @@ public class FizzGroupRepository : IFizzGroupRepository
 
     void Listener_OnGroupMemberRemoved(FizzGroupMemberEventData eventData)
     {
-        if (FizzService.Instance.UserId.Equals(eventData.MemberId))
+        if (UserId.Equals(eventData.MemberId))
         {
             FizzGroup group = GetGroup(eventData.GroupId);
             GroupInvites.Remove(eventData.GroupId);
@@ -204,7 +155,7 @@ public class FizzGroupRepository : IFizzGroupRepository
         FizzGroup group = GetGroup(eventData.GroupId);
         if (group != null)
         {
-            if (eventData.MemberId.Equals(FizzService.Instance.UserId) && eventData.State == FizzGroupMemberState.Joined)
+            if (eventData.MemberId.Equals(UserId) && eventData.State == FizzGroupMemberState.Joined)
             {
                 GroupInvites.Remove(eventData.GroupId);
             }
@@ -226,7 +177,7 @@ public class FizzGroupRepository : IFizzGroupRepository
         }
     }
 
-    public FizzGroup GetGroup(string id)
+    private FizzGroup GetGroup(string id)
     {
         if (groupLookup.ContainsKey(id))
             return groupLookup[id];
@@ -236,13 +187,13 @@ public class FizzGroupRepository : IFizzGroupRepository
 
     public void JoinGroup(string groupId, Action<FizzException> cb)
     {
-        if (FizzService.Instance.Client.State == FizzClientState.Closed)
+        if (Client.State == FizzClientState.Closed)
         {
             FizzLogger.W("FizzClient should be opened before joining group.");
             return;
         }
 
-        FizzService.Instance.Client.Chat.Users.JoinGroup(FizzService.Instance.UserId, groupId, ex =>
+        Client.Chat.Users.JoinGroup(UserId, groupId, ex =>
         {
             if (ex == null)
             {
@@ -255,13 +206,13 @@ public class FizzGroupRepository : IFizzGroupRepository
 
     public void RemoveGroup(string groupId, Action<FizzException> cb)
     {
-        if (FizzService.Instance.Client.State == FizzClientState.Closed)
+        if (Client.State == FizzClientState.Closed)
         {
             FizzLogger.W("FizzClient should be opened before removing group.");
             return;
         }
 
-        FizzService.Instance.Client.Chat.Users.RemoveGroup(FizzService.Instance.UserId, groupId, ex =>
+        Client.Chat.Users.RemoveGroup(UserId, groupId, ex =>
         {
             FizzUtils.DoCallback(ex, cb);
         });
@@ -269,13 +220,23 @@ public class FizzGroupRepository : IFizzGroupRepository
 
     private void SubscribeNotificationsAndFetchGroups()
     {
-        FizzService.Instance.SubscribeUserNotifications(ex =>
+        if (Client.State == FizzClientState.Closed)
+        {
+            FizzLogger.W("FizzClient should be opened before subscribing user.");
+            return;
+        }
+
+        Client.Chat.UserNotifications.Subscribe(ex =>
         {
             if (ex == null)
             {
-                IFizzFetchUserGroupsQuery groupFetchQuery = FizzService.Instance.Client.Chat.Users.BuildFetchUserGroupsQuery(FizzService.Instance.UserId);
-                FetchUserGroups(groupFetchQuery, new List<IFizzUserGroup>());
+                if (ex == null)
+                {
+                    IFizzFetchUserGroupsQuery groupFetchQuery = Client.Chat.Users.BuildFetchUserGroupsQuery(UserId);
+                    FetchUserGroups(groupFetchQuery, new List<IFizzUserGroup>());
+                }
             }
+
         });
     }
 
@@ -291,7 +252,7 @@ public class FizzGroupRepository : IFizzGroupRepository
                     {
                         if (group.State == FizzGroupMemberState.Pending)
                         {
-                            GroupInvites.Add(group.GroupId, group.GroupId);
+                            GroupInvites.Add(group.GroupId, group);
                         }
                         userGroups.Add(group);
                     }
@@ -309,11 +270,11 @@ public class FizzGroupRepository : IFizzGroupRepository
     {
         foreach (IFizzUserGroup userGroup in userGroups)
         {
-            FizzService.Instance.Client.Chat.Groups.FetchGroup(userGroup.GroupId, (group, ex) =>
+            Client.Chat.Groups.FetchGroup(userGroup.GroupId, (group, ex) =>
             {
                 if (ex == null)
                 {
-                    AddGroup(new FizzGroup(group));
+                    AddGroup(new FizzGroup(group, GroupTag));
                 }
             });
         }
@@ -321,7 +282,7 @@ public class FizzGroupRepository : IFizzGroupRepository
 
     private void AddGroup(FizzGroup group)
     {
-        if (FizzService.Instance.Client.State == FizzClientState.Closed)
+        if (Client.State == FizzClientState.Closed)
         {
             FizzLogger.W("FizzClient should be opened before adding group.");
             return;
@@ -341,5 +302,18 @@ public class FizzGroupRepository : IFizzGroupRepository
 
         group = groupLookup[group.Id];
         group.Channel.SubscribeAndQueryLatest();
+    }
+
+    private IFizzUserGroup CreateUserGroup(FizzGroupMemberEventData eventData)
+    {
+        JSONClass userGroupJson = new JSONClass
+        {
+            { FizzJsonUserGroup.KEY_GROUP_ID, eventData.GroupId },
+            { FizzJsonUserGroup.KEY_ROLE, eventData.Role.ToString() },
+            { FizzJsonUserGroup.KEY_STATE, eventData.State.ToString() },
+            { FizzJsonUserGroup.KEY_CREATED, Utils.GetCurrentUnixTimeStamp() }
+        };
+
+        return new FizzJsonUserGroup(userGroupJson.ToString());
     }
 }
