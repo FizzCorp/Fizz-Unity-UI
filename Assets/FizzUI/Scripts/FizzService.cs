@@ -254,7 +254,7 @@ namespace Fizz
                 return;
             }
 
-            FizzService.Instance.Client.Chat.Users.GetUser(userId, (user, ex) =>
+            Client.Chat.Users.GetUser(userId, (user, ex) =>
             {
                 FizzUtils.DoCallback(user, ex, cb);
             });
@@ -286,13 +286,13 @@ namespace Fizz
 
             if (IsConnected)
             {
-                FizzService.Instance.Client.Chat.Users.Subscribe(userId, ex =>
+                Client.Chat.Users.Subscribe(userId, ex =>
                 {
                     if (ex == null)
                     {
-                        if (FizzService.Instance.OnUserSubscribed != null)
+                        if (OnUserSubscribed != null)
                         {
-                            FizzService.Instance.OnUserSubscribed.Invoke(userId);
+                            OnUserSubscribed.Invoke(userId);
                         }
                     }
 
@@ -323,13 +323,13 @@ namespace Fizz
                 if (userSubcriptionLookup.ContainsKey(userId))
                 {
                     userSubcriptionLookup.Remove(userId);
-                    FizzService.Instance.Client.Chat.Users.Unsubscribe(userId, ex =>
+                    Client.Chat.Users.Unsubscribe(userId, ex =>
                     {
                         if (ex == null)
                         {
-                            if (FizzService.Instance.OnUserUnsubscribed != null)
+                            if (OnUserUnsubscribed != null)
                             {
-                                FizzService.Instance.OnUserUnsubscribed.Invoke(userId);
+                                OnUserUnsubscribed.Invoke(userId);
                             }
                         }
 
