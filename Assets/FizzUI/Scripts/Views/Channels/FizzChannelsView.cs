@@ -105,6 +105,56 @@ namespace Fizz.UI
             }
         }
 
+        public void AddGroup(FizzGroup group, bool select = false)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            if (!_channelsLookup.ContainsKey(group.Channel.Id))
+            {
+                AddChannelInternal(group.Channel);
+            }
+
+            if (_channelsLookup.ContainsKey(group.Channel.Id) && select)
+            {
+                HandleChannelSelected(group.Channel);
+            }
+        }
+
+        public void RemoveGroup(FizzGroup group)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            if (RemoveChannelInternal(group.Channel.Id) && CurrentSelectedChannel == null && _channelsLookup.Count > 0)
+            {
+                HandleChannelSelected(_channelsLookup.Values.First().GetChannel());
+            }
+        }
+
+        public bool SetGroup(FizzGroup group)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            if (_channelsLookup.ContainsKey(group.Channel.Id))
+            {
+                HandleChannelSelected(group.Channel);
+                return true;
+            }
+            else
+            {
+                FizzLogger.W("FizzChatView: Unable to set group");
+                return false;
+            }
+        }
+
         public void Reset ()
         {
             if (!_initialized)
@@ -199,6 +249,14 @@ namespace Fizz.UI
                     {
                         AddChannelInternal (channel);
                         _channelWatchList.Remove (channel.Id);
+                    }
+                }
+
+                foreach (FizzGroup group in FizzService.Instance.GroupRepository.Groups)
+                {
+                    if (!_channelsLookup.ContainsKey(group.Channel.Id))
+                    {
+                        AddChannelInternal(group.Channel);
                     }
                 }
 

@@ -4,8 +4,9 @@ using Fizz.Chat;
 using Fizz.Common;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
-public class PrecenseSample : MonoBehaviour 
+public class PresenceSample : MonoBehaviour 
 {
 	[SerializeField] Dropdown userDropdown;
 	[SerializeField] Button OpenButton;
@@ -45,6 +46,11 @@ public class PrecenseSample : MonoBehaviour
 		FizzService.Instance.OnConnected -= OnConnected;
 		FizzService.Instance.OnDisconnected -= OnDisconnected;
 		FizzService.Instance.OnUserUpdated -= OnUserUpdate;
+	}
+
+	void OnDestroy()
+	{
+		FizzService.Instance.Close();
 	}
 
 	void HandleOpenButton ()
@@ -155,5 +161,10 @@ public class PrecenseSample : MonoBehaviour
 		{
 			statusImages[5].color = color;
 		}
+	}
+
+	public void HandleClose()
+	{
+		SceneManager.LoadScene("SceneSelector");
 	}
 }

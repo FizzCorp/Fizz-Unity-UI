@@ -19,6 +19,10 @@ namespace Fizz
         private static readonly string APP_SECRET = "5c963d03-64e6-439a-b2a9-31db60dd0b34";
         #endregion
 
+        #region UI
+        private static readonly string UI_GROUP_TAG = "Groups";
+        #endregion
+
         #region Properties
         public IFizzClient Client { get; private set; }
 
@@ -32,7 +36,16 @@ namespace Fizz
 
         public IFizzLanguageCode Language { get; private set; }
 
-        public List<FizzChannel> Channels { get; private set; }
+        public FizzGroupRepository GroupRepository { get { if (!_isIntialized) Initialize(); return _groupRepository; }  }
+
+        public List<FizzChannel> Channels {
+            get
+            {
+                List<FizzChannel> fizzChannels = new List<FizzChannel>();
+                fizzChannels.AddRange(channels);
+                return channels;
+            }
+        }
         #endregion
 
         #region Events
@@ -46,6 +59,9 @@ namespace Fizz
         public Action<string> OnChannelSubscribed { get; set; }
         public Action<string> OnChannelUnsubscribed { get; set; }
         public Action<string> OnChannelMessagesAvailable { get; set; }
+
+        public Action OnUserNotificationsSubscribed { get; set; }
+        public Action OnUserNotificationsUnsubscribed { get; set; }
 
         public Action<FizzUserUpdateEventData> OnUserUpdated { get; set; }
         public Action<string> OnUserSubscribed { get; set; }
@@ -78,6 +94,7 @@ namespace Fizz
             UserName = userName;
             Language = lang;
             IsTranslationEnabled = tranlation;
+            _groupRepository.Open(userId);
             Client.Open(userId, lang, services, ex =>
             {
                 if (onDone != null)
@@ -94,17 +111,20 @@ namespace Fizz
         {
             if (!_isIntialized) Initialize();
 
+            if (channels != null) channels.Clear();
+            if (channelLookup != null) channelLookup.Clear();
+
+            if (_groupRepository != null) _groupRepository.Close();
+            
+            if (userSubcriptionLookup != null) userSubcriptionLookup.Clear();
+
             if (Client != null)
             {
                 Client.Close(null);
             }
-
-            if (Channels != null) Channels.Clear();
-            if (channelLoopup != null) channelLoopup.Clear();
-            if (userSubcriptionLookup != null) userSubcriptionLookup.Clear();
         }
 
-        public void SubscribeChannel(FizzChannelMeta meta)
+        public void SubscribeChannel(FizzChannel channel)
         {
             if (!_isIntialized) Initialize();
 
@@ -114,24 +134,21 @@ namespace Fizz
                 return;
             }
 
-            if (meta == null)
+            if (channel == null)
             {
-                FizzLogger.E("FizzClient unable to subscribe, channel meta is null.");
+                FizzLogger.E("FizzClient unable to subscribe, channel is null.");
                 return;
             }
 
-            if (channelLoopup.ContainsKey(meta.Id))
+            if (channelLookup.ContainsKey(channel.Id))
             {
                 FizzLogger.W("FizzClient channel is already subscribed.");
                 return;
             }
 
-            FizzChannel fizzChannel = AddChannelToList(meta);
-
-            if (IsConnected && fizzChannel != null)
-            {
-                fizzChannel.SubscribeAndQuery();
-            }
+            channels.Add(channel);
+            channelLookup.Add(channel.Id, channel);
+            channel.SubscribeAndQueryLatest();
         }
 
         public void UnsubscribeChannel(string channelId)
@@ -150,19 +167,70 @@ namespace Fizz
                 return;
             }
 
+            if (!channelLookup.ContainsKey(channelId))
+            {
+                FizzLogger.W("FizzService unable to remove, channel [" + channelId + "] does not exist. ");
+                return;
+            }
+
+            FizzChannel channel = channelLookup[channelId];
+            channelLookup.Remove(channelId);
+            channels.Remove(channel);
+            channel.Unsubscribe(null);
+        }
+
+        public void SubscribeUserNotifications(Action<FizzException> cb)
+        {
+            if (!_isIntialized) Initialize();
+
+            if (Client.State == FizzClientState.Closed)
+            {
+                FizzLogger.W("FizzClient should be opened before subscribing user.");
+                return;
+            }
+
+            if (IsConnected)
+            {
+                Client.Chat.UserNotifications.Subscribe(ex =>
+                {
+                    if (ex == null)
+                    {
+                        if (OnUserNotificationsSubscribed != null)
+                        {
+                            OnUserNotificationsSubscribed.Invoke();
+                        }
+                    }
+
+                    FizzUtils.DoCallback(ex, cb);
+                });
+            }
+
+        }
+
+        public void UnsubscribeUserNotifications(Action<FizzException> cb)
+        {
+            if (!_isIntialized) Initialize();
+
+            if (Client.State == FizzClientState.Closed)
+            {
+                FizzLogger.W("FizzClient should be opened before unsubscribing user.");
+                return;
+            }
+
             try
             {
-                if (channelLoopup.ContainsKey(channelId))
+                Client.Chat.UserNotifications.Unsubscribe(ex =>
                 {
-                    FizzChannel fizzChannel = channelLoopup[channelId];
-                    channelLoopup.Remove(channelId);
-                    Channels.Remove(fizzChannel);
-                    fizzChannel.Unsubscribe(ex => { });
-                }
-                else
-                {
-                    FizzLogger.W("FizzService unable to unsubscribe, channel [" + channelId + "] does not exist. ");
-                }
+                    if (ex == null)
+                    {
+                        if (OnUserNotificationsUnsubscribed != null)
+                        {
+                            OnUserNotificationsUnsubscribed.Invoke();
+                        }
+                    }
+
+                    FizzUtils.DoCallback(ex, cb);
+                });
             }
             catch (Exception e)
             {
@@ -186,7 +254,7 @@ namespace Fizz
                 return;
             }
 
-            FizzService.Instance.Client.Chat.Users.GetUser(userId, (user, ex) =>
+            Client.Chat.Users.GetUser(userId, (user, ex) =>
             {
                 FizzUtils.DoCallback(user, ex, cb);
             });
@@ -218,13 +286,13 @@ namespace Fizz
 
             if (IsConnected)
             {
-                FizzService.Instance.Client.Chat.Users.Subscribe(userId, ex =>
+                Client.Chat.Users.Subscribe(userId, ex =>
                 {
                     if (ex == null)
                     {
-                        if (FizzService.Instance.OnUserSubscribed != null)
+                        if (OnUserSubscribed != null)
                         {
-                            FizzService.Instance.OnUserSubscribed.Invoke(userId);
+                            OnUserSubscribed.Invoke(userId);
                         }
                     }
 
@@ -255,13 +323,13 @@ namespace Fizz
                 if (userSubcriptionLookup.ContainsKey(userId))
                 {
                     userSubcriptionLookup.Remove(userId);
-                    FizzService.Instance.Client.Chat.Users.Unsubscribe(userId, ex =>
+                    Client.Chat.Users.Unsubscribe(userId, ex =>
                     {
                         if (ex == null)
                         {
-                            if (FizzService.Instance.OnUserUnsubscribed != null)
+                            if (OnUserUnsubscribed != null)
                             {
-                                FizzService.Instance.OnUserUnsubscribed.Invoke(userId);
+                                OnUserUnsubscribed.Invoke(userId);
                             }
                         }
 
@@ -283,8 +351,14 @@ namespace Fizz
         {
             if (!_isIntialized) Initialize();
 
-            if (channelLoopup.ContainsKey(id))
-                return channelLoopup[id];
+            if (channelLookup.ContainsKey(id))
+                return channelLookup[id];
+
+            foreach (FizzGroup group in GroupRepository.Groups)
+            {
+                if (group.Channel.Id.Equals(id))
+                    return group.Channel;
+            }
 
             return null;
         }
@@ -312,9 +386,13 @@ namespace Fizz
             Language = FizzLanguageCodes.English;
 
             Client = new FizzClient(APP_ID, APP_SECRET);
-            Channels = new List<FizzChannel>();
 
-            channelLoopup = new Dictionary<string, FizzChannel>();
+            channels = new List<FizzChannel>();
+            channelLookup = new Dictionary<string, FizzChannel>();
+
+            _groupRepository = new FizzGroupRepository(Client, UI_GROUP_TAG);
+            
+
             userSubcriptionLookup = new Dictionary<string, string>();
 
             AddInternalListeners();
@@ -324,12 +402,12 @@ namespace Fizz
 
         FizzChannel AddChannelToList(FizzChannelMeta channelMeta)
         {
-            if (channelLoopup.ContainsKey(channelMeta.Id))
+            if (channelLookup.ContainsKey(channelMeta.Id))
                 return null;
 
             FizzChannel channel = new FizzChannel(channelMeta);
             Channels.Add(channel);
-            channelLoopup.Add(channel.Id, channel);
+            channelLookup.Add(channel.Id, channel);
             return channel;
         }
 
@@ -380,40 +458,43 @@ namespace Fizz
 
         void Listener_OnMessagePublished(FizzChannelMessage msg)
         {
-            if (channelLoopup.ContainsKey(msg.To))
+            FizzChannel channel = GetChannel(msg.To);
+            if (channel != null)
             {
-                channelLoopup[msg.To].AddMessage(msg);
-            }
+                channel.AddMessage(msg);
 
-            if (OnChannelMessagePublish != null)
-            {
-                OnChannelMessagePublish.Invoke(msg.To, msg);
+                if (OnChannelMessagePublish != null)
+                {
+                    OnChannelMessagePublish.Invoke(msg.To, msg);
+                }
             }
         }
 
         void Listener_OnMessageDeleted(FizzChannelMessage msg)
         {
-            if (channelLoopup.ContainsKey(msg.To))
+            FizzChannel channel = GetChannel(msg.To);
+            if (channel != null)
             {
-                channelLoopup[msg.To].RemoveMessage(msg);
-            }
+                channel.RemoveMessage(msg);
 
-            if (OnChannelMessageDelete != null)
-            {
-                OnChannelMessageDelete.Invoke(msg.To, msg);
+                if (OnChannelMessageDelete != null)
+                {
+                    OnChannelMessageDelete.Invoke(msg.To, msg);
+                }
             }
         }
 
         void Listener_OnMessageUpdated(FizzChannelMessage msg)
         {
-            if (channelLoopup.ContainsKey(msg.To))
+            FizzChannel channel = GetChannel(msg.To);
+            if (channel != null)
             {
-                channelLoopup[msg.To].UpdateMessage(msg);
-            }
+                channel.UpdateMessage(msg);
 
-            if (OnChannelMessageUpdate != null)
-            {
-                OnChannelMessageUpdate.Invoke(msg.To, msg);
+                if (OnChannelMessageUpdate != null)
+                {
+                    OnChannelMessageUpdate.Invoke(msg.To, msg);
+                }
             }
         }
 
@@ -427,17 +508,18 @@ namespace Fizz
 
         void Listener_OnConnected(bool syncRequired)
         {
+            FizzLogger.D("FizzService Listener_OnConnected = " + syncRequired);
+            if (syncRequired)
+            {
+                foreach (FizzChannel channel in channels)
+                {
+                    channel.SubscribeAndQueryLatest();
+                }
+            }
+
             if (OnConnected != null)
             {
                 OnConnected.Invoke(syncRequired);
-            }
-
-            if (!syncRequired)
-                return;
-
-            foreach (FizzChannel channel in Channels)
-            {
-                channel.SubscribeAndQuery();
             }
         }
 
@@ -450,7 +532,9 @@ namespace Fizz
         }
 
         private bool _isIntialized = false;
-        private Dictionary<string, FizzChannel> channelLoopup;
+        private List<FizzChannel> channels;
+        private Dictionary<string, FizzChannel> channelLookup;
+        private FizzGroupRepository _groupRepository;
         private Dictionary<string, string> userSubcriptionLookup;
     }
 }

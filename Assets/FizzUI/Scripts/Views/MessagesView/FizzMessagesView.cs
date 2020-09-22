@@ -559,7 +559,10 @@ namespace Fizz.UI
                     if (_chatDataSource != null)
                     {
                         customView = _chatDataSource.GetCustomMessageCellViewNode (model);
-                        chatCellView.SetCustomData (customView);
+                        if (customView != null)
+                        {
+                            chatCellView.SetCustomData(customView);
+                        }
                     }
                     else if (_chatDataSource == null && string.IsNullOrEmpty (model.Body))
                     {

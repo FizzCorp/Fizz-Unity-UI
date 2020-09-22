@@ -18,13 +18,24 @@ namespace Fizz.Chat.Impl
 
         private readonly IFizzActionDispatcher _dispatcher;
         private readonly FizzMQTTChannelMessageListener _messageListener;
+        private readonly FizzGroups _groups;
         private readonly FizzUsers _users;
+
+        private readonly FizzUserNotifications _userNotifications;
 
         private string _userId;
         private IFizzAuthRestClient _restClient;
         private readonly FizzSessionRepository sessionRepository;
 
         public IFizzChannelMessageListener Listener
+        {
+            get
+            {
+                return _messageListener;
+            }
+        }
+
+        public IFizzGroupListener GroupListener
         {
             get
             {
@@ -40,11 +51,27 @@ namespace Fizz.Chat.Impl
             }
         }
 
+        public IFizzGroups Groups
+        {
+            get
+            {
+                return _groups;
+            }
+        }
+
         public IFizzUsers Users
         {
             get
             {
                 return _users;
+            }
+        }
+
+        public IFizzUserNotifications UserNotifications
+        {
+            get
+            {
+                return _userNotifications;
             }
         }
 
@@ -66,7 +93,9 @@ namespace Fizz.Chat.Impl
             _dispatcher = dispatcher;
 
             _messageListener = CreateListener (appId, _dispatcher);
+            _groups = new FizzGroups();
             _users = new FizzUsers();
+            _userNotifications = new FizzUserNotifications();
         }
 
         public void Open (string userId, IFizzAuthRestClient client, FizzSessionRepository sessionRepository)
@@ -95,7 +124,9 @@ namespace Fizz.Chat.Impl
                 _restClient = client;
 
                 _messageListener.Open (userId, sessionRepository);
-                _users.Open (_restClient);
+                _groups.Open(_restClient);
+                _users.Open(_restClient);
+                _userNotifications.Open(_restClient);
             });
         }
 
@@ -107,6 +138,8 @@ namespace Fizz.Chat.Impl
                 _restClient = null;
 
                 _users.Close();
+                _groups.Close();
+                _userNotifications.Close();
                 _messageListener.Close (cb);
             });
         }
