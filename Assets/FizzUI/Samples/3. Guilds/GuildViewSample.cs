@@ -33,8 +33,7 @@ namespace Fizz.Demo
             guildChannel = new FizzChannelMeta(guild + "-channel", guild, "GUILD");
 
             // Subscribe to channel (Note that it is compalsory to Subscribe a channel before adding to UI)
-            FizzChannel channel = new FizzChannel(guildChannel);
-            FizzService.Instance.SubscribeChannel(channel);
+            FizzService.Instance.SubscribeChannel(guildChannel);
 
             titleLabel.text = "Joined " + guild.ToUpper();
         }
