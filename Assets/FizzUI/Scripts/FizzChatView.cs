@@ -252,7 +252,10 @@ namespace Fizz.UI
                     {
                         if (exception == null)
                         {
-                            model.DeliveryState = FizzChatCellDeliveryState.Sent;
+                            if (model.DeliveryState != FizzChatCellDeliveryState.Published)
+                            {
+                                model.DeliveryState = FizzChatCellDeliveryState.Sent;
+                            }
                             MessagesView.AddMessage(model);
 
                             FizzService.Instance.Client.Ingestion.TextMessageSent(channel.Id, message, FizzService.Instance.UserName);
@@ -303,7 +306,10 @@ namespace Fizz.UI
                     {
                         if (exception == null)
                         {
-                            model.DeliveryState = FizzChatCellDeliveryState.Sent;
+                            if (model.DeliveryState != FizzChatCellDeliveryState.Published)
+                            {
+                                model.DeliveryState = FizzChatCellDeliveryState.Sent;
+                            }
                             MessagesView.AddMessage(model);
 
 

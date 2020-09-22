@@ -38,14 +38,7 @@ namespace Fizz
 
         public FizzGroupRepository GroupRepository { get { if (!_isIntialized) Initialize(); return _groupRepository; }  }
 
-        public List<FizzChannel> Channels {
-            get
-            {
-                List<FizzChannel> fizzChannels = new List<FizzChannel>();
-                fizzChannels.AddRange(channels);
-                return channels;
-            }
-        }
+        public List<FizzChannel> Channels { get; private set; }
         #endregion
 
         #region Events
@@ -111,7 +104,7 @@ namespace Fizz
         {
             if (!_isIntialized) Initialize();
 
-            if (channels != null) channels.Clear();
+            if (Channels != null) Channels.Clear();
             if (channelLookup != null) channelLookup.Clear();
 
             if (_groupRepository != null) _groupRepository.Close();
@@ -124,7 +117,7 @@ namespace Fizz
             }
         }
 
-        public void SubscribeChannel(FizzChannel channel)
+        public void SubscribeChannel(FizzChannelMeta channelMeta)
         {
             if (!_isIntialized) Initialize();
 
@@ -134,19 +127,21 @@ namespace Fizz
                 return;
             }
 
-            if (channel == null)
+            if (channelMeta == null)
             {
-                FizzLogger.E("FizzClient unable to subscribe, channel is null.");
+                FizzLogger.E("FizzClient unable to subscribe, channel meta is null.");
                 return;
             }
 
-            if (channelLookup.ContainsKey(channel.Id))
+            if (channelLookup.ContainsKey(channelMeta.Id))
             {
                 FizzLogger.W("FizzClient channel is already subscribed.");
                 return;
             }
 
-            channels.Add(channel);
+            FizzChannel channel = new FizzChannel(channelMeta);
+
+            Channels.Add(channel);
             channelLookup.Add(channel.Id, channel);
             channel.SubscribeAndQueryLatest();
         }
@@ -175,7 +170,7 @@ namespace Fizz
 
             FizzChannel channel = channelLookup[channelId];
             channelLookup.Remove(channelId);
-            channels.Remove(channel);
+            Channels.Remove(channel);
             channel.Unsubscribe(null);
         }
 
@@ -387,7 +382,7 @@ namespace Fizz
 
             Client = new FizzClient(APP_ID, APP_SECRET);
 
-            channels = new List<FizzChannel>();
+            Channels = new List<FizzChannel>();
             channelLookup = new Dictionary<string, FizzChannel>();
 
             _groupRepository = new FizzGroupRepository(Client, UI_GROUP_TAG);
@@ -398,17 +393,6 @@ namespace Fizz
             AddInternalListeners();
 
             _isIntialized = true;
-        }
-
-        FizzChannel AddChannelToList(FizzChannelMeta channelMeta)
-        {
-            if (channelLookup.ContainsKey(channelMeta.Id))
-                return null;
-
-            FizzChannel channel = new FizzChannel(channelMeta);
-            Channels.Add(channel);
-            channelLookup.Add(channel.Id, channel);
-            return channel;
         }
 
         void AddUserToList(string userId)
@@ -511,7 +495,7 @@ namespace Fizz
             FizzLogger.D("FizzService Listener_OnConnected = " + syncRequired);
             if (syncRequired)
             {
-                foreach (FizzChannel channel in channels)
+                foreach (FizzChannel channel in Channels)
                 {
                     channel.SubscribeAndQueryLatest();
                 }
@@ -532,7 +516,6 @@ namespace Fizz
         }
 
         private bool _isIntialized = false;
-        private List<FizzChannel> channels;
         private Dictionary<string, FizzChannel> channelLookup;
         private FizzGroupRepository _groupRepository;
         private Dictionary<string, string> userSubcriptionLookup;
