@@ -195,7 +195,7 @@ namespace Fizz.Demo
         {
             foreach (FizzChannelMeta channelMeta in channelMetas)
             {
-                FizzService.Instance.SubscribeChannel(new FizzChannel(channelMeta));
+                FizzService.Instance.SubscribeChannel(channelMeta);
             }
         }
 
