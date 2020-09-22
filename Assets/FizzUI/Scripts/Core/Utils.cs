@@ -18,8 +18,8 @@ namespace Fizz.UI
 
         public static string GetCurrentUnixTimeStamp()
         {
-            DateTime dateTime = new DateTime(2017, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
-            return Math.Truncate((DateTime.Now - dateTime).TotalMilliseconds).ToString();
+            DateTime dateTime = new DateTime(1970, 1, 1, 0, 0, 0, 0, System.DateTimeKind.Utc);
+            return Math.Truncate((DateTime.UtcNow - dateTime).TotalMilliseconds).ToString();
         }
 
         public static string GetRemainingTimeToString(long unixTimeStamp)

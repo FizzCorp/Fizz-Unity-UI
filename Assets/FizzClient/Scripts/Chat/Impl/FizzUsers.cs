@@ -12,17 +12,17 @@ namespace Fizz.Chat.Impl
 
         private IFizzAuthRestClient _client;
 
-        public void Open(IFizzAuthRestClient client) 
+        public void Open(IFizzAuthRestClient client)
         {
-            IfClosed(() => 
+            IfClosed(() =>
             {
                 _client = client;
             });
         }
 
-        public void Close() 
+        public void Close()
         {
-            IfOpened(() => 
+            IfOpened(() =>
             {
                 _client = null;
             });
@@ -80,28 +80,59 @@ namespace Fizz.Chat.Impl
             });
         }
 
-        private void IfOpened (Action callback)
+        public IFizzFetchUserGroupsQuery BuildFetchUserGroupsQuery(string userId)
+        {
+            return new FizzFetchUserGroupsQuery(userId, _client);
+        }
+
+        public void JoinGroup(string userId, string groupId, Action<FizzException> callback)
+        {
+            IfOpened(() =>
+            {
+                string path = string.Format(FizzConfig.API_PATH_USER_GROUP, userId, groupId);
+                _client.Post(FizzConfig.API_BASE_URL, path, string.Empty, (response, ex) =>
+                {
+                    FizzUtils.DoCallback(ex, callback);
+                });
+            });
+        }
+
+        public void RemoveGroup(string userId, string groupId, Action<FizzException> callback)
+        {
+            IfOpened(() =>
+            {
+                string path = string.Format(FizzConfig.API_PATH_USER_GROUP, userId, groupId);
+
+                _client.Delete(FizzConfig.API_BASE_URL, path, string.Empty, (response, ex) =>
+                {
+                    FizzUtils.DoCallback(ex, callback);
+                });
+            });
+        }
+
+        private void IfOpened(Action callback)
         {
             if (_client != null)
             {
-                FizzUtils.DoCallback (callback);
+                FizzUtils.DoCallback(callback);
             }
             else
             {
-                FizzLogger.W ("Client should have been opened.");
+                FizzLogger.W("Client should have been opened.");
             }
         }
 
-        private void IfClosed (Action callback)
+        private void IfClosed(Action callback)
         {
             if (_client == null)
             {
-                FizzUtils.DoCallback (callback);
+                FizzUtils.DoCallback(callback);
             }
             else
             {
-                FizzLogger.W ("Client should have been closed.");
+                FizzLogger.W("Client should have been closed.");
             }
         }
+
     }
 }
