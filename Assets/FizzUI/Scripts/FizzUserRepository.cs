@@ -10,6 +10,8 @@ public class FizzUserRepository : IFizzUserRepository
     private IFizzClient Client { get; set; }
     private Dictionary<string, FizzUser> Users { get; set; }
 
+    private Queue<GetUserRequest> requestQueue = new Queue<GetUserRequest>();
+
     #region Events
     public Action<FizzUser> OnUserUpdated { get; set; }
     #endregion
@@ -99,7 +101,18 @@ public class FizzUserRepository : IFizzUserRepository
             return;
         }
 
-        Client.Chat.Users.GetUser(userId, (userMeta, ex) =>
+        requestQueue.Enqueue(new GetUserRequest(userId, cb));
+        if (requestQueue.Count > 1)
+        {
+            return;
+        }
+        GetUser(requestQueue.Peek());
+    }
+
+
+    private void GetUser(GetUserRequest request)
+    {
+        Client.Chat.Users.GetUser(request.UserId, (userMeta, ex) =>
         {
             FizzUser user = null;
             if (ex == null)
@@ -107,7 +120,12 @@ public class FizzUserRepository : IFizzUserRepository
                 user = new FizzUser(userMeta, Client);
                 Users.Add(user.Id, user);
             }
-            FizzUtils.DoCallback(user, ex, cb);
+            FizzUtils.DoCallback(user, ex, request.Callback);
+            requestQueue.Dequeue();
+            if (requestQueue.Count > 0)
+            {
+                GetUser(requestQueue.Peek());
+            }
         });
     }
 
@@ -117,6 +135,34 @@ public class FizzUserRepository : IFizzUserRepository
         {
             FizzLogger.W("FizzClient should be opened before subscribing user.");
             return;
+        }
+
+        foreach (KeyValuePair<string, FizzUser> entry in Users)
+        {
+            GetUser(entry.Key, (user, ex) =>
+            {
+                if (ex == null)
+                {
+                    FizzUser existingUser = entry.Value;
+                    existingUser.Apply(user);
+                    if (existingUser.IsSubscribed)
+                    {
+                        existingUser.Subscribe(null);
+                    }
+                }
+            });
+        }
+    }
+
+    private class GetUserRequest
+    {
+        public string UserId { get; private set; }
+        public Action<FizzUser, FizzException> Callback { get; private set; }
+
+        public GetUserRequest(string userId, Action<FizzUser, FizzException> cb)
+        {
+            UserId = userId;
+            Callback = cb;
         }
     }
 

@@ -27,6 +27,14 @@ namespace Fizz.UI.Model
             Client = client;
         }
 
+        public void Apply(FizzUser user)
+        {
+            Nick = user.Nick;
+            StatusMessage = user.StatusMessage;
+            ProfileUrl = user.ProfileUrl;
+            Online = user.Online;
+        }
+
         public void Update(FizzUserUpdateEventData eventData)
         {
             switch (eventData.Reason)
