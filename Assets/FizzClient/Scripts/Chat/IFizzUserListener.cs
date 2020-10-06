@@ -7,6 +7,7 @@ namespace Fizz.Chat
         public enum UpdateReason
         {
             Profile,
+            Presence,
             Unknown
         }
 
@@ -17,9 +18,11 @@ namespace Fizz.Chat
 
         public UpdateReason Reason { get; set; }
         public string UserId { get; set; }
+        public string Nick { get; set;  }
+        public string StatusMessage { get; set; }
+        public string ProfileUrl { get; set; }
         public bool Online { get; set; }
     }
-
 
     public interface IFizzUserListener
     {

@@ -330,11 +330,42 @@ namespace Fizz.Chat.Impl
             FizzUserUpdateEventData update = new FizzUserUpdateEventData();
             FizzLogger.D(message.Data);
 
-            update.Reason = FizzUserUpdateEventData.UpdateReason.Profile;
+            update.Reason = ParseUserUpdateReason(payload["reason"]);
             update.UserId = message.From;
-            update.Online = payload["is_online"].AsBool;
+            switch (update.Reason)
+            {
+                case FizzUserUpdateEventData.UpdateReason.Profile:
+                    update.Nick = payload["nick"];
+                    update.StatusMessage = payload["status_message"];
+                    update.ProfileUrl = payload["profile_url"];
+                    break;
 
+                case FizzUserUpdateEventData.UpdateReason.Presence:
+                    update.Online = payload["is_online"].AsBool;
+                    break;
+            }
+            
             return update;
+        }
+
+        public FizzUserUpdateEventData.UpdateReason ParseUserUpdateReason(string value)
+        {
+            if (value == null)
+            {
+                throw new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_reason");
+            }
+
+            switch (value)
+            {
+                case "profile":
+                    return FizzUserUpdateEventData.UpdateReason.Profile;
+
+                case "presence":
+                    return FizzUserUpdateEventData.UpdateReason.Presence;
+
+                default:
+                    return FizzUserUpdateEventData.UpdateReason.Unknown;
+            }
         }
     }
 }
