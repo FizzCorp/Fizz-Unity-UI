@@ -242,6 +242,12 @@ namespace Fizz.Chat.Impl
                     case "USRPU":
                         if (OnUserUpdated != null)
                         {
+                            OnUserUpdated.Invoke(ParsePresenceUpdateEventData(message));
+                        }
+                        break;
+                    case "USRUU":
+                        if (OnUserUpdated != null)
+                        {
                             OnUserUpdated.Invoke(ParseUserUpdateEventData(message));
                         }
                         break;
@@ -324,48 +330,30 @@ namespace Fizz.Chat.Impl
             return update;
         }
 
+        private FizzUserUpdateEventData ParsePresenceUpdateEventData(FizzTopicMessage message)
+        {
+            JSONClass payload = JSONNode.Parse(message.Data).AsObject;
+            FizzUserUpdateEventData update = new FizzUserUpdateEventData();
+            FizzLogger.D(message.Data);
+
+            update.Reason = FizzUserUpdateEventData.UpdateReason.Presence;
+            update.UserId = message.From;
+            update.Online = payload["is_online"].AsBool;
+            return update;
+        }
+
         private FizzUserUpdateEventData ParseUserUpdateEventData(FizzTopicMessage message)
         {
             JSONClass payload = JSONNode.Parse(message.Data).AsObject;
             FizzUserUpdateEventData update = new FizzUserUpdateEventData();
             FizzLogger.D(message.Data);
 
-            update.Reason = ParseUserUpdateReason(payload["reason"]);
+            update.Reason = FizzUserUpdateEventData.UpdateReason.Profile;
             update.UserId = message.From;
-            switch (update.Reason)
-            {
-                case FizzUserUpdateEventData.UpdateReason.Profile:
-                    update.Nick = payload["nick"];
-                    update.StatusMessage = payload["status_message"];
-                    update.ProfileUrl = payload["profile_url"];
-                    break;
-
-                case FizzUserUpdateEventData.UpdateReason.Presence:
-                    update.Online = payload["is_online"].AsBool;
-                    break;
-            }
-            
+            update.Nick = payload["nick"];
+            update.StatusMessage = payload["status_message"];
+            update.ProfileUrl = payload["profile_url"];
             return update;
-        }
-
-        public FizzUserUpdateEventData.UpdateReason ParseUserUpdateReason(string value)
-        {
-            if (value == null)
-            {
-                throw new FizzException(FizzError.ERROR_BAD_ARGUMENT, "invalid_reason");
-            }
-
-            switch (value)
-            {
-                case "profile":
-                    return FizzUserUpdateEventData.UpdateReason.Profile;
-
-                case "presence":
-                    return FizzUserUpdateEventData.UpdateReason.Presence;
-
-                default:
-                    return FizzUserUpdateEventData.UpdateReason.Unknown;
-            }
         }
     }
 }
