@@ -245,7 +245,7 @@ namespace Fizz.Chat.Impl
                             OnUserUpdated.Invoke(ParsePresenceUpdateEventData(message));
                         }
                         break;
-                    case "USRUU":
+                    case "USRU":
                         if (OnUserUpdated != null)
                         {
                             OnUserUpdated.Invoke(ParseUserUpdateEventData(message));
