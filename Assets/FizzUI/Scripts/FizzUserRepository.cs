@@ -118,7 +118,8 @@ public class FizzUserRepository : IFizzUserRepository
             if (ex == null)
             {
                 user = new FizzUser(userMeta, Client);
-                Users.Add(user.Id, user);
+                
+                Users[user.Id] = user;
             }
             FizzUtils.DoCallback(user, ex, request.Callback);
             requestQueue.Dequeue();
