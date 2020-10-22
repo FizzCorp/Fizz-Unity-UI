@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using Fizz;
-using Fizz.Chat;
+using Fizz.UI.Model;
 using Fizz.Common;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,7 +34,7 @@ public class PresenceSample : MonoBehaviour
 
 		FizzService.Instance.OnConnected += OnConnected;
 		FizzService.Instance.OnDisconnected += OnDisconnected;
-		FizzService.Instance.OnUserUpdated += OnUserUpdate;
+		FizzService.Instance.UserRepository.OnUserUpdated += OnUserUpdate;
 	}
 
 	void OnDisable ()
@@ -45,7 +45,7 @@ public class PresenceSample : MonoBehaviour
 
 		FizzService.Instance.OnConnected -= OnConnected;
 		FizzService.Instance.OnDisconnected -= OnDisconnected;
-		FizzService.Instance.OnUserUpdated -= OnUserUpdate;
+		FizzService.Instance.UserRepository.OnUserUpdated -= OnUserUpdate;
 	}
 
 	void OnDestroy()
@@ -90,8 +90,7 @@ public class PresenceSample : MonoBehaviour
 
 		if (syncReq)
 		{
-			GetUserPresence();
-			SubscribeUsers();
+			GetAndSubscribeUser();
 		}
 	}
 
@@ -101,22 +100,15 @@ public class PresenceSample : MonoBehaviour
 		CloseButton.interactable = false;
 	}
 
-	void GetUserPresence()
+	void GetAndSubscribeUser()
 	{
 		foreach (Dropdown.OptionData data in userDropdown.options)
 		{
-			FizzService.Instance.GetUser(data.text, (user, ex) =>
+			FizzService.Instance.UserRepository.GetUser(data.text, (user, ex) =>
 			{
+				user.Subscribe(null);
 				SetPresenceStatus(user.Id, user.Online);
 			});
-		}
-	}
-
-	void SubscribeUsers ()
-	{
-		foreach (Dropdown.OptionData data in userDropdown.options)
-		{
-			FizzService.Instance.SubscribeUser(data.text, ex => { });
 		}
 	}
 
@@ -129,9 +121,9 @@ public class PresenceSample : MonoBehaviour
 		}
 	}
 
-	void OnUserUpdate(Fizz.Chat.FizzUserUpdateEventData eventData)
+	void OnUserUpdate(FizzUser user)
 	{
-		SetPresenceStatus(eventData.UserId, eventData.Online);
+		SetPresenceStatus(user.Id, user.Online);
 	}
 
 	private void SetPresenceStatus(string userId, bool online)

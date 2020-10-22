@@ -20,6 +20,9 @@ namespace Fizz.Chat
     public interface IFizzUser
     {
         string Id { get; }
+        string Nick { get; }
+        string StatusMessage { get; }
+        string ProfileUrl { get; }
         bool Online { get; }
     }
 

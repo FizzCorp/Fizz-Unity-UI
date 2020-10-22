@@ -6,16 +6,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IFizzGroupRepository
+namespace Fizz
 {
-    List<FizzGroup> Groups { get; }
-    Dictionary<string, IFizzUserGroup> GroupInvites { get; }
+    public interface IFizzGroupRepository
+    {
+        List<FizzGroup> Groups { get; }
+        Dictionary<string, IFizzUserGroup> GroupInvites { get; }
 
-    void JoinGroup(string groupId, Action<FizzException> cb);
-    void RemoveGroup(string groupId, Action<FizzException> cb);
+        void JoinGroup(string groupId, Action<FizzException> cb);
+        void RemoveGroup(string groupId, Action<FizzException> cb);
 
-    Action<FizzGroup> OnGroupAdded { get; set; }
-    Action<FizzGroup> OnGroupUpdated { get; set; }
-    Action<FizzGroup> OnGroupRemoved { get; set; }
-    Action<FizzGroup> OnGroupMembersUpdated { get; set; }
+        Action<FizzGroup> OnGroupAdded { get; set; }
+        Action<FizzGroup> OnGroupUpdated { get; set; }
+        Action<FizzGroup> OnGroupRemoved { get; set; }
+        Action<FizzGroup> OnGroupMembersUpdated { get; set; }
+    }
 }

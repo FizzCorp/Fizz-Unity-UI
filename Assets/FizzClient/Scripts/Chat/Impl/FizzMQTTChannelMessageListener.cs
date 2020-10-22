@@ -242,6 +242,12 @@ namespace Fizz.Chat.Impl
                     case "USRPU":
                         if (OnUserUpdated != null)
                         {
+                            OnUserUpdated.Invoke(ParsePresenceUpdateEventData(message));
+                        }
+                        break;
+                    case "USRU":
+                        if (OnUserUpdated != null)
+                        {
                             OnUserUpdated.Invoke(ParseUserUpdateEventData(message));
                         }
                         break;
@@ -324,6 +330,18 @@ namespace Fizz.Chat.Impl
             return update;
         }
 
+        private FizzUserUpdateEventData ParsePresenceUpdateEventData(FizzTopicMessage message)
+        {
+            JSONClass payload = JSONNode.Parse(message.Data).AsObject;
+            FizzUserUpdateEventData update = new FizzUserUpdateEventData();
+            FizzLogger.D(message.Data);
+
+            update.Reason = FizzUserUpdateEventData.UpdateReason.Presence;
+            update.UserId = message.From;
+            update.Online = payload["is_online"].AsBool;
+            return update;
+        }
+
         private FizzUserUpdateEventData ParseUserUpdateEventData(FizzTopicMessage message)
         {
             JSONClass payload = JSONNode.Parse(message.Data).AsObject;
@@ -332,8 +350,9 @@ namespace Fizz.Chat.Impl
 
             update.Reason = FizzUserUpdateEventData.UpdateReason.Profile;
             update.UserId = message.From;
-            update.Online = payload["is_online"].AsBool;
-
+            update.Nick = payload["nick"];
+            update.StatusMessage = payload["status_message"];
+            update.ProfileUrl = payload["profile_url"];
             return update;
         }
     }
