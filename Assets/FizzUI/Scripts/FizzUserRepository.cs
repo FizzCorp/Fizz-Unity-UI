@@ -8,18 +8,18 @@ using Fizz.UI.Model;
 public class FizzUserRepository : IFizzUserRepository
 {
     private IFizzClient Client { get; set; }
-    private Dictionary<string, FizzUser> Users { get; set; }
+    private Dictionary<string, FizzUserModel> Users { get; set; }
 
     private Queue<GetUserRequest> requestQueue = new Queue<GetUserRequest>();
 
     #region Events
-    public Action<FizzUser> OnUserUpdated { get; set; }
+    public Action<FizzUserModel> OnUserUpdated { get; set; }
     #endregion
 
     public FizzUserRepository(IFizzClient client)
     {
         Client = client;
-        Users = new Dictionary<string, FizzUser>();
+        Users = new Dictionary<string, FizzUserModel>();
     }
 
     public void Open(string userId)
@@ -65,7 +65,7 @@ public class FizzUserRepository : IFizzUserRepository
     {
         if (OnUserUpdated != null)
         {
-            FizzUser user = Users[eventData.UserId];
+            FizzUserModel user = Users[eventData.UserId];
             if (user != null)
             {
                 user.Update(eventData);
@@ -87,7 +87,7 @@ public class FizzUserRepository : IFizzUserRepository
         }
     }
 
-    public void GetUser(string userId, Action<FizzUser, FizzException> cb)
+    public void GetUser(string userId, Action<FizzUserModel, FizzException> cb)
     {
         if (Client.State == FizzClientState.Closed)
         {
@@ -114,10 +114,10 @@ public class FizzUserRepository : IFizzUserRepository
     {
         Client.Chat.Users.GetUser(request.UserId, (userMeta, ex) =>
         {
-            FizzUser user = null;
+            FizzUserModel user = null;
             if (ex == null)
             {
-                user = new FizzUser(userMeta, Client);
+                user = new FizzUserModel(userMeta, Client);
                 
                 Users[user.Id] = user;
             }
@@ -138,13 +138,13 @@ public class FizzUserRepository : IFizzUserRepository
             return;
         }
 
-        foreach (KeyValuePair<string, FizzUser> entry in Users)
+        foreach (KeyValuePair<string, FizzUserModel> entry in Users)
         {
             GetUser(entry.Key, (user, ex) =>
             {
                 if (ex == null)
                 {
-                    FizzUser existingUser = entry.Value;
+                    FizzUserModel existingUser = entry.Value;
                     existingUser.Apply(user);
                     if (existingUser.IsSubscribed)
                     {
@@ -158,9 +158,9 @@ public class FizzUserRepository : IFizzUserRepository
     private class GetUserRequest
     {
         public string UserId { get; private set; }
-        public Action<FizzUser, FizzException> Callback { get; private set; }
+        public Action<FizzUserModel, FizzException> Callback { get; private set; }
 
-        public GetUserRequest(string userId, Action<FizzUser, FizzException> cb)
+        public GetUserRequest(string userId, Action<FizzUserModel, FizzException> cb)
         {
             UserId = userId;
             Callback = cb;

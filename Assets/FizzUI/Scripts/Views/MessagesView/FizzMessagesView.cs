@@ -460,7 +460,7 @@ namespace Fizz.UI
             return model;
         }
 
-        private FizzChannel GetChannelById(string id)
+        private FizzChannelModel GetChannelById(string id)
         {
             try
             {
@@ -643,7 +643,7 @@ namespace Fizz.UI
         /// <summary>
         /// The data.
         /// </summary>
-        private FizzChannel _channel;
+        private FizzChannelModel _channel;
         /// <summary>
         /// The last action.
         /// </summary>

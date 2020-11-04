@@ -20,7 +20,7 @@ namespace Fizz.UI
 
         public FizzChannelItemSelectedEvent OnChannelSelected;
 
-        public FizzChannel CurrentSelectedChannel { get; private set; }
+        public FizzChannelModel CurrentSelectedChannel { get; private set; }
 
         private const string DEFAULT_NO_GROUP = "001D3F4U1T_9O_GRP";
 
@@ -46,7 +46,7 @@ namespace Fizz.UI
                 Initialize ();
             }
 
-            FizzChannel channel = GetChannelById (channelId);
+            FizzChannelModel channel = GetChannelById (channelId);
 
             if (channel == null)
             {
@@ -88,7 +88,7 @@ namespace Fizz.UI
                 Initialize ();
             }
 
-            FizzChannel channel = GetChannelById (channelId);
+            FizzChannelModel channel = GetChannelById (channelId);
 
             if (channel == null)
                 return false;
@@ -105,7 +105,7 @@ namespace Fizz.UI
             }
         }
 
-        public void AddGroup(FizzGroup group, bool select = false)
+        public void AddGroup(FizzGroupModel group, bool select = false)
         {
             if (!_initialized)
             {
@@ -123,7 +123,7 @@ namespace Fizz.UI
             }
         }
 
-        public void RemoveGroup(FizzGroup group)
+        public void RemoveGroup(FizzGroupModel group)
         {
             if (!_initialized)
             {
@@ -136,7 +136,7 @@ namespace Fizz.UI
             }
         }
 
-        public bool SetGroup(FizzGroup group)
+        public bool SetGroup(FizzGroupModel group)
         {
             if (!_initialized)
             {
@@ -243,7 +243,7 @@ namespace Fizz.UI
         {
             try
             {
-                foreach (FizzChannel channel in FizzService.Instance.Channels)
+                foreach (FizzChannelModel channel in FizzService.Instance.Channels)
                 {
                     if (_channelWatchList.Contains (channel.Id) && !_channelsLookup.ContainsKey (channel.Id))
                     {
@@ -252,7 +252,7 @@ namespace Fizz.UI
                     }
                 }
 
-                foreach (FizzGroup group in FizzService.Instance.GroupRepository.Groups)
+                foreach (FizzGroupModel group in FizzService.Instance.GroupRepository.Groups)
                 {
                     if (!_channelsLookup.ContainsKey(group.Channel.Id))
                     {
@@ -300,7 +300,7 @@ namespace Fizz.UI
             RemoveChannelInternal (channelId);
         }
 
-        private void HandleChannelSelected (FizzChannel data)
+        private void HandleChannelSelected (FizzChannelModel data)
         {
             if (CurrentSelectedChannel != null)
             {
@@ -323,7 +323,7 @@ namespace Fizz.UI
             barButton.SetSelected (true);
         }
 
-        private bool AddChannelInternal (FizzChannel _item)
+        private bool AddChannelInternal (FizzChannelModel _item)
         {
             if (_item == null) return false;
 
@@ -359,7 +359,7 @@ namespace Fizz.UI
                     CurrentSelectedChannel = null;
                 }
 
-                FizzChannel channel = _channelsLookup[channelId].GetChannel ();
+                FizzChannelModel channel = _channelsLookup[channelId].GetChannel ();
                 if (channel != null && !string.IsNullOrEmpty (channel.Meta.Group) && _groupsLookup.ContainsKey (channel.Meta.Group))
                 {
                     _groupsLookup[channel.Meta.Group].ChannelCount--;
@@ -379,7 +379,7 @@ namespace Fizz.UI
             return _removed;
         }
 
-        private RectTransform GetChannelGroup (FizzChannel channel)
+        private RectTransform GetChannelGroup (FizzChannelModel channel)
         {
             string channelGroup = (string.IsNullOrEmpty (channel.Meta.Group) ? DEFAULT_NO_GROUP : channel.Meta.Group);
             
@@ -395,7 +395,7 @@ namespace Fizz.UI
             return parentRect;
         }
 
-        private RectTransform AddChannelGroup (FizzChannel channel, string channelGroup)
+        private RectTransform AddChannelGroup (FizzChannelModel channel, string channelGroup)
         {
             RectTransform groupRect = null;
             if (!_groupsLookup.ContainsKey (channelGroup))
@@ -433,7 +433,7 @@ namespace Fizz.UI
 
         private
 
-        FizzChannel GetChannelById (string channelId)
+        FizzChannelModel GetChannelById (string channelId)
         {
             try
             {
@@ -447,7 +447,7 @@ namespace Fizz.UI
         }
 
         [Serializable]
-        public class FizzChannelItemSelectedEvent : UnityEvent<FizzChannel>
+        public class FizzChannelItemSelectedEvent : UnityEvent<FizzChannelModel>
         { }
     }
 }

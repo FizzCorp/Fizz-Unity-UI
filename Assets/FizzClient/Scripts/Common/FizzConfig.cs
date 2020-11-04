@@ -7,7 +7,7 @@ namespace Fizz.Common
         public static readonly string API_PROTOCOL = "https";
         public static readonly string API_ENDPOINT = "api.fizz.io";
 
-        public static bool MQTT_USE_TLS = false;
+        public static bool MQTT_USE_TLS = true;
         public static string MQTT_HOST_ENDPOINT = "mqtt.fizz.io";
 
         public static readonly string API_VERSION = "v1";

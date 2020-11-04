@@ -108,7 +108,7 @@ namespace Fizz.Chat.Impl
                             FizzConfig.MQTT_USE_TLS ? 8883 : 1883,
                             FizzConfig.MQTT_USE_TLS,
                             null, null,
-                            FizzConfig.MQTT_USE_TLS ? MqttSslProtocols.SSLv3 : MqttSslProtocols.None
+                            FizzConfig.MQTT_USE_TLS ? MqttSslProtocols.TLSv1_2 : MqttSslProtocols.None
                         );
 
             _client.ConnectionClosed += (sender, args) =>

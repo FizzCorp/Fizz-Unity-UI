@@ -40,7 +40,7 @@ namespace Fizz
 
         public FizzUserRepository UserRepository { get { if (!_isIntialized) Initialize(); return _userRepository; } }
 
-        public List<FizzChannel> Channels { get; private set; }
+        public List<FizzChannelModel> Channels { get; private set; }
         #endregion
 
         #region Events
@@ -138,7 +138,7 @@ namespace Fizz
                 return;
             }
 
-            FizzChannel channel = new FizzChannel(channelMeta);
+            FizzChannelModel channel = new FizzChannelModel(channelMeta);
 
             Channels.Add(channel);
             channelLookup.Add(channel.Id, channel);
@@ -167,7 +167,7 @@ namespace Fizz
                 return;
             }
 
-            FizzChannel channel = channelLookup[channelId];
+            FizzChannelModel channel = channelLookup[channelId];
             channelLookup.Remove(channelId);
             Channels.Remove(channel);
             channel.Unsubscribe(null);
@@ -234,14 +234,14 @@ namespace Fizz
 
         
 
-        public FizzChannel GetChannel(string id)
+        public FizzChannelModel GetChannel(string id)
         {
             if (!_isIntialized) Initialize();
 
             if (channelLookup.ContainsKey(id))
                 return channelLookup[id];
 
-            foreach (FizzGroup group in GroupRepository.Groups)
+            foreach (FizzGroupModel group in GroupRepository.Groups)
             {
                 if (group.Channel.Id.Equals(id))
                     return group.Channel;
@@ -274,8 +274,8 @@ namespace Fizz
 
             Client = new FizzClient(APP_ID, APP_SECRET);
 
-            Channels = new List<FizzChannel>();
-            channelLookup = new Dictionary<string, FizzChannel>();
+            Channels = new List<FizzChannelModel>();
+            channelLookup = new Dictionary<string, FizzChannelModel>();
 
             _groupRepository = new FizzGroupRepository(Client, UI_GROUP_TAG);
             _userRepository = new FizzUserRepository(Client);
@@ -326,7 +326,7 @@ namespace Fizz
 
         void Listener_OnMessagePublished(FizzChannelMessage msg)
         {
-            FizzChannel channel = GetChannel(msg.To);
+            FizzChannelModel channel = GetChannel(msg.To);
             if (channel != null)
             {
                 channel.AddMessage(msg);
@@ -340,7 +340,7 @@ namespace Fizz
 
         void Listener_OnMessageDeleted(FizzChannelMessage msg)
         {
-            FizzChannel channel = GetChannel(msg.To);
+            FizzChannelModel channel = GetChannel(msg.To);
             if (channel != null)
             {
                 channel.RemoveMessage(msg);
@@ -354,7 +354,7 @@ namespace Fizz
 
         void Listener_OnMessageUpdated(FizzChannelMessage msg)
         {
-            FizzChannel channel = GetChannel(msg.To);
+            FizzChannelModel channel = GetChannel(msg.To);
             if (channel != null)
             {
                 channel.UpdateMessage(msg);
@@ -379,7 +379,7 @@ namespace Fizz
             FizzLogger.D("FizzService Listener_OnConnected = " + syncRequired);
             if (syncRequired)
             {
-                foreach (FizzChannel channel in Channels)
+                foreach (FizzChannelModel channel in Channels)
                 {
                     channel.SubscribeAndQueryLatest();
                 }
@@ -392,7 +392,7 @@ namespace Fizz
         }
 
         private bool _isIntialized = false;
-        private Dictionary<string, FizzChannel> channelLookup;
+        private Dictionary<string, FizzChannelModel> channelLookup;
         private FizzGroupRepository _groupRepository;
         private FizzUserRepository _userRepository;
     }
