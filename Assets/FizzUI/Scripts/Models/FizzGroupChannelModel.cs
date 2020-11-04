@@ -8,7 +8,7 @@ using Fizz.Common.Json;
 
 namespace Fizz.UI.Model
 {
-    public class FizzGroupChannel : FizzChannel
+    public class FizzGroupChannel : FizzChannelModel
     {
         public string GroupId { get; private set; }
 

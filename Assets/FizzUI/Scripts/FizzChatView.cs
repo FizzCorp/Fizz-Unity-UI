@@ -215,7 +215,7 @@ namespace Fizz.UI
         {
             if (string.IsNullOrEmpty(message)) return;
 
-            FizzChannel channel = ChannelsView.CurrentSelectedChannel;
+            FizzChannelModel channel = ChannelsView.CurrentSelectedChannel;
 
             if (channel == null)
                 return;
@@ -275,7 +275,7 @@ namespace Fizz.UI
             if (ChannelsView.CurrentSelectedChannel == null)
                 return;
 
-            FizzChannel channel = ChannelsView.CurrentSelectedChannel;
+            FizzChannelModel channel = ChannelsView.CurrentSelectedChannel;
 
             try
             {
@@ -324,7 +324,7 @@ namespace Fizz.UI
             }
         }
 
-        private void HandleChannelSelected(FizzChannel channel)
+        private void HandleChannelSelected(FizzChannelModel channel)
         {
             if (channel != null)
             {
@@ -332,9 +332,9 @@ namespace Fizz.UI
                 HeaderView.SetTitleText(channel.Name);
 
                 ShowInput = true;
-                if (channel.GetType() == typeof(FizzGroupChannel))
+                if (channel.GetType() == typeof(FizzGroupChannelModel))
                 {
-                    FizzGroupChannel groupChannel = (FizzGroupChannel)channel;
+                    FizzGroupChannelModel groupChannel = (FizzGroupChannelModel)channel;
                     if (FizzService.Instance.GroupRepository.GroupInvites.ContainsKey(groupChannel.GroupId))
                     {
                         ShowInput = false;
@@ -396,7 +396,7 @@ namespace Fizz.UI
 
         void UpdateGroupsVisibility()
         {
-            foreach (FizzGroup group in FizzService.Instance.GroupRepository.Groups)
+            foreach (FizzGroupModel group in FizzService.Instance.GroupRepository.Groups)
             {
                 if (_showGroups)
                 {
@@ -409,7 +409,7 @@ namespace Fizz.UI
             }
         }
 
-        void OnGroupAdded(FizzGroup group)
+        void OnGroupAdded(FizzGroupModel group)
         {
             if (!_showGroups)
                 return;
@@ -417,7 +417,7 @@ namespace Fizz.UI
             ChannelsView.AddGroup(group);
         }
 
-        void OnGroupRemoved(FizzGroup group)
+        void OnGroupRemoved(FizzGroupModel group)
         {
             if (!_showGroups)
                 return;
@@ -425,7 +425,7 @@ namespace Fizz.UI
             ChannelsView.RemoveGroup(group);
         }
 
-        void OnGroupMembersUpdated(FizzGroup group)
+        void OnGroupMembersUpdated(FizzGroupModel group)
         {
             if (!_showGroups)
                 return;

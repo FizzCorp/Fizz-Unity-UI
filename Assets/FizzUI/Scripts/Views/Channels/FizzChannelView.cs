@@ -12,10 +12,10 @@ namespace Fizz.UI
         [SerializeField] Button ActionButton;
         [SerializeField] Text NameLabel;
 
-        private FizzChannel _channel;
-        private Action<FizzChannel> _onClickAction;
+        private FizzChannelModel _channel;
+        private Action<FizzChannelModel> _onClickAction;
 
-        public void SetData (FizzChannel channel, Action<FizzChannel> onClick)
+        public void SetData (FizzChannelModel channel, Action<FizzChannelModel> onClick)
         {
             _channel = channel;
             _onClickAction = onClick;
@@ -32,7 +32,7 @@ namespace Fizz.UI
             ActionButton.interactable = !selected;
         }
 
-        public FizzChannel GetChannel ()
+        public FizzChannelModel GetChannel ()
         {
             return _channel;
         }
