@@ -14,19 +14,19 @@ namespace Fizz
 {
     public class FizzGroupRepository : IFizzGroupRepository
     {
-        private Dictionary<string, FizzGroup> groupLookup;
+        private Dictionary<string, FizzGroupModel> groupLookup;
         private IFizzClient Client { get; set; }
         private string UserId { get; set; }
         private string GroupTag { get; set; }
 
-        public List<FizzGroup> Groups { get; private set; }
+        public List<FizzGroupModel> Groups { get; private set; }
         public Dictionary<string, IFizzUserGroup> GroupInvites { get; private set; }
 
         #region Events
-        public Action<FizzGroup> OnGroupAdded { get; set; }
-        public Action<FizzGroup> OnGroupUpdated { get; set; }
-        public Action<FizzGroup> OnGroupRemoved { get; set; }
-        public Action<FizzGroup> OnGroupMembersUpdated { get; set; }
+        public Action<FizzGroupModel> OnGroupAdded { get; set; }
+        public Action<FizzGroupModel> OnGroupUpdated { get; set; }
+        public Action<FizzGroupModel> OnGroupRemoved { get; set; }
+        public Action<FizzGroupModel> OnGroupMembersUpdated { get; set; }
         #endregion
 
         public FizzGroupRepository(IFizzClient client, string groupTag)
@@ -34,9 +34,9 @@ namespace Fizz
             Client = client;
             GroupTag = groupTag;
 
-            Groups = new List<FizzGroup>();
+            Groups = new List<FizzGroupModel>();
             GroupInvites = new Dictionary<string, IFizzUserGroup>();
-            groupLookup = new Dictionary<string, FizzGroup>();
+            groupLookup = new Dictionary<string, FizzGroupModel>();
         }
 
         public void Open(string userId)
@@ -90,7 +90,7 @@ namespace Fizz
 
         void Listener_OnGroupUpdated(FizzGroupUpdateEventData eventData)
         {
-            FizzGroup group = GetGroup(eventData.GroupId);
+            FizzGroupModel group = GetGroup(eventData.GroupId);
             if (group != null && OnGroupUpdated != null)
             {
                 OnGroupUpdated.Invoke(group);
@@ -105,8 +105,8 @@ namespace Fizz
                 {
                     if (ex == null)
                     {
-                        AddGroup(new FizzGroup(groupMeta, GroupTag));
-                        FizzGroup group = GetGroup(groupMeta.Id);
+                        AddGroup(new FizzGroupModel(groupMeta, GroupTag));
+                        FizzGroupModel group = GetGroup(groupMeta.Id);
                         if (eventData.State == FizzGroupMemberState.Pending)
                         {
                             GroupInvites.Add(group.Id, CreateUserGroup(eventData));
@@ -120,7 +120,7 @@ namespace Fizz
             }
             else
             {
-                FizzGroup group = GetGroup(eventData.GroupId);
+                FizzGroupModel group = GetGroup(eventData.GroupId);
                 if (group != null && OnGroupMembersUpdated != null)
                 {
                     OnGroupMembersUpdated.Invoke(group);
@@ -132,7 +132,7 @@ namespace Fizz
         {
             if (UserId.Equals(eventData.MemberId))
             {
-                FizzGroup group = GetGroup(eventData.GroupId);
+                FizzGroupModel group = GetGroup(eventData.GroupId);
                 GroupInvites.Remove(eventData.GroupId);
                 Groups.Remove(groupLookup[eventData.GroupId]);
                 groupLookup.Remove(eventData.GroupId);
@@ -144,7 +144,7 @@ namespace Fizz
             }
             else
             {
-                FizzGroup group = GetGroup(eventData.GroupId);
+                FizzGroupModel group = GetGroup(eventData.GroupId);
                 if (group != null && OnGroupMembersUpdated != null)
                 {
                     OnGroupMembersUpdated.Invoke(group);
@@ -154,7 +154,7 @@ namespace Fizz
 
         void Listener_OnGroupMemberUpdated(FizzGroupMemberEventData eventData)
         {
-            FizzGroup group = GetGroup(eventData.GroupId);
+            FizzGroupModel group = GetGroup(eventData.GroupId);
             if (group != null)
             {
                 if (eventData.MemberId.Equals(UserId) && eventData.State == FizzGroupMemberState.Joined)
@@ -179,7 +179,7 @@ namespace Fizz
             }
         }
 
-        private FizzGroup GetGroup(string id)
+        private FizzGroupModel GetGroup(string id)
         {
             if (groupLookup.ContainsKey(id))
                 return groupLookup[id];
@@ -276,13 +276,13 @@ namespace Fizz
                 {
                     if (ex == null)
                     {
-                        AddGroup(new FizzGroup(group, GroupTag));
+                        AddGroup(new FizzGroupModel(group, GroupTag));
                     }
                 });
             }
         }
 
-        private void AddGroup(FizzGroup group)
+        private void AddGroup(FizzGroupModel group)
         {
             if (Client.State == FizzClientState.Closed)
             {

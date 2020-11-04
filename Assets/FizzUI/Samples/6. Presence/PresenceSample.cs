@@ -121,7 +121,7 @@ public class PresenceSample : MonoBehaviour
 		}
 	}
 
-	void OnUserUpdate(FizzUser user)
+	void OnUserUpdate(FizzUserModel user)
 	{
 		SetPresenceStatus(user.Id, user.Online);
 	}

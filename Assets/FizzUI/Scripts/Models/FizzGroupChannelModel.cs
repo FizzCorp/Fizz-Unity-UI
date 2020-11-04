@@ -8,7 +8,7 @@ using Fizz.Common.Json;
 
 namespace Fizz.UI.Model
 {
-    public class FizzGroupChannel : FizzChannel
+    public class FizzGroupChannelModel : FizzChannelModel
     {
         public string GroupId { get; private set; }
 
@@ -27,7 +27,7 @@ namespace Fizz.UI.Model
             }
         }
 
-        public FizzGroupChannel(string groupId, FizzChannelMeta channelMeta) : base(channelMeta)
+        public FizzGroupChannelModel(string groupId, FizzChannelMeta channelMeta) : base(channelMeta)
         {
             GroupId = groupId;
         }

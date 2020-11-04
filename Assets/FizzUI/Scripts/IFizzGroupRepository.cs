@@ -10,15 +10,15 @@ namespace Fizz
 {
     public interface IFizzGroupRepository
     {
-        List<FizzGroup> Groups { get; }
+        List<FizzGroupModel> Groups { get; }
         Dictionary<string, IFizzUserGroup> GroupInvites { get; }
 
         void JoinGroup(string groupId, Action<FizzException> cb);
         void RemoveGroup(string groupId, Action<FizzException> cb);
 
-        Action<FizzGroup> OnGroupAdded { get; set; }
-        Action<FizzGroup> OnGroupUpdated { get; set; }
-        Action<FizzGroup> OnGroupRemoved { get; set; }
-        Action<FizzGroup> OnGroupMembersUpdated { get; set; }
+        Action<FizzGroupModel> OnGroupAdded { get; set; }
+        Action<FizzGroupModel> OnGroupUpdated { get; set; }
+        Action<FizzGroupModel> OnGroupRemoved { get; set; }
+        Action<FizzGroupModel> OnGroupMembersUpdated { get; set; }
     }
 }

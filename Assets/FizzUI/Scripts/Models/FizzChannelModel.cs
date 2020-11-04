@@ -6,7 +6,7 @@ using Fizz.Common;
 
 namespace Fizz.UI.Model
 {
-    public class FizzChannel
+    public class FizzChannelModel
     {
         public string Id { get { return _channelMeta.Id; } }
 
@@ -28,7 +28,7 @@ namespace Fizz.UI.Model
             }
         }
 
-        public FizzChannel(FizzChannelMeta channelMeta)
+        public FizzChannelModel(FizzChannelMeta channelMeta)
         {
             this._channelMeta = channelMeta;
         }
