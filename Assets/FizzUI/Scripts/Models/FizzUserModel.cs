@@ -4,7 +4,7 @@ using Fizz.Common;
 
 namespace Fizz.UI.Model
 {
-    public class FizzUser
+    public class FizzUserModel
     {
         private readonly IFizzClient Client;
 
@@ -16,7 +16,7 @@ namespace Fizz.UI.Model
 
         public bool IsSubscribed { get; private set; }
 
-        public FizzUser(IFizzUser userMeta, IFizzClient client)
+        public FizzUserModel(IFizzUser userMeta, IFizzClient client)
         {
             Id = userMeta.Id;
             Nick = userMeta.Nick;
@@ -27,7 +27,7 @@ namespace Fizz.UI.Model
             Client = client;
         }
 
-        public void Apply(FizzUser user)
+        public void Apply(FizzUserModel user)
         {
             Nick = user.Nick;
             StatusMessage = user.StatusMessage;
