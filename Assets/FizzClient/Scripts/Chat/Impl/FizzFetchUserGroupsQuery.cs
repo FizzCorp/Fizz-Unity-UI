@@ -23,7 +23,7 @@ namespace Fizz.Chat.Impl
 
         public void Next(Action<IList<IFizzUserGroup>, FizzException> callback) 
         {
-            string path = string.Format(FizzConfig.API_PATH_USER_GROUPS, _userId) + "?page_size=1";
+            string path = string.Format(FizzConfig.API_PATH_USER_GROUPS, _userId) + "?page_size=100";
             if (_next != null && _next != string.Empty) 
             {
                 path += "&page=" + _next;
