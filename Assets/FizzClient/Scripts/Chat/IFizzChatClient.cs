@@ -9,9 +9,15 @@ namespace Fizz.Chat
 
         IFizzChannelMessageListener Listener { get; }
 
-        IFizzUsers Users { get; }
+        IFizzGroupListener GroupListener { get; }
 
         IFizzUserListener UserListener { get; }
+
+        IFizzGroups Groups { get; }
+
+        IFizzUsers Users { get; }
+
+        IFizzUserNotifications UserNotifications { get; }
 
         void Subscribe(string channel, Action<FizzException> callback);
 

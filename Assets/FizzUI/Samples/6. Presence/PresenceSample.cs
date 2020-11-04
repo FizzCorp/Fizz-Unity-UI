@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
 using Fizz;
-using Fizz.Chat;
+using Fizz.UI.Model;
 using Fizz.Common;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
-public class PrecenseSample : MonoBehaviour 
+public class PresenceSample : MonoBehaviour 
 {
 	[SerializeField] Dropdown userDropdown;
 	[SerializeField] Button OpenButton;
@@ -33,7 +34,7 @@ public class PrecenseSample : MonoBehaviour
 
 		FizzService.Instance.OnConnected += OnConnected;
 		FizzService.Instance.OnDisconnected += OnDisconnected;
-		FizzService.Instance.OnUserUpdated += OnUserUpdate;
+		FizzService.Instance.UserRepository.OnUserUpdated += OnUserUpdate;
 	}
 
 	void OnDisable ()
@@ -44,7 +45,12 @@ public class PrecenseSample : MonoBehaviour
 
 		FizzService.Instance.OnConnected -= OnConnected;
 		FizzService.Instance.OnDisconnected -= OnDisconnected;
-		FizzService.Instance.OnUserUpdated -= OnUserUpdate;
+		FizzService.Instance.UserRepository.OnUserUpdated -= OnUserUpdate;
+	}
+
+	void OnDestroy()
+	{
+		FizzService.Instance.Close();
 	}
 
 	void HandleOpenButton ()
@@ -84,8 +90,7 @@ public class PrecenseSample : MonoBehaviour
 
 		if (syncReq)
 		{
-			GetUserPresence();
-			SubscribeUsers();
+			GetAndSubscribeUser();
 		}
 	}
 
@@ -95,22 +100,15 @@ public class PrecenseSample : MonoBehaviour
 		CloseButton.interactable = false;
 	}
 
-	void GetUserPresence()
+	void GetAndSubscribeUser()
 	{
 		foreach (Dropdown.OptionData data in userDropdown.options)
 		{
-			FizzService.Instance.GetUser(data.text, (user, ex) =>
+			FizzService.Instance.UserRepository.GetUser(data.text, (user, ex) =>
 			{
+				user.Subscribe(null);
 				SetPresenceStatus(user.Id, user.Online);
 			});
-		}
-	}
-
-	void SubscribeUsers ()
-	{
-		foreach (Dropdown.OptionData data in userDropdown.options)
-		{
-			FizzService.Instance.SubscribeUser(data.text, ex => { });
 		}
 	}
 
@@ -123,9 +121,9 @@ public class PrecenseSample : MonoBehaviour
 		}
 	}
 
-	void OnUserUpdate(Fizz.Chat.FizzUserUpdateEventData eventData)
+	void OnUserUpdate(FizzUser user)
 	{
-		SetPresenceStatus(eventData.UserId, eventData.Online);
+		SetPresenceStatus(user.Id, user.Online);
 	}
 
 	private void SetPresenceStatus(string userId, bool online)
@@ -155,5 +153,10 @@ public class PrecenseSample : MonoBehaviour
 		{
 			statusImages[5].color = color;
 		}
+	}
+
+	public void HandleClose()
+	{
+		SceneManager.LoadScene("SceneSelector");
 	}
 }

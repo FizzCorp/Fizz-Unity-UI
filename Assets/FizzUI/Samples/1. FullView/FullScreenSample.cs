@@ -1,6 +1,9 @@
-﻿using Fizz.UI;
+﻿using Fizz.Chat;
+using Fizz.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Fizz.Common;
+using Fizz.UI.Model;
 
 namespace Fizz.Demo
 {
@@ -8,7 +11,7 @@ namespace Fizz.Demo
     /// FullScreensample is designed to demonstrate how FizzChatView can be used to display a full screen chat 
     /// including channel list and an input bar.
     /// </summary>
-    public class FullScreenSample : MonoBehaviour
+    public class FullScreenSample : MonoBehaviour, IFizzCustomMessageCellViewDataSource
     {
         [SerializeField] FizzChatView chatView;
 
@@ -25,11 +28,13 @@ namespace Fizz.Demo
         private void OnEnable()
         {
             AddChannels();
+            chatView.ShowGroups = true;
         }
 
         private void OnDisable()
         {
             RemoveChannels();
+            chatView.ShowGroups = false;
         }
 
         private void SetupChatView()
@@ -52,7 +57,33 @@ namespace Fizz.Demo
             // Show messaage translations
             chatView.ShowMessageTranslation = true;
 
+            //Set view source for custom data 
+            chatView.SetCustomDataViewSource(this);
+
             chatView.onClose.AddListener (() => gameObject.SetActive (false));
+        }
+
+        RectTransform IFizzCustomMessageCellViewDataSource.GetCustomMessageCellViewNode(FizzChannelMessage message)
+        {
+            try
+            {
+                // Custom data key
+                string KEY_DATA_TYPE = "custom-type";
+
+                if (message != null && message.Data != null
+                    && (message.Data.ContainsKey(KEY_DATA_TYPE) && message.Data[KEY_DATA_TYPE] == "invite"))
+                {
+                    GroupInviteNode node = Instantiate(Resources.Load<GroupInviteNode>("GroupInviteNode"));
+                    node.SetData(message);
+                    return node.GetComponent<RectTransform>();
+                }
+            }
+            catch
+            {
+                FizzLogger.E("Unable to add custom node in message cell.");
+            }
+
+            return null;
         }
 
         private void AddChannels()

@@ -3,6 +3,7 @@ using Fizz.Common;
 using Fizz.UI.Model;
 using UnityEngine;
 using UnityEngine.UI;
+using Fizz.Chat;
 
 namespace Fizz.Demo
 {
@@ -18,10 +19,13 @@ namespace Fizz.Demo
 
         [SerializeField] Button launchButton;
 
-        private readonly FizzChannelMeta globalChannel = new FizzChannelMeta ("global-channel", "Global", "DEMO");
-        private readonly FizzChannelMeta localChannel = new FizzChannelMeta ("local-channel", "Local", "DEMO");
-        private readonly FizzChannelMeta statusChannel = new FizzChannelMeta ("status-channel", "Status", "DEMO");
-        private readonly FizzChannelMeta predefinedInputChannel = new FizzChannelMeta ("predefine-channel", "Global", "DEMO");
+        private readonly List<FizzChannelMeta> channelMetas = new List<FizzChannelMeta>
+                                                                {
+                                                                    new FizzChannelMeta("global-channel", "Global", "DEMO"),
+                                                                    new FizzChannelMeta ("local-channel", "Local", "DEMO"),
+                                                                    new FizzChannelMeta ("status-channel", "Status", "DEMO"),
+                                                                    new FizzChannelMeta ("predefine-channel", "Global", "DEMO")
+                                                                };
 
         private void Awake ()
         {
@@ -57,10 +61,7 @@ namespace Fizz.Demo
                     {
                         FizzLogger.D ("FizzClient Opened Successfully!!");
 
-                        FizzService.Instance.SubscribeChannel (localChannel);
-                        FizzService.Instance.SubscribeChannel (globalChannel);
-                        FizzService.Instance.SubscribeChannel (statusChannel);
-                        FizzService.Instance.SubscribeChannel (predefinedInputChannel);
+                        SubscribeChannels();
                     }
                 });
             }
@@ -188,6 +189,14 @@ namespace Fizz.Demo
         {
             PlayerPrefs.SetInt (USER_TRANSLATION_KEY, isOn ? 1 : 0);
             PlayerPrefs.Save ();
+        }
+
+        private void SubscribeChannels()
+        {
+            foreach (FizzChannelMeta channelMeta in channelMetas)
+            {
+                FizzService.Instance.SubscribeChannel(channelMeta);
+            }
         }
 
         private readonly string USER_ID_KEY = "FIZZ_USER_ID";

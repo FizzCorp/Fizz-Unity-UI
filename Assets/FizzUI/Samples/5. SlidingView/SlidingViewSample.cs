@@ -1,6 +1,7 @@
 ﻿using Fizz.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using Fizz.UI.Model;
 
 namespace Fizz.Demo
 {

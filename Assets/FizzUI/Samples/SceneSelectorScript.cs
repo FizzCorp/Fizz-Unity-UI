@@ -30,6 +30,11 @@ namespace Fizz.Demo
             SceneManager.LoadScene("SlidingViewScene");
         }
 
+        public void HandlePresenceView()
+        {
+            SceneManager.LoadScene("PresenceScene");
+        }
+
         public void HandlePredefinedInputView ()
         {
             SceneManager.LoadScene ("PredefinedInputView");
