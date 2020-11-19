@@ -36,9 +36,9 @@ namespace Fizz
 
         public IFizzLanguageCode Language { get; private set; }
 
-        public FizzGroupRepository GroupRepository { get { if (!_isIntialized) Initialize(); return _groupRepository; }  }
+        public FizzGroupRepository GroupRepository { get { return _groupRepository; }  }
 
-        public FizzUserRepository UserRepository { get { if (!_isIntialized) Initialize(); return _userRepository; } }
+        public FizzUserRepository UserRepository { get { return _userRepository; } }
 
         public List<FizzChannelModel> Channels { get; private set; }
         #endregion
@@ -61,8 +61,6 @@ namespace Fizz
 
         public void Open(string userId, string userName, IFizzLanguageCode lang, FizzServices services, bool tranlation, Action<bool> onDone)
         {
-            if (!_isIntialized) Initialize();
-
             if (string.IsNullOrEmpty(userId))
             {
                 FizzLogger.E("FizzService can not open client with null of empty userId.");
@@ -101,8 +99,6 @@ namespace Fizz
 
         public void Close()
         {
-            if (!_isIntialized) Initialize();
-
             if (Channels != null) Channels.Clear();
             if (channelLookup != null) channelLookup.Clear();
 
@@ -118,8 +114,6 @@ namespace Fizz
 
         public void SubscribeChannel(FizzChannelMeta channelMeta)
         {
-            if (!_isIntialized) Initialize();
-
             if (Client.State == FizzClientState.Closed)
             {
                 FizzLogger.W("FizzClient should be opened before subscribing channel.");
@@ -147,8 +141,6 @@ namespace Fizz
 
         public void UnsubscribeChannel(string channelId)
         {
-            if (!_isIntialized) Initialize();
-
             if (Client.State == FizzClientState.Closed)
             {
                 FizzLogger.W("FizzClient should be opened before unsubscribing channel.");
@@ -175,8 +167,6 @@ namespace Fizz
 
         public void SubscribeUserNotifications(Action<FizzException> cb)
         {
-            if (!_isIntialized) Initialize();
-
             if (Client.State == FizzClientState.Closed)
             {
                 FizzLogger.W("FizzClient should be opened before subscribing user.");
@@ -203,8 +193,6 @@ namespace Fizz
 
         public void UnsubscribeUserNotifications(Action<FizzException> cb)
         {
-            if (!_isIntialized) Initialize();
-
             if (Client.State == FizzClientState.Closed)
             {
                 FizzLogger.W("FizzClient should be opened before unsubscribing user.");
@@ -236,8 +224,6 @@ namespace Fizz
 
         public FizzChannelModel GetChannel(string id)
         {
-            if (!_isIntialized) Initialize();
-
             if (channelLookup.ContainsKey(id))
                 return channelLookup[id];
 
@@ -260,7 +246,7 @@ namespace Fizz
 
         public FizzService ()
         {
-            if (_isIntialized) Initialize();
+            if (!_isIntialized) Initialize();
         }
 
         void Initialize()
