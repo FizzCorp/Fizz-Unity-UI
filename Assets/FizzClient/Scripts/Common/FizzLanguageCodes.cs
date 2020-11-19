@@ -72,7 +72,7 @@ namespace Fizz.Common
 
         public static IList<IFizzLanguageCode> AllLanguages { get { return _languageCodes; } } 
 
-        private static IList<IFizzLanguageCode> _languageCodes = new List<IFizzLanguageCode>()
+        private static readonly IList<IFizzLanguageCode> _languageCodes = new List<IFizzLanguageCode>()
         {
             Afrikaans,
             Arabic,
@@ -147,8 +147,8 @@ namespace Fizz.Common
             public string Language { get { return _language; } }
             public string Code { get { return _code; } }
 
-            private string _language;
-            private string _code;
+            private readonly string _language;
+            private readonly string _code;
 
             internal FizzLanguageCode(string lang, string code)
             {
