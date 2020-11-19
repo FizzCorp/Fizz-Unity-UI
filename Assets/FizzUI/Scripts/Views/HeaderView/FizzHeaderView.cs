@@ -7,9 +7,9 @@ namespace Fizz.UI
 {
     public class FizzHeaderView : FizzBaseComponent
     {
-        [SerializeField] Text TitleLabel;
-        [SerializeField] Button ChannelsButton;
-        [SerializeField] Button CloseButton;
+        [SerializeField] private Text TitleLabel = null;
+        [SerializeField] private Button ChannelsButton = null;
+        [SerializeField] private Button CloseButton = null;
 
         public UnityEvent OnClose;
         public UnityEvent OnChannel;

@@ -8,14 +8,14 @@ using UnityEngine.SceneManagement;
 
 public class PresenceSample : MonoBehaviour 
 {
-	[SerializeField] Dropdown userDropdown;
-	[SerializeField] Button OpenButton;
-	[SerializeField] Button CloseButton;
+	[SerializeField] private Dropdown userDropdown = null;
+	[SerializeField] private Button OpenButton = null;
+	[SerializeField] private Button CloseButton = null;
 
-	[SerializeField] Text[] userLabels;
-	[SerializeField] Image[] statusImages;
+	[SerializeField] private Text[] userLabels = null;
+	[SerializeField] private Image[] statusImages = null;
 
-	[SerializeField] RectTransform usersContainer;
+	[SerializeField] private RectTransform usersContainer = null;
 
 	string userId;
 

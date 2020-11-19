@@ -8,9 +8,9 @@ namespace Fizz.UI
 {
     public class FizzChannelView : FizzBaseComponent
     {
-        [SerializeField] Image BackgroundImage;
-        [SerializeField] Button ActionButton;
-        [SerializeField] Text NameLabel;
+        [SerializeField] private Image BackgroundImage = null;
+        [SerializeField] private Button ActionButton = null;
+        [SerializeField] private Text NameLabel = null;
 
         private FizzChannelModel _channel;
         private Action<FizzChannelModel> _onClickAction;

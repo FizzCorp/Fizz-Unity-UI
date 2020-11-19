@@ -6,8 +6,8 @@ namespace Fizz.UI
 {
     public class FizzTooltipItem : MonoBehaviour
     {
-        [SerializeField] Button button;
-        [SerializeField] Text text;
+        [SerializeField] private Button button = null;
+        [SerializeField] private Text text = null;
 
         private Action<string> _clickEvent;
         private string _id;

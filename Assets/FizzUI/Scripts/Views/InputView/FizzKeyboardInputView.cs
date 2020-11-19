@@ -11,15 +11,15 @@ namespace Fizz.UI
         /// <summary>
         /// The background image.
         /// </summary>
-        [SerializeField] Image BackgroundImage;
+        [SerializeField] private Image BackgroundImage = null;
         /// <summary>
         /// The input field for Editor.
         /// </summary>
-        [SerializeField] InputFieldWithEmoji MessageInputField;
+        [SerializeField] private InputFieldWithEmoji MessageInputField = null;
         /// <summary>
         /// The send button.
         /// </summary>
-        [SerializeField] Button SendButton;
+        [SerializeField] private Button SendButton = null;
 
         private void Awake ()
         {

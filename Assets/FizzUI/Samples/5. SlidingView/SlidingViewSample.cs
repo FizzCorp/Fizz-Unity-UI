@@ -10,8 +10,8 @@ namespace Fizz.Demo
     /// </summary>
     public class SlidingViewSample : MonoBehaviour
     {
-        [SerializeField] FizzChatView chatView;
-        [SerializeField] RectTransform blocker;
+        [SerializeField] private FizzChatView chatView = null;
+        [SerializeField] private RectTransform blocker = null;
 
         private readonly string globalChannelId = "global-channel";
         private readonly string localChannelId = "local-channel";

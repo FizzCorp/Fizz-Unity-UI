@@ -13,11 +13,11 @@ namespace Fizz.UI.Components
         /// <summary>
         /// The translate toggle node.
         /// </summary>
-        [SerializeField] RectTransform TranslateToggleNode;
+        [SerializeField] private RectTransform TranslateToggleNode = null;
         /// <summary>
         /// The translate toggle.
         /// </summary>
-        [SerializeField] Button TranslateToggle;
+        [SerializeField] private Button TranslateToggle = null;
 
         public Action<int> OnTranslateToggle { get; set; }
 

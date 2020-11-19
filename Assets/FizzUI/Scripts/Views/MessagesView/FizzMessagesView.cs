@@ -19,23 +19,23 @@ namespace Fizz.UI
         /// <summary>
         /// The background image.
         /// </summary>
-        [SerializeField] Image BackgroundImage;
+        [SerializeField] private Image BackgroundImage = null;
         /// <summary>
         /// The table view.
         /// </summary>
-        [SerializeField] CustomScrollRect ScrollRect;
+        [SerializeField] private CustomScrollRect ScrollRect = null;
         /// <summary>
         /// The options menu.
         /// </summary>
-        [SerializeField] FizzTooltipComponent OptionsMenu;
+        [SerializeField] private FizzTooltipComponent OptionsMenu = null;
         /// <summary>
         /// Spinner to show when fetching history
         /// </summary>
-        [SerializeField] FizzSpinnerComponent Spinner;
+        [SerializeField] private FizzSpinnerComponent Spinner = null;
         /// <summary>
         /// Scroll Indicator button
         /// </summary>
-        [SerializeField] Button ScrollIndicator;
+        [SerializeField] private Button ScrollIndicator = null;
 
         public bool EnableHistoryFetch { get; set; }
 

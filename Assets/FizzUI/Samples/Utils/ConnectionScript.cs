@@ -9,15 +9,15 @@ namespace Fizz.Demo
 {
     public class ConnectionScript : MonoBehaviour
     {
-        [SerializeField] InputField userIdInputField;
-        [SerializeField] InputField userNameInputField;
-        [SerializeField] Dropdown langCodeDropDown;
-        [SerializeField] Toggle translationToggle;
+        [SerializeField] private InputField userIdInputField = null;
+        [SerializeField] private InputField userNameInputField = null;
+        [SerializeField] private Dropdown langCodeDropDown = null;
+        [SerializeField] private Toggle translationToggle = null;
 
-        [SerializeField] Button connectButton;
-        [SerializeField] Button disconnectButton;
+        [SerializeField] private Button connectButton = null;
+        [SerializeField] private Button disconnectButton = null;
 
-        [SerializeField] Button launchButton;
+        [SerializeField] private Button launchButton = null;
 
         private readonly List<FizzChannelMeta> channelMetas = new List<FizzChannelMeta>
                                                                 {

@@ -5,7 +5,7 @@ namespace Fizz.UI.Extentions
 {
     public class ThemeLabel : MonoBehaviour
     {
-        [SerializeField] ThemeFont Font;
+        [SerializeField] private ThemeFont Font = ThemeFont.Normal;
         
         private void Awake ()
         {

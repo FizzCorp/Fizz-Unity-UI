@@ -12,12 +12,12 @@ namespace Fizz.Demo
     /// </summary>
     public class GroupInviteNode : MonoBehaviour
     {
-        [SerializeField] Text titleLabel;
+        [SerializeField] private Text titleLabel = null;
 
-        [SerializeField] Button acceptButton;
-        [SerializeField] Button rejectButton;
+        [SerializeField] private Button acceptButton = null;
+        [SerializeField] private Button rejectButton = null;
 
-        [SerializeField] RectTransform actionsNode;
+        [SerializeField] private RectTransform actionsNode = null;
 
         private string _groupId;
 

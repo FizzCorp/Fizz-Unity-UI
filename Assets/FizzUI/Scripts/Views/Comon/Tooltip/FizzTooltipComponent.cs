@@ -6,7 +6,7 @@ namespace Fizz.UI
 {
     public class FizzTooltipComponent : MonoBehaviour
     {
-        [SerializeField] FizzTooltipItem botton;
+        [SerializeField] private FizzTooltipItem botton = null;
 
         private Action<string> _callback;
         private List<GameObject> _options;

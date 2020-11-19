@@ -7,7 +7,7 @@ namespace Fizz.UI
 {
     public class FizzChannelGroupView : FizzBaseComponent
     {
-        [SerializeField] Text TitleLabel;
+        [SerializeField] private Text TitleLabel = null;
 
         public int ChannelCount { get; set; }
 

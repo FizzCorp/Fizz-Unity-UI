@@ -13,7 +13,7 @@ namespace Fizz.Demo
     /// </summary>
     public class FullScreenSample : MonoBehaviour, IFizzCustomMessageCellViewDataSource
     {
-        [SerializeField] FizzChatView chatView;
+        [SerializeField] private FizzChatView chatView = null;
 
         // Global Channel Id
         private readonly string globalChannelId = "global-channel";

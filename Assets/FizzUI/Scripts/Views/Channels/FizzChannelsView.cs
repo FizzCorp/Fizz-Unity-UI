@@ -13,10 +13,10 @@ namespace Fizz.UI
 {
     public class FizzChannelsView : FizzBaseComponent
     {
-        [SerializeField] Text TitleLabel; 
-        [SerializeField] FizzChannelView ChannelPrefab;
-        [SerializeField] FizzChannelGroupView ChannelGroupPrefab;
-        [SerializeField] RectTransform Container;
+        [SerializeField] private Text TitleLabel = null; 
+        [SerializeField] private FizzChannelView ChannelPrefab = null;
+        [SerializeField] private FizzChannelGroupView ChannelGroupPrefab = null;
+        [SerializeField] private RectTransform Container = null;
 
         public FizzChannelItemSelectedEvent OnChannelSelected;
 
@@ -268,9 +268,9 @@ namespace Fizz.UI
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                FizzLogger.E ("Something went wrong while calling Channels of FizzService.");
+                FizzLogger.E ("Something went wrong while calling Channels of FizzService." +ex);
             }
         }
 

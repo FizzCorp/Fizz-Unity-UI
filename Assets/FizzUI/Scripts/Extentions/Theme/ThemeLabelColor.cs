@@ -5,7 +5,7 @@ namespace Fizz.UI.Extentions
 {
     public class ThemeLabelColor : MonoBehaviour
     {
-        [SerializeField] ThemeColor Color;
+        [SerializeField] private ThemeColor Color = ThemeColor.Primary;
 
         private void Awake ()
         {

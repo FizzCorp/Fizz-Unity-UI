@@ -11,7 +11,7 @@ namespace Fizz.Demo
     /// </summary>
     public class TabViewSample : MonoBehaviour
     {
-        [SerializeField] RectTransform[] tabContainers;
+        [SerializeField] private RectTransform[] tabContainers = null;
 
         // Global channel Id
         private readonly string globalChannelId = "global-channel";

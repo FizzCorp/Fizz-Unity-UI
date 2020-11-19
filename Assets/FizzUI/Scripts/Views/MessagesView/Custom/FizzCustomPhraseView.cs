@@ -6,7 +6,7 @@ namespace Fizz.UI
 {
     public class FizzCustomPhraseView : IFizzCustomMessageCellView
     {
-        [SerializeField] Text PhraseLabel;
+        [SerializeField] private Text PhraseLabel = null;
 
         private string phrase;
 

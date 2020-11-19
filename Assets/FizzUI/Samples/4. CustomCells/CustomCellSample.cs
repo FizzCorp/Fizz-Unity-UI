@@ -14,8 +14,8 @@ namespace Fizz.Demo
     /// </summary>
     public class CustomCellSample : MonoBehaviour, IFizzCustomMessageCellViewDataSource
     {
-        [SerializeField] FizzChatView chatView;
-        [SerializeField] Button sendStatusButton;
+        [SerializeField] private FizzChatView chatView = null;
+        [SerializeField] private Button sendStatusButton = null;
 
         // Custom data keys
         public static string KEY_DATA_TYPE = "custom-type";

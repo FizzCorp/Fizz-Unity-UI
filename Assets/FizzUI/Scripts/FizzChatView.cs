@@ -16,10 +16,10 @@ namespace Fizz.UI
     /// </summary>
     public class FizzChatView : FizzBaseComponent
     {
-        [SerializeField] FizzHeaderView HeaderView;
-        [SerializeField] FizzChannelsView ChannelsView;
-        [SerializeField] FizzMessagesView MessagesView;
-        [SerializeField] FizzInputView InputView;
+        [SerializeField] private FizzHeaderView HeaderView = null;
+        [SerializeField] private FizzChannelsView ChannelsView = null;
+        [SerializeField] private FizzMessagesView MessagesView = null;
+        [SerializeField] private FizzInputView InputView = null;
 
         private bool _showChannels = true;
         private bool _showGroups = false;
