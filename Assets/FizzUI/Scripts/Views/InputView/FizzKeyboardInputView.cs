@@ -9,10 +9,6 @@ namespace Fizz.UI
     public class FizzKeyboardInputView : FizzInputView
     {
         /// <summary>
-        /// The background image.
-        /// </summary>
-        [SerializeField] private Image BackgroundImage = null;
-        /// <summary>
         /// The input field for Editor.
         /// </summary>
         [SerializeField] private InputFieldWithEmoji MessageInputField = null;

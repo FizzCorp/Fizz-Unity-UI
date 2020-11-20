@@ -8,7 +8,6 @@ namespace Fizz.UI
 {
     public class FizzChannelView : FizzBaseComponent
     {
-        [SerializeField] private Image BackgroundImage = null;
         [SerializeField] private Button ActionButton = null;
         [SerializeField] private Text NameLabel = null;
 
@@ -25,10 +24,6 @@ namespace Fizz.UI
 
         public void SetSelected (bool selected)
         {
-            //Color color;
-            //ColorUtility.TryParseHtmlString ("#EEEEEEFF", out color);
-
-            //BackgroundImage.color = selected ? color : Color.white;
             ActionButton.interactable = !selected;
         }
 

@@ -17,10 +17,6 @@ namespace Fizz.UI
     public class FizzMessagesView : FizzBaseComponent, ICustomScrollRectDataSource
     {
         /// <summary>
-        /// The background image.
-        /// </summary>
-        [SerializeField] private Image BackgroundImage = null;
-        /// <summary>
         /// The table view.
         /// </summary>
         [SerializeField] private CustomScrollRect ScrollRect = null;
