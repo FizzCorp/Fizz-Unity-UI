@@ -1,7 +1,6 @@
 ﻿using Fizz.UI.Components;
 using Fizz.UI.Core;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Fizz.UI

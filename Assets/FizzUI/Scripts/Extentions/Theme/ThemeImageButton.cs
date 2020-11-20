@@ -1,5 +1,4 @@
-﻿using Fizz.UI.Core;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Fizz.UI.Extentions

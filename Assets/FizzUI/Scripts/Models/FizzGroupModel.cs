@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Fizz.Chat;
-using Fizz.Common;
+﻿using Fizz.Chat;
 
 namespace Fizz.UI.Model
 {

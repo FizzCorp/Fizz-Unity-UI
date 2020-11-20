@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using Fizz.Chat;
+﻿using Fizz.Chat;
 using Fizz.Common;
 using UnityEngine;
 using UnityEngine.UI;

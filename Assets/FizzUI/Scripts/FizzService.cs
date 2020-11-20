@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Fizz.Chat;
 using Fizz.Common;
 using Fizz.UI.Model;
-using UnityEngine;
 
 namespace Fizz
 {

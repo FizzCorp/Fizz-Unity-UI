@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 using Fizz.Common;
 using Fizz.Common.Json;

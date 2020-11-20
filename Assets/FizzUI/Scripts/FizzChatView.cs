@@ -1,5 +1,4 @@
 ﻿using Fizz.Common;
-using Fizz.Chat;
 using Fizz.UI.Core;
 using Fizz.UI.Model;
 using System.Collections.Generic;

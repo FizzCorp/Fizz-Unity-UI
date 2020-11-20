@@ -1,5 +1,4 @@
-﻿using Fizz.Common;
-using Fizz.Common.Json;
+﻿using Fizz.Common.Json;
 
 namespace Fizz.Chat.Impl
 {

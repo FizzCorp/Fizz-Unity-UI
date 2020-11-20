@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using Fizz;
 using Fizz.UI;
 using Fizz.Chat;
 using Fizz.Chat.Impl;
