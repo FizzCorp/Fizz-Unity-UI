@@ -12,11 +12,11 @@ namespace Fizz.UI.Components
 		/// <summary>
 		/// Chat message delivery status image.
 		/// </summary>
-		[SerializeField] Image DeliveryStatusImage;
+		[SerializeField] private Image DeliveryStatusImage = null;
 		/// <summary>
 		/// Chat message sent status image.
 		/// </summary>
-		[SerializeField] Image SentStatusImage;
+		[SerializeField] private Image SentStatusImage = null;
 
 		#region Public Methods
 

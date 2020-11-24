@@ -317,6 +317,7 @@ namespace Fizz.Chat.Impl
         private FizzGroupUpdateEventData ParseGroupUpdateEventData(FizzTopicMessage message) {
             JSONClass payload = JSONNode.Parse(message.Data).AsObject;
             FizzGroupUpdateEventData update = new FizzGroupUpdateEventData();
+            update.GroupId = message.From;
             string reason = payload["reason"];
             FizzLogger.D(message.Data);
 

@@ -12,15 +12,15 @@ namespace Fizz.Demo
     /// </summary>
     public class StatusNode : MonoBehaviour
     {
-        [SerializeField] Text statusLabel;
+        [SerializeField] private Text statusLabel = null;
 
-        [SerializeField] Button happyButton;
-        [SerializeField] Button sadButton;
-        [SerializeField] Button angryButton;
-        [SerializeField] Button boredButton;
-        [SerializeField] Button deleteButton;
+        [SerializeField] private Button happyButton = null;
+        [SerializeField] private Button sadButton = null;
+        [SerializeField] private Button angryButton = null;
+        [SerializeField] private Button boredButton = null;
+        [SerializeField] private Button deleteButton = null;
 
-        [SerializeField] RectTransform actionsNode;
+        [SerializeField] private RectTransform actionsNode = null;
 
         private FizzChannelMessage _message;
 

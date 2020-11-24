@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using Fizz;
 using Fizz.UI;
 using Fizz.Chat;
 using Fizz.Chat.Impl;
@@ -93,6 +90,7 @@ namespace Fizz
             FizzGroupModel group = GetGroup(eventData.GroupId);
             if (group != null && OnGroupUpdated != null)
             {
+                group.Update(eventData);
                 OnGroupUpdated.Invoke(group);
             }
         }

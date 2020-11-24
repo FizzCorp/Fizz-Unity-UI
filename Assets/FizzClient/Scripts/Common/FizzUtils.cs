@@ -60,7 +60,7 @@ namespace Fizz.Common
             return cur_time;
         }
 
-        public static IDictionary<string, string> headers (string sessionToken)
+        public static IDictionary<string, string> Headers (string sessionToken)
         {
             return new Dictionary<string, string> {
                     { FizzConfig.API_HEADER_SESSION_TOKEN, sessionToken }

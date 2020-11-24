@@ -4,8 +4,8 @@ namespace Fizz.UI
 {
     public class FizzSpinnerComponent : MonoBehaviour
     {
-        [SerializeField] RectTransform target;
-        [SerializeField] float rotationSpeed = 5;
+        [SerializeField] private RectTransform target = null;
+        [SerializeField] private float rotationSpeed = 5;
 
         private bool rotationEnabled = false;
 

@@ -13,10 +13,10 @@ namespace Fizz.UI
 {
     public class FizzChannelsView : FizzBaseComponent
     {
-        [SerializeField] Text TitleLabel; 
-        [SerializeField] FizzChannelView ChannelPrefab;
-        [SerializeField] FizzChannelGroupView ChannelGroupPrefab;
-        [SerializeField] RectTransform Container;
+        [SerializeField] private Text TitleLabel = null; 
+        [SerializeField] private FizzChannelView ChannelPrefab = null;
+        [SerializeField] private FizzChannelGroupView ChannelGroupPrefab = null;
+        [SerializeField] private RectTransform Container = null;
 
         public FizzChannelItemSelectedEvent OnChannelSelected;
 
@@ -133,6 +133,21 @@ namespace Fizz.UI
             if (RemoveChannelInternal(group.Channel.Id) && CurrentSelectedChannel == null && _channelsLookup.Count > 0)
             {
                 HandleChannelSelected(_channelsLookup.Values.First().GetChannel());
+            }
+        }
+
+        public void UpdateGroup(FizzGroupModel group)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            if (_channelsLookup.ContainsKey(group.Channel.Id))
+            {
+                FizzChannelView button = _channelsLookup[group.Channel.Id];
+                button.UpdateNameLabel(group.Channel.Name);
+                button.gameObject.name = group.Channel.Name;
             }
         }
 
@@ -268,9 +283,9 @@ namespace Fizz.UI
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                FizzLogger.E ("Something went wrong while calling Channels of FizzService.");
+                FizzLogger.E ("Something went wrong while calling Channels of FizzService." +ex);
             }
         }
 

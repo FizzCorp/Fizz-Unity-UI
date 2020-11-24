@@ -9,8 +9,8 @@ namespace Fizz.Chat.Impl
     public class FizzFetchUserGroupsQuery: IFizzFetchUserGroupsQuery 
     {
         private string _next;
-        private string _userId;
-        private IFizzAuthRestClient _restClient;
+        private readonly string _userId;
+        private readonly IFizzAuthRestClient _restClient;
 
         public FizzFetchUserGroupsQuery(string userId, IFizzAuthRestClient restClient) 
         {

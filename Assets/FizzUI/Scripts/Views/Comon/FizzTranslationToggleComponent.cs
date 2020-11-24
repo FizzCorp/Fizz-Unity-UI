@@ -6,8 +6,8 @@ namespace Fizz.UI
 {
     public class FizzTranslationToggleComponent : MonoBehaviour
     {
-        [SerializeField] Image orignalImage;
-        [SerializeField] Image translateImage;
+        [SerializeField] private Image orignalImage = null;
+        [SerializeField] private Image translateImage = null;
         
         bool _isOriginal;
         

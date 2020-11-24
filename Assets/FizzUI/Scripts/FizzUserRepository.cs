@@ -1,170 +1,172 @@
 ﻿using System;
 using System.Collections.Generic;
-using Fizz;
 using Fizz.Chat;
 using Fizz.Common;
 using Fizz.UI.Model;
 
-public class FizzUserRepository : IFizzUserRepository
+namespace Fizz
 {
-    private IFizzClient Client { get; set; }
-    private Dictionary<string, FizzUserModel> Users { get; set; }
-
-    private Queue<GetUserRequest> requestQueue = new Queue<GetUserRequest>();
-
-    #region Events
-    public Action<FizzUserModel> OnUserUpdated { get; set; }
-    #endregion
-
-    public FizzUserRepository(IFizzClient client)
+    public class FizzUserRepository : IFizzUserRepository
     {
-        Client = client;
-        Users = new Dictionary<string, FizzUserModel>();
-    }
+        private IFizzClient Client { get; set; }
+        private Dictionary<string, FizzUserModel> Users { get; set; }
 
-    public void Open(string userId)
-    {
-        AddInternalListeners();
-    }
+        private Queue<GetUserRequest> requestQueue = new Queue<GetUserRequest>();
 
-    public void Close()
-    {
-        Users.Clear();
-        RemoveInternalListeners();
-    }
+        #region Events
+        public Action<FizzUserModel> OnUserUpdated { get; set; }
+        #endregion
 
-    void AddInternalListeners()
-    {
-        try
+        public FizzUserRepository(IFizzClient client)
         {
-            Client.Chat.Listener.OnConnected += Listener_OnConnected;
-            Client.Chat.Listener.OnDisconnected += Listener_OnDisconnected;
-            Client.Chat.UserListener.OnUserUpdated += Listener_OnUserUpdated;
+            Client = client;
+            Users = new Dictionary<string, FizzUserModel>();
         }
-        catch (FizzException ex)
-        {
-            FizzLogger.E("Unable to bind group listeners. " + ex.Message);
-        }
-    }
 
-    void RemoveInternalListeners()
-    {
-        try
+        public void Open(string userId)
         {
-            Client.Chat.Listener.OnConnected -= Listener_OnConnected;
-            Client.Chat.Listener.OnDisconnected -= Listener_OnDisconnected;
-            Client.Chat.UserListener.OnUserUpdated -= Listener_OnUserUpdated;
+            AddInternalListeners();
         }
-        catch (FizzException ex)
-        {
-            FizzLogger.E("Unable to unbind group listeners. " + ex.Message);
-        }
-    }
 
-    void Listener_OnUserUpdated(FizzUserUpdateEventData eventData)
-    {
-        if (OnUserUpdated != null)
+        public void Close()
         {
-            FizzUserModel user = Users[eventData.UserId];
-            if (user != null)
+            Users.Clear();
+            RemoveInternalListeners();
+        }
+
+        void AddInternalListeners()
+        {
+            try
             {
-                user.Update(eventData);
-                OnUserUpdated.Invoke(user);
+                Client.Chat.Listener.OnConnected += Listener_OnConnected;
+                Client.Chat.Listener.OnDisconnected += Listener_OnDisconnected;
+                Client.Chat.UserListener.OnUserUpdated += Listener_OnUserUpdated;
+            }
+            catch (FizzException ex)
+            {
+                FizzLogger.E("Unable to bind group listeners. " + ex.Message);
             }
         }
-    }
 
-    void Listener_OnDisconnected(FizzException obj)
-    {
-
-    }
-
-    void Listener_OnConnected(bool syncRequired)
-    {
-        if (syncRequired)
+        void RemoveInternalListeners()
         {
-            FetchProfilesAndSubscibe();
-        }
-    }
-
-    public void GetUser(string userId, Action<FizzUserModel, FizzException> cb)
-    {
-        if (Client.State == FizzClientState.Closed)
-        {
-            FizzLogger.W("FizzClient should be opened before fetching user.");
-            return;
-        }
-
-        if (userId == null)
-        {
-            FizzLogger.E("FizzClient unable to fetch, userId is null.");
-            return;
-        }
-
-        requestQueue.Enqueue(new GetUserRequest(userId, cb));
-        if (requestQueue.Count > 1)
-        {
-            return;
-        }
-        GetUser(requestQueue.Peek());
-    }
-
-
-    private void GetUser(GetUserRequest request)
-    {
-        Client.Chat.Users.GetUser(request.UserId, (userMeta, ex) =>
-        {
-            FizzUserModel user = null;
-            if (ex == null)
+            try
             {
-                user = new FizzUserModel(userMeta, Client);
-                
-                Users[user.Id] = user;
+                Client.Chat.Listener.OnConnected -= Listener_OnConnected;
+                Client.Chat.Listener.OnDisconnected -= Listener_OnDisconnected;
+                Client.Chat.UserListener.OnUserUpdated -= Listener_OnUserUpdated;
             }
-            FizzUtils.DoCallback(user, ex, request.Callback);
-            requestQueue.Dequeue();
-            if (requestQueue.Count > 0)
+            catch (FizzException ex)
             {
-                GetUser(requestQueue.Peek());
+                FizzLogger.E("Unable to unbind group listeners. " + ex.Message);
             }
-        });
-    }
-
-    private void FetchProfilesAndSubscibe()
-    {
-        if (Client.State == FizzClientState.Closed)
-        {
-            FizzLogger.W("FizzClient should be opened before subscribing user.");
-            return;
         }
 
-        foreach (KeyValuePair<string, FizzUserModel> entry in Users)
+        void Listener_OnUserUpdated(FizzUserUpdateEventData eventData)
         {
-            GetUser(entry.Key, (user, ex) =>
+            if (OnUserUpdated != null)
             {
+                FizzUserModel user = Users[eventData.UserId];
+                if (user != null)
+                {
+                    user.Update(eventData);
+                    OnUserUpdated.Invoke(user);
+                }
+            }
+        }
+
+        void Listener_OnDisconnected(FizzException obj)
+        {
+
+        }
+
+        void Listener_OnConnected(bool syncRequired)
+        {
+            if (syncRequired)
+            {
+                FetchProfilesAndSubscibe();
+            }
+        }
+
+        public void GetUser(string userId, Action<FizzUserModel, FizzException> cb)
+        {
+            if (Client.State == FizzClientState.Closed)
+            {
+                FizzLogger.W("FizzClient should be opened before fetching user.");
+                return;
+            }
+
+            if (userId == null)
+            {
+                FizzLogger.E("FizzClient unable to fetch, userId is null.");
+                return;
+            }
+
+            requestQueue.Enqueue(new GetUserRequest(userId, cb));
+            if (requestQueue.Count > 1)
+            {
+                return;
+            }
+            GetUser(requestQueue.Peek());
+        }
+
+
+        private void GetUser(GetUserRequest request)
+        {
+            Client.Chat.Users.GetUser(request.UserId, (userMeta, ex) =>
+            {
+                FizzUserModel user = null;
                 if (ex == null)
                 {
-                    FizzUserModel existingUser = entry.Value;
-                    existingUser.Apply(user);
-                    if (existingUser.IsSubscribed)
-                    {
-                        existingUser.Subscribe(null);
-                    }
+                    user = new FizzUserModel(userMeta, Client);
+
+                    Users[user.Id] = user;
+                }
+                FizzUtils.DoCallback(user, ex, request.Callback);
+                requestQueue.Dequeue();
+                if (requestQueue.Count > 0)
+                {
+                    GetUser(requestQueue.Peek());
                 }
             });
         }
-    }
 
-    private class GetUserRequest
-    {
-        public string UserId { get; private set; }
-        public Action<FizzUserModel, FizzException> Callback { get; private set; }
-
-        public GetUserRequest(string userId, Action<FizzUserModel, FizzException> cb)
+        private void FetchProfilesAndSubscibe()
         {
-            UserId = userId;
-            Callback = cb;
-        }
-    }
+            if (Client.State == FizzClientState.Closed)
+            {
+                FizzLogger.W("FizzClient should be opened before subscribing user.");
+                return;
+            }
 
+            foreach (KeyValuePair<string, FizzUserModel> entry in Users)
+            {
+                GetUser(entry.Key, (user, ex) =>
+                {
+                    if (ex == null)
+                    {
+                        FizzUserModel existingUser = entry.Value;
+                        existingUser.Apply(user);
+                        if (existingUser.IsSubscribed)
+                        {
+                            existingUser.Subscribe(null);
+                        }
+                    }
+                });
+            }
+        }
+
+        private class GetUserRequest
+        {
+            public string UserId { get; private set; }
+            public Action<FizzUserModel, FizzException> Callback { get; private set; }
+
+            public GetUserRequest(string userId, Action<FizzUserModel, FizzException> cb)
+            {
+                UserId = userId;
+                Callback = cb;
+            }
+        }
+
+    }
 }

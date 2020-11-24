@@ -1,7 +1,6 @@
 ﻿using Fizz.UI.Components;
 using Fizz.UI.Core;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace Fizz.UI
@@ -9,17 +8,13 @@ namespace Fizz.UI
     public class FizzKeyboardInputView : FizzInputView
     {
         /// <summary>
-        /// The background image.
-        /// </summary>
-        [SerializeField] Image BackgroundImage;
-        /// <summary>
         /// The input field for Editor.
         /// </summary>
-        [SerializeField] InputFieldWithEmoji MessageInputField;
+        [SerializeField] private InputFieldWithEmoji MessageInputField = null;
         /// <summary>
         /// The send button.
         /// </summary>
-        [SerializeField] Button SendButton;
+        [SerializeField] private Button SendButton = null;
 
         private void Awake ()
         {

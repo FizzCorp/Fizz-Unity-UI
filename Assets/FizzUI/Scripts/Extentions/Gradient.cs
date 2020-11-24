@@ -17,25 +17,25 @@ namespace Fizz.UI.Extentions
     public class Gradient : BaseMeshEffect
     {
         [SerializeField]
-        Type _gradientType;
+        private Type _gradientType;
 
         [SerializeField]
-        Blend _blendMode = Blend.Multiply;
+        private Blend _blendMode = Blend.Multiply;
 
         [SerializeField]
         [Tooltip("Add vertices to display complex gradients. Turn off if your shape is already very complex, like text.")]
-        bool _modifyVertices = true;
+        private bool _modifyVertices = true;
 
         [SerializeField]
         [Range(-1, 1)]
-        float _offset = 0f;
+        private float _offset = 0f;
 
         [SerializeField]
         [Range(0.1f, 10)]
-        float _zoom = 1f;
+        private float _zoom = 1f;
 
         [SerializeField]
-        UnityEngine.Gradient _effectGradient = new UnityEngine.Gradient() { colorKeys = new GradientColorKey[] { new GradientColorKey(Color.black, 0), new GradientColorKey(Color.white, 1) } };
+        private UnityEngine.Gradient _effectGradient = new UnityEngine.Gradient() { colorKeys = new GradientColorKey[] { new GradientColorKey(Color.black, 0), new GradientColorKey(Color.white, 1) } };
 
         #region Properties
         public Blend BlendMode

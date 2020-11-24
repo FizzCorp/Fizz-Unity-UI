@@ -5,7 +5,7 @@ namespace Fizz.UI.Extentions
 {
     public class ThemeImage : MonoBehaviour
     {
-        [SerializeField] ThemeSprite Sprite;
+        [SerializeField] private ThemeSprite Sprite = ThemeSprite.CloseButton;
 
         private void Awake ()
         {

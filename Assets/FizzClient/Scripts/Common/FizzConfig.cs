@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Fizz.Common
+﻿namespace Fizz.Common
 {
     public class FizzConfig
     {

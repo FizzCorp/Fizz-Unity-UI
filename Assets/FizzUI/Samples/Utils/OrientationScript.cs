@@ -4,7 +4,7 @@ namespace Fizz.Demo
 {
     public class OrientationScript : MonoBehaviour
     {
-        [SerializeField] ScreenOrientation Orientation;
+        [SerializeField] private ScreenOrientation Orientation = ScreenOrientation.Portrait;
 
         void Start()
         {

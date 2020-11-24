@@ -11,7 +11,7 @@ namespace Fizz.UI.Extentions
         private static FizzTheme instance;
 
         [SerializeField]
-        private FizzThemeData currentTheme;
+        private FizzThemeData currentTheme = null;
 
         public static FizzThemeData FizzThemeData
         {

@@ -8,7 +8,7 @@ namespace Fizz.UI.Core
     /// </summary>
     public class FizzBaseComponent : MonoBehaviour
     {
-        [SerializeField] RectTransform ConnectionNode;
+        [SerializeField] private RectTransform ConnectionNode = null;
 
         private RectTransform rectTransform;
 

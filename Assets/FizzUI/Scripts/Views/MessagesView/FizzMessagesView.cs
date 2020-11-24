@@ -17,25 +17,21 @@ namespace Fizz.UI
     public class FizzMessagesView : FizzBaseComponent, ICustomScrollRectDataSource
     {
         /// <summary>
-        /// The background image.
-        /// </summary>
-        [SerializeField] Image BackgroundImage;
-        /// <summary>
         /// The table view.
         /// </summary>
-        [SerializeField] CustomScrollRect ScrollRect;
+        [SerializeField] private CustomScrollRect ScrollRect = null;
         /// <summary>
         /// The options menu.
         /// </summary>
-        [SerializeField] FizzTooltipComponent OptionsMenu;
+        [SerializeField] private FizzTooltipComponent OptionsMenu = null;
         /// <summary>
         /// Spinner to show when fetching history
         /// </summary>
-        [SerializeField] FizzSpinnerComponent Spinner;
+        [SerializeField] private FizzSpinnerComponent Spinner = null;
         /// <summary>
         /// Scroll Indicator button
         /// </summary>
-        [SerializeField] Button ScrollIndicator;
+        [SerializeField] private Button ScrollIndicator = null;
 
         public bool EnableHistoryFetch { get; set; }
 

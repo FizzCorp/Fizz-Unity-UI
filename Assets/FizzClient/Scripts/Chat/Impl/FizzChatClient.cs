@@ -25,7 +25,6 @@ namespace Fizz.Chat.Impl
 
         private string _userId;
         private IFizzAuthRestClient _restClient;
-        private readonly FizzSessionRepository sessionRepository;
 
         public IFizzChannelMessageListener Listener
         {
