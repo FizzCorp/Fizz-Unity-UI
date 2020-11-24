@@ -53,5 +53,10 @@ namespace Fizz.UI
                 _onClickAction.Invoke (_channel);
             }
         }
+
+        public void UpdateNameLabel(string label)
+        {
+            NameLabel.text = label;
+        }
     }
 }

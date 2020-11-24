@@ -182,6 +182,7 @@ namespace Fizz.UI
             HeaderView.OnClose.AddListener(HandleCloseButton);
 
             FizzService.Instance.GroupRepository.OnGroupAdded += OnGroupAdded;
+            FizzService.Instance.GroupRepository.OnGroupUpdated += OnGroupUpdated;
             FizzService.Instance.GroupRepository.OnGroupRemoved += OnGroupRemoved;
             FizzService.Instance.GroupRepository.OnGroupMembersUpdated += OnGroupMembersUpdated;
 
@@ -199,6 +200,7 @@ namespace Fizz.UI
             HeaderView.OnClose.RemoveListener(HandleCloseButton);
 
             FizzService.Instance.GroupRepository.OnGroupAdded -= OnGroupAdded;
+            FizzService.Instance.GroupRepository.OnGroupUpdated -= OnGroupUpdated;
             FizzService.Instance.GroupRepository.OnGroupRemoved -= OnGroupRemoved;
             FizzService.Instance.GroupRepository.OnGroupMembersUpdated -= OnGroupMembersUpdated;
         }
@@ -414,6 +416,18 @@ namespace Fizz.UI
                 return;
 
             ChannelsView.AddGroup(group);
+        }
+
+        void OnGroupUpdated(FizzGroupModel group)
+        {
+            if (!_showGroups)
+                return;
+
+            ChannelsView.UpdateGroup(group);
+            if (ChannelsView.CurrentSelectedChannel == group.Channel)
+            {
+                HeaderView.SetTitleText(group.Channel.Name);
+            }
         }
 
         void OnGroupRemoved(FizzGroupModel group)

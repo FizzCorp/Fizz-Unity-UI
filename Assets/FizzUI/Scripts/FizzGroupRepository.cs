@@ -90,6 +90,7 @@ namespace Fizz
             FizzGroupModel group = GetGroup(eventData.GroupId);
             if (group != null && OnGroupUpdated != null)
             {
+                group.Update(eventData);
                 OnGroupUpdated.Invoke(group);
             }
         }

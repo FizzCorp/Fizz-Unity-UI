@@ -136,6 +136,21 @@ namespace Fizz.UI
             }
         }
 
+        public void UpdateGroup(FizzGroupModel group)
+        {
+            if (!_initialized)
+            {
+                Initialize();
+            }
+
+            if (_channelsLookup.ContainsKey(group.Channel.Id))
+            {
+                FizzChannelView button = _channelsLookup[group.Channel.Id];
+                button.UpdateNameLabel(group.Channel.Name);
+                button.gameObject.name = group.Channel.Name;
+            }
+        }
+
         public bool SetGroup(FizzGroupModel group)
         {
             if (!_initialized)
