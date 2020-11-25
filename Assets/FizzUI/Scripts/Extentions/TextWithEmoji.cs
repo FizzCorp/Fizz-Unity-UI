@@ -14,7 +14,7 @@ namespace Fizz.UI.Components
     public class TextWithEmoji : Text {
         [FormerlySerializedAs ("config")]
         [SerializeField]
-        EmojiConfig m_Config;
+        private EmojiConfig m_Config;
         EmojiConfig config {
             get {
                 return m_Config;

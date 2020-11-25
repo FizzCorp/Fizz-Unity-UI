@@ -9,7 +9,7 @@ namespace Fizz.Demo
     /// </summary>
     public class ChatPopup : MonoBehaviour
     {
-        [SerializeField] FizzChatView chatView;
+        [SerializeField] private FizzChatView chatView = null;
 
         private void Awake ()
         {

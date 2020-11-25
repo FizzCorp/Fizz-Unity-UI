@@ -1,5 +1,4 @@
 ﻿using Fizz.Common;
-using Fizz.Chat;
 using Fizz.UI.Core;
 using Fizz.UI.Model;
 using System.Collections.Generic;
@@ -16,10 +15,10 @@ namespace Fizz.UI
     /// </summary>
     public class FizzChatView : FizzBaseComponent
     {
-        [SerializeField] FizzHeaderView HeaderView;
-        [SerializeField] FizzChannelsView ChannelsView;
-        [SerializeField] FizzMessagesView MessagesView;
-        [SerializeField] FizzInputView InputView;
+        [SerializeField] private FizzHeaderView HeaderView = null;
+        [SerializeField] private FizzChannelsView ChannelsView = null;
+        [SerializeField] private FizzMessagesView MessagesView = null;
+        [SerializeField] private FizzInputView InputView = null;
 
         private bool _showChannels = true;
         private bool _showGroups = false;
@@ -183,6 +182,7 @@ namespace Fizz.UI
             HeaderView.OnClose.AddListener(HandleCloseButton);
 
             FizzService.Instance.GroupRepository.OnGroupAdded += OnGroupAdded;
+            FizzService.Instance.GroupRepository.OnGroupUpdated += OnGroupUpdated;
             FizzService.Instance.GroupRepository.OnGroupRemoved += OnGroupRemoved;
             FizzService.Instance.GroupRepository.OnGroupMembersUpdated += OnGroupMembersUpdated;
 
@@ -200,6 +200,7 @@ namespace Fizz.UI
             HeaderView.OnClose.RemoveListener(HandleCloseButton);
 
             FizzService.Instance.GroupRepository.OnGroupAdded -= OnGroupAdded;
+            FizzService.Instance.GroupRepository.OnGroupUpdated -= OnGroupUpdated;
             FizzService.Instance.GroupRepository.OnGroupRemoved -= OnGroupRemoved;
             FizzService.Instance.GroupRepository.OnGroupMembersUpdated -= OnGroupMembersUpdated;
         }
@@ -415,6 +416,18 @@ namespace Fizz.UI
                 return;
 
             ChannelsView.AddGroup(group);
+        }
+
+        void OnGroupUpdated(FizzGroupModel group)
+        {
+            if (!_showGroups)
+                return;
+
+            ChannelsView.UpdateGroup(group);
+            if (ChannelsView.CurrentSelectedChannel == group.Channel)
+            {
+                HeaderView.SetTitleText(group.Channel.Name);
+            }
         }
 
         void OnGroupRemoved(FizzGroupModel group)

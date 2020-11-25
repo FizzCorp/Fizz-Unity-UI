@@ -1,162 +1,163 @@
-﻿using System.Collections.Generic;
-using Fizz;
-using Fizz.UI.Model;
+﻿using Fizz.UI.Model;
 using Fizz.Common;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-public class PresenceSample : MonoBehaviour 
+namespace Fizz.Demo
 {
-	[SerializeField] Dropdown userDropdown;
-	[SerializeField] Button OpenButton;
-	[SerializeField] Button CloseButton;
-
-	[SerializeField] Text[] userLabels;
-	[SerializeField] Image[] statusImages;
-
-	[SerializeField] RectTransform usersContainer;
-
-	string userId;
-
-	void Start ()
+	public class PresenceSample : MonoBehaviour
 	{
-		userId = "presence-user-01";
+		[SerializeField] private Dropdown userDropdown = null;
+		[SerializeField] private Button OpenButton = null;
+		[SerializeField] private Button CloseButton = null;
 
-		ResetUsers ();
-	}
+		[SerializeField] private Text[] userLabels = null;
+		[SerializeField] private Image[] statusImages = null;
 
-	void OnEnable ()
-	{
-		userDropdown.onValueChanged.AddListener (HandleDropdownChange);
-		OpenButton.onClick.AddListener (HandleOpenButton);
-		CloseButton.onClick.AddListener (HandleCloseButton);
+		[SerializeField] private RectTransform usersContainer = null;
 
-		FizzService.Instance.OnConnected += OnConnected;
-		FizzService.Instance.OnDisconnected += OnDisconnected;
-		FizzService.Instance.UserRepository.OnUserUpdated += OnUserUpdate;
-	}
+		string userId;
 
-	void OnDisable ()
-	{
-		userDropdown.onValueChanged.RemoveListener (HandleDropdownChange);
-		OpenButton.onClick.RemoveListener (HandleOpenButton);
-		CloseButton.onClick.RemoveListener (HandleCloseButton);
-
-		FizzService.Instance.OnConnected -= OnConnected;
-		FizzService.Instance.OnDisconnected -= OnDisconnected;
-		FizzService.Instance.UserRepository.OnUserUpdated -= OnUserUpdate;
-	}
-
-	void OnDestroy()
-	{
-		FizzService.Instance.Close();
-	}
-
-	void HandleOpenButton ()
-	{
-		FizzService.Instance.Open (userId, userId, FizzLanguageCodes.English, FizzServices.All, false, isDone => 
+		void Start()
 		{
-			if (isDone)
+			userId = "presence-user-01";
+
+			ResetUsers();
+		}
+
+		void OnEnable()
+		{
+			userDropdown.onValueChanged.AddListener(HandleDropdownChange);
+			OpenButton.onClick.AddListener(HandleOpenButton);
+			CloseButton.onClick.AddListener(HandleCloseButton);
+
+			FizzService.Instance.OnConnected += OnConnected;
+			FizzService.Instance.OnDisconnected += OnDisconnected;
+			FizzService.Instance.UserRepository.OnUserUpdated += OnUserUpdate;
+		}
+
+		void OnDisable()
+		{
+			userDropdown.onValueChanged.RemoveListener(HandleDropdownChange);
+			OpenButton.onClick.RemoveListener(HandleOpenButton);
+			CloseButton.onClick.RemoveListener(HandleCloseButton);
+
+			FizzService.Instance.OnConnected -= OnConnected;
+			FizzService.Instance.OnDisconnected -= OnDisconnected;
+			FizzService.Instance.UserRepository.OnUserUpdated -= OnUserUpdate;
+		}
+
+		void OnDestroy()
+		{
+			FizzService.Instance.Close();
+		}
+
+		void HandleOpenButton()
+		{
+			FizzService.Instance.Open(userId, userId, FizzLanguageCodes.English, FizzServices.All, false, isDone =>
+		   {
+			   if (isDone)
+			   {
+				   FizzLogger.D("HandleOpenButton " + isDone);
+			   }
+		   });
+		}
+
+		void HandleCloseButton()
+		{
+			FizzService.Instance.Close();
+
+			ResetUsers();
+		}
+
+		void HandleDropdownChange(int index)
+		{
+			userDropdown.interactable = false;
+
+			userLabels[index].gameObject.SetActive(false);
+			statusImages[index].gameObject.SetActive(false);
+
+			usersContainer.gameObject.SetActive(true);
+
+			userId = userDropdown.captionText.text;
+		}
+
+		void OnConnected(bool syncReq)
+		{
+			OpenButton.interactable = false;
+			CloseButton.interactable = true;
+
+			if (syncReq)
 			{
-				FizzLogger.D ("HandleOpenButton " + isDone);
+				GetAndSubscribeUser();
 			}
-		});
-	}
-
-	void HandleCloseButton ()
-	{
-		FizzService.Instance.Close ();
-
-		ResetUsers ();	
-	}
-
-	void HandleDropdownChange (int index)
-	{
-		userDropdown.interactable = false;
-
-		userLabels[index].gameObject.SetActive (false);
-		statusImages[index].gameObject.SetActive (false);
-
-		usersContainer.gameObject.SetActive (true);
-
-		userId = userDropdown.captionText.text;
-	}
-
-	void OnConnected (bool syncReq)
-	{
-		OpenButton.interactable = false;
-		CloseButton.interactable = true;
-
-		if (syncReq)
-		{
-			GetAndSubscribeUser();
 		}
-	}
 
-	void OnDisconnected (FizzException ex)
-	{
-		OpenButton.interactable = true;
-		CloseButton.interactable = false;
-	}
-
-	void GetAndSubscribeUser()
-	{
-		foreach (Dropdown.OptionData data in userDropdown.options)
+		void OnDisconnected(FizzException ex)
 		{
-			FizzService.Instance.UserRepository.GetUser(data.text, (user, ex) =>
+			OpenButton.interactable = true;
+			CloseButton.interactable = false;
+		}
+
+		void GetAndSubscribeUser()
+		{
+			foreach (Dropdown.OptionData data in userDropdown.options)
 			{
-				user.Subscribe(null);
-				SetPresenceStatus(user.Id, user.Online);
-			});
+				FizzService.Instance.UserRepository.GetUser(data.text, (user, ex) =>
+				{
+					user.Subscribe(null);
+					SetPresenceStatus(user.Id, user.Online);
+				});
+			}
 		}
-	}
 
-	void ResetUsers ()
-	{
-		for (int i = 0; i < userDropdown.options.Count; i++)
+		void ResetUsers()
 		{
-			userLabels[i].text = userDropdown.options[i].text;
-			statusImages[i].color = Color.white;
+			for (int i = 0; i < userDropdown.options.Count; i++)
+			{
+				userLabels[i].text = userDropdown.options[i].text;
+				statusImages[i].color = Color.white;
+			}
 		}
-	}
 
-	void OnUserUpdate(FizzUserModel user)
-	{
-		SetPresenceStatus(user.Id, user.Online);
-	}
+		void OnUserUpdate(FizzUserModel user)
+		{
+			SetPresenceStatus(user.Id, user.Online);
+		}
 
-	private void SetPresenceStatus(string userId, bool online)
-	{
-		Color color = (online) ? Color.green : Color.white;
-		if (userId.EndsWith("01"))
+		private void SetPresenceStatus(string userId, bool online)
 		{
-			statusImages[0].color = color;
+			Color color = (online) ? Color.green : Color.white;
+			if (userId.EndsWith("01"))
+			{
+				statusImages[0].color = color;
+			}
+			else if (userId.EndsWith("02"))
+			{
+				statusImages[1].color = color;
+			}
+			else if (userId.EndsWith("03"))
+			{
+				statusImages[2].color = color;
+			}
+			else if (userId.EndsWith("04"))
+			{
+				statusImages[3].color = color;
+			}
+			else if (userId.EndsWith("05"))
+			{
+				statusImages[4].color = color;
+			}
+			else if (userId.EndsWith("06"))
+			{
+				statusImages[5].color = color;
+			}
 		}
-		else if (userId.EndsWith("02"))
-		{
-			statusImages[1].color = color;
-		}
-		else if (userId.EndsWith("03"))
-		{
-			statusImages[2].color = color;
-		}
-		else if (userId.EndsWith("04"))
-		{
-			statusImages[3].color = color;
-		}
-		else if (userId.EndsWith("05"))
-		{
-			statusImages[4].color = color;
-		}
-		else if (userId.EndsWith("06"))
-		{
-			statusImages[5].color = color;
-		}
-	}
 
-	public void HandleClose()
-	{
-		SceneManager.LoadScene("SceneSelector");
+		public void HandleClose()
+		{
+			SceneManager.LoadScene("SceneSelector");
+		}
 	}
 }

@@ -6,15 +6,15 @@ namespace Fizz.Demo
 {
     public class ThemeSelectorScript : MonoBehaviour
     {
-        [SerializeField] FizzThemeData DefaultTheme;
-        [SerializeField] FizzThemeData BlueTheme;
-        [SerializeField] FizzThemeData GreenTheme;
-        [SerializeField] FizzThemeData PurpleTheme;
+        [SerializeField] private FizzThemeData DefaultTheme = null;
+        [SerializeField] private FizzThemeData BlueTheme = null;
+        [SerializeField] private FizzThemeData GreenTheme = null;
+        [SerializeField] private FizzThemeData PurpleTheme = null;
 
-        [SerializeField] Toggle defaultToggle;
-        [SerializeField] Toggle blueToggle;
-        [SerializeField] Toggle greenToggle;
-        [SerializeField] Toggle purpleToggle;
+        [SerializeField] private Toggle defaultToggle = null;
+        [SerializeField] private Toggle blueToggle = null;
+        [SerializeField] private Toggle greenToggle = null;
+        [SerializeField] private Toggle purpleToggle = null;
 
         private void Awake ()
         {

@@ -11,11 +11,11 @@ namespace Fizz.Demo
     /// </summary>
     public class GuildViewSample : MonoBehaviour
     {
-        [SerializeField] Text titleLabel;
+        [SerializeField] private Text titleLabel = null;
         /// <summary>
         /// Popup which contains FizzChatView
         /// </summary>
-        [SerializeField] ChatPopup chatPopup;
+        [SerializeField] private ChatPopup chatPopup = null;
 
         // Global Channel Id
         private readonly string globalChannelId = "global-channel";

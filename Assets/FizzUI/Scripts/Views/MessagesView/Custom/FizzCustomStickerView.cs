@@ -6,7 +6,7 @@ namespace Fizz.UI
 {
     public class FizzCustomStickerView : IFizzCustomMessageCellView
     {
-        [SerializeField] Image StickerImage;
+        [SerializeField] private Image StickerImage = null;
 
         private Sprite sticker;
 

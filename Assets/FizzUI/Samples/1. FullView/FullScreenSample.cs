@@ -3,7 +3,6 @@ using Fizz.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Fizz.Common;
-using Fizz.UI.Model;
 
 namespace Fizz.Demo
 {
@@ -13,7 +12,7 @@ namespace Fizz.Demo
     /// </summary>
     public class FullScreenSample : MonoBehaviour, IFizzCustomMessageCellViewDataSource
     {
-        [SerializeField] FizzChatView chatView;
+        [SerializeField] private FizzChatView chatView = null;
 
         // Global Channel Id
         private readonly string globalChannelId = "global-channel";

@@ -1,10 +1,7 @@
 ﻿using System;
-using Fizz;
 using Fizz.Chat;
 using Fizz.UI.Model;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Fizz
 {

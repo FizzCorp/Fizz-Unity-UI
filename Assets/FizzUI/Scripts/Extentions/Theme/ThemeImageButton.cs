@@ -1,14 +1,13 @@
-﻿using Fizz.UI.Core;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.UI;
 
 namespace Fizz.UI.Extentions
 {
     public class ThemeImageButton : MonoBehaviour
     {
-        [SerializeField] ThemeImage ThemeImage;
-        [SerializeField] ThemeSprite ActivatedSprite;
-        [SerializeField] ThemeSprite DeactivatedSprite;
+        [SerializeField] private ThemeImage ThemeImage = null;
+        [SerializeField] private ThemeSprite ActivatedSprite = ThemeSprite.CloseButton;
+        [SerializeField] private ThemeSprite DeactivatedSprite = ThemeSprite.CloseButton;
 
         private void Awake ()
         {

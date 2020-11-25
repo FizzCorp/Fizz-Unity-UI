@@ -15,19 +15,19 @@ namespace Fizz.UI
         /// <summary>
         /// Chat cell background image.
         /// </summary>
-        [SerializeField] protected Image BackgroundImage;
+        [SerializeField] protected Image BackgroundImage = null;
         /// <summary>
         /// Chat message label.
         /// </summary>
-        [SerializeField] protected TextWithEmoji MessageLabel;
+        [SerializeField] protected TextWithEmoji MessageLabel = null;
         /// <summary>
         /// Custom view node.
         /// </summary>
-        [SerializeField] protected RectTransform CustomNode;
+        [SerializeField] protected RectTransform CustomNode = null;
         /// <summary>
         /// Chat message time label.
         /// </summary>
-        [SerializeField] protected Text TimeLabel;
+        [SerializeField] protected Text TimeLabel = null;
 
         public RectTransform messageRect
         {

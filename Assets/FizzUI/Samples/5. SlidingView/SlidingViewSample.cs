@@ -1,7 +1,6 @@
 ﻿using Fizz.UI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Fizz.UI.Model;
 
 namespace Fizz.Demo
 {
@@ -10,8 +9,8 @@ namespace Fizz.Demo
     /// </summary>
     public class SlidingViewSample : MonoBehaviour
     {
-        [SerializeField] FizzChatView chatView;
-        [SerializeField] RectTransform blocker;
+        [SerializeField] private FizzChatView chatView = null;
+        [SerializeField] private RectTransform blocker = null;
 
         private readonly string globalChannelId = "global-channel";
         private readonly string localChannelId = "local-channel";

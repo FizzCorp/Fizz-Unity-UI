@@ -1,9 +1,11 @@
 ﻿using System;
-using Fizz;
 using Fizz.UI.Model;
 
-public interface IFizzUserRepository
+namespace Fizz
 {
-    void GetUser(string userId, Action<FizzUserModel, FizzException> cb);
-    Action<FizzUserModel> OnUserUpdated { get; set; }
+    public interface IFizzUserRepository
+    {
+        void GetUser(string userId, Action<FizzUserModel, FizzException> cb);
+        Action<FizzUserModel> OnUserUpdated { get; set; }
+    }
 }

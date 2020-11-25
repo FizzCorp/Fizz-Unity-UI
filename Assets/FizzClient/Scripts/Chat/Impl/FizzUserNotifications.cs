@@ -1,7 +1,6 @@
 ﻿using System;
 
 using Fizz.Common;
-using Fizz.Common.Json;
 
 namespace Fizz.Chat.Impl
 {
