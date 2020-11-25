@@ -84,12 +84,28 @@ namespace Fizz.Chat.Impl
             return new FizzFetchUserGroupsQuery(userId, _client);
         }
 
-        public void JoinGroup(string userId, string groupId, Action<FizzException> callback)
+        public void UpdateGroup(
+            string userId,
+            string groupId,
+            FizzGroupMemberState? state,
+            long? lastReadMessageId,
+            Action<FizzException> callback
+        )
         {
             IfOpened(() =>
             {
                 string path = string.Format(FizzConfig.API_PATH_USER_GROUP, userId, groupId);
-                _client.Post(FizzConfig.API_BASE_URL, path, string.Empty, (response, ex) =>
+                JSONClass body = new JSONClass();
+                if (state != null)
+                {
+                    body["state"] = Value(state.Value);
+                }
+                if (lastReadMessageId != null)
+                {
+                    body["last_read_message_id"].AsDouble = lastReadMessageId.Value;
+                }
+
+                _client.Post(FizzConfig.API_BASE_URL, path, body.ToString(), (response, ex) =>
                 {
                     FizzUtils.DoCallback(ex, callback);
                 });
@@ -107,6 +123,21 @@ namespace Fizz.Chat.Impl
                     FizzUtils.DoCallback(ex, callback);
                 });
             });
+        }
+
+        private string Value(FizzGroupMemberState state)
+        {
+            switch (state)
+            {
+                case FizzGroupMemberState.Joined:
+                    return "joined";
+
+                case FizzGroupMemberState.Pending:
+                    return "pending";
+
+                default:
+                    return "";
+            }
         }
 
         private void IfOpened(Action callback)

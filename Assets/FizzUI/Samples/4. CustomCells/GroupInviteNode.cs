@@ -52,7 +52,7 @@ namespace Fizz.Demo
             // Accept Group Invite
             try
             {
-                FizzService.Instance.GroupRepository.JoinGroup(_groupId, ex =>
+                FizzService.Instance.GroupRepository.UpdateGroup(_groupId, ex =>
                 {
                     if (ex == null)
                     {
