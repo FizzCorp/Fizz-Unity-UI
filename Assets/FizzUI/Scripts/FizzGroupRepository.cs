@@ -185,7 +185,7 @@ namespace Fizz
             return null;
         }
 
-        public void JoinGroup(string groupId, Action<FizzException> cb)
+        public void UpdateGroup(string groupId, Action<FizzException> cb)
         {
             if (Client.State == FizzClientState.Closed)
             {
@@ -193,7 +193,7 @@ namespace Fizz
                 return;
             }
 
-            Client.Chat.Users.JoinGroup(UserId, groupId, ex =>
+            Client.Chat.Users.UpdateGroup(UserId, groupId, null, null, ex =>
             {
                 if (ex == null)
                 {
