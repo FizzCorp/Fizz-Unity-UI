@@ -8,6 +8,7 @@ namespace Fizz.Chat
         string GroupId { get; }
         FizzGroupMemberRole Role { get; }
         FizzGroupMemberState State { get; }
+        long? LastReadMessageId { get; }
         long Created { get; }
     }
 
@@ -32,7 +33,7 @@ namespace Fizz.Chat
         void Subscribe(string userId, Action<FizzException> callback);
         void Unsubscribe(string userId, Action<FizzException> callback);
         IFizzFetchUserGroupsQuery BuildFetchUserGroupsQuery(string userId);
-        void JoinGroup(string userId, string groupId, Action<FizzException> callback);
+        void UpdateGroup(string userId, string groupId, FizzGroupMemberState? state, long? lastReadMessageId, Action<FizzException> callback);
         void RemoveGroup(string userId, string groupId, Action<FizzException> callback);
     }
 }

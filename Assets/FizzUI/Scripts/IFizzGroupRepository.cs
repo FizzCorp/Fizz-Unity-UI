@@ -10,7 +10,7 @@ namespace Fizz
         List<FizzGroupModel> Groups { get; }
         Dictionary<string, IFizzUserGroup> GroupInvites { get; }
 
-        void JoinGroup(string groupId, Action<FizzException> cb);
+        void UpdateGroup(string groupId, Action<FizzException> cb);
         void RemoveGroup(string groupId, Action<FizzException> cb);
 
         Action<FizzGroupModel> OnGroupAdded { get; set; }
