@@ -193,6 +193,7 @@ namespace Fizz.UI.Model
 
         public virtual void PublishMessage(string nick,
                                     string body,
+                                    string locale,
                                     Dictionary<string, string> data,
                                     bool translate,
                                     Action<FizzException> callback)
@@ -201,6 +202,7 @@ namespace Fizz.UI.Model
                     Id,
                     nick,
                     body,
+                    locale,
                     data,
                     translate,
                     Meta.FilterContent,

@@ -53,7 +53,8 @@ namespace Fizz.Chat
         void PublishMessage(
             string groupId,
             string nick, 
-            string body, 
+            string body,
+            string locale,
             Dictionary<string, string> data, 
             bool translate, 
             bool filter, 

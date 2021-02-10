@@ -76,6 +76,7 @@ namespace Fizz.Demo
                 "status-channel",
                 FizzService.Instance.UserName,
                 string.Empty,
+                string.Empty,
                 data,
                 false,
                 false,

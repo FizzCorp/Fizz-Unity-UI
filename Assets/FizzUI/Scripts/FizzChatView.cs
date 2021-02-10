@@ -1,6 +1,7 @@
 ﻿using Fizz.Common;
 using Fizz.UI.Core;
 using Fizz.UI.Model;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
@@ -247,6 +248,7 @@ namespace Fizz.UI
                 channel.PublishMessage(
                     FizzService.Instance.UserName,
                     message,
+                    GetLanguageCode(),
                     data,
                     FizzService.Instance.IsTranslationEnabled,
                     exception =>
@@ -300,6 +302,7 @@ namespace Fizz.UI
 
                 channel.PublishMessage(
                     FizzService.Instance.UserName,
+                    string.Empty,
                     string.Empty,
                     data,
                     FizzService.Instance.IsTranslationEnabled,
@@ -450,6 +453,21 @@ namespace Fizz.UI
                     ShowInput = true;
                 }
             }
+        }
+
+        private string GetLanguageCode()
+        {
+            string langCode = FizzLanguageCodes.English.Code;
+            try
+            {
+                langCode = FizzService.Instance.Language.Code;
+            }
+            catch (Exception)
+            {
+                FizzLogger.E("Unable to get LanguageCode");
+            }
+
+            return langCode;
         }
     }
 }
