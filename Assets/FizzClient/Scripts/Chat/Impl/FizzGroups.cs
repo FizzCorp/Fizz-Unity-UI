@@ -71,7 +71,8 @@ namespace Fizz.Chat.Impl
         public void PublishMessage(
             string groupId,
             string nick, 
-            string body, 
+            string body,
+            string locale,
             Dictionary<string, string> data, 
             bool translate, 
             bool filter, 
@@ -99,8 +100,12 @@ namespace Fizz.Chat.Impl
 
                     dataStr = dataJson.ToString();
                 }
-
                 json[FizzJsonChannelMessage.KEY_DATA] = dataStr;
+
+                if (!string.IsNullOrEmpty(locale))
+                {
+                    json[FizzJsonChannelMessage.KEY_LOCALE] = locale;
+                }
 
                 _restClient.Post (FizzConfig.API_BASE_URL, path, json.ToString (), (response, ex) =>
                 {

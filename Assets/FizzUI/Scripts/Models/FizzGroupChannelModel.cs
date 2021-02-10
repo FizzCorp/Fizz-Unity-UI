@@ -132,6 +132,7 @@ namespace Fizz.UI.Model
 
         public override void PublishMessage(string nick,
                                     string body,
+                                    string locale,
                                     Dictionary<string, string> data,
                                     bool translate,
                                     Action<FizzException> callback)
@@ -146,6 +147,7 @@ namespace Fizz.UI.Model
                     GroupId,
                     nick,
                     body,
+                    locale,
                     data,
                     translate,
                     Meta.FilterContent,

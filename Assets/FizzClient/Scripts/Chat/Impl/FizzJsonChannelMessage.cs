@@ -10,6 +10,7 @@ namespace Fizz.Chat.Impl
         public static readonly string KEY_NICK = "nick";
         public static readonly string KEY_TO = "to";
         public static readonly string KEY_BODY = "body";
+        public static readonly string KEY_LOCALE = "locale";
         public static readonly string KEY_DATA = "data";
         public static readonly string KEY_TRANSLATE = "translate";
         public static readonly string KEY_PERSIST = "persist";

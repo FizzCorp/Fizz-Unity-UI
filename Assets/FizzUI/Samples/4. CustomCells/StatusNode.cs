@@ -109,7 +109,7 @@ namespace Fizz.Demo
             {
                 Dictionary<string, string> data = _message.Data;
                 data[CustomCellSample.KEY_DATA_STATUS] = status;
-                FizzService.Instance.Client.Chat.UpdateMessage(_message.To, _message.Id, _message.Nick, _message.Body, data, true, false, true, ex =>
+                FizzService.Instance.Client.Chat.UpdateMessage(_message.To, _message.Id, _message.Nick, _message.Body, string.Empty, data, false, false, true, ex =>
                 {
                     if (ex == null)
                     {
