@@ -135,11 +135,6 @@ namespace Fizz.Chat.Impl
 
         private void OnConnConnected (object sender, bool sessionPresent)
         {
-            if (_connection != null)
-            {
-                FizzLogger.W ("Received connected event for old connection.");
-            }
-
             FizzLogger.D ("MQTT - OnConnected: " + sessionPresent);
 
             if (OnConnected != null)
@@ -150,11 +145,6 @@ namespace Fizz.Chat.Impl
 
         private void OnConnDisconnected (object sender, FizzMqttDisconnectedArgs args)
         {
-            if (_connection != null)
-            {
-                FizzLogger.W ("Received disconnected event for old connection.");
-            }
-
             FizzLogger.D ("MQTT - OnDisconnected: " + args.ClientWasConnected.ToString ());
 
             if (OnDisconnected != null)

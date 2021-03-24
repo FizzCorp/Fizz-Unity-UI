@@ -43,7 +43,7 @@ namespace Fizz.Moderation.Impl
 
         public void Close ()
         {
-            IfOpened (() => _restClient = null);
+            _restClient = null;
         }
 
         public void SanitizeText (IList<string> texts, Action<IList<string>, FizzException> callback)
