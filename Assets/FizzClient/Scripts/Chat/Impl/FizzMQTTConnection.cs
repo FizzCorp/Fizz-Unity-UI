@@ -167,10 +167,17 @@ namespace Fizz.Chat.Impl
         public void DisconnectAsync ()
         {
             _manualDisconnect = true;
-            
+
             if (IsConnected)
             {
-                _client.Disconnect ();
+                _client.Disconnect();
+            }
+            else
+            {
+                if (Disconnected != null)
+                {
+                    _dispatcher.Post(() => Disconnected.Invoke(this, new FizzMqttDisconnectedArgs(IsConnected, null)));
+                }
             }
         }
 
