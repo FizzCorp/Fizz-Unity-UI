@@ -138,7 +138,10 @@ namespace Fizz
             try
             {
                 if (State == FizzClientState.Opened)
+                {
+                    FizzUtils.DoCallback(null, callback);
                     return;
+                }
 
                 FizzSessionRepository sessionRepo = new FizzSessionRepository(userId, locale.Code, _sessionClient);
                 _authClient.Open(sessionRepo, ex =>
