@@ -1,8 +1,10 @@
 ﻿using Fizz.Common;
+using MQTTnet;
+using MQTTnet.Client;
+using MQTTnet.Client.Connecting;
+using MQTTnet.Client.Options;
 using System;
 using System.Threading;
-using uPLibrary.Networking.M2Mqtt;
-using uPLibrary.Networking.M2Mqtt.Messages;
 
 namespace Fizz.Chat.Impl
 {
@@ -56,12 +58,11 @@ namespace Fizz.Chat.Impl
         // TODO: make this exponential backoff
         private static readonly int RETRY_DELAY_MS = 10 * 1000;
 
-        private readonly MqttClient _client;
-        private readonly string _username;
-        private readonly string _password;
-        private readonly string _clientId;
+        private readonly IMqttClient _client;
+        private readonly IMqttClientFactory _clientFactory;
+        private readonly IMqttClientOptions _clientOptions;
+
         private readonly bool _retry;
-        private readonly bool _cleanSession;
         private bool _manualDisconnect = false;
         private readonly IFizzActionDispatcher _dispatcher;
 
@@ -96,27 +97,34 @@ namespace Fizz.Chat.Impl
                 throw ERROR_INVALID_DISPATCHER;
             }
 
-            _clientId = clientId;
-            _username = username;
-            _password = password;
+            _clientOptions = new MqttClientOptionsBuilder()
+                .WithClientId(clientId)
+                .WithTcpServer(FizzConfig.MQTT_HOST_ENDPOINT)
+                .WithCredentials(username, password)
+                .WithTls()
+                .WithCleanSession()
+                .WithKeepAlivePeriod(TimeSpan.FromSeconds(30))
+                .Build();
+
             _retry = retry;
-            _cleanSession = cleanSession;
             _dispatcher = dispatcher;
 
-            _client = new MqttClient (
-                            FizzConfig.MQTT_HOST_ENDPOINT,
-                            FizzConfig.MQTT_USE_TLS ? 8883 : 1883,
-                            FizzConfig.MQTT_USE_TLS,
-                            null, null,
-                            FizzConfig.MQTT_USE_TLS ? MqttSslProtocols.TLSv1_2 : MqttSslProtocols.None
-                        );
+            _clientFactory = new MqttFactory();
+            _client = _clientFactory.CreateMqttClient();
 
-            _client.ConnectionClosed += (sender, args) =>
-            {
-                OnDisconnected (true, null);
-            };
 
-            _client.MqttMsgPublishReceived += OnMqttMessageReceived;
+            _client.UseDisconnectedHandler(discArgs => {
+                OnDisconnected(discArgs.ClientWasConnected, null);
+            });
+
+            _client.UseConnectedHandler(conArgs => {
+                if (Connected != null)
+                {
+                    _dispatcher.Post(() => Connected.Invoke(this, conArgs.AuthenticateResult.IsSessionPresent));
+                }
+            });
+
+            _client.UseApplicationMessageReceivedHandler(OnMqttMessageReceived);
         }
 
         public void ConnectAsync ()
@@ -131,31 +139,34 @@ namespace Fizz.Chat.Impl
             {
                 try
                 {
-                    byte ret = _client.Connect (_clientId, _username, _password, _cleanSession, 30);
-                    if (ret == 0)
-                    {
-                        if (!_manualDisconnect) {
-                            if (Connected != null)
+                    _client.ConnectAsync(_clientOptions)
+                        .ContinueWith(conTask => {
+                            if (conTask.IsCanceled || conTask.IsFaulted)
                             {
-                                _dispatcher.Post (() => Connected.Invoke (this, _client.SessionPresent));
+                                OnDisconnected(false, new FizzMqttConnectException((byte) MqttClientConnectResultCode.UnspecifiedError, "connect_failed"));
                             }
-                        }
-                        else {
-                           DisconnectAsync();
-                        }
-                    }
-                    else
-                    {
-                        switch (ret)
-                        {
-                            case 5:
-                                OnDisconnected (false, new FizzMqttAuthException ());
-                                break;
-                            default:
-                                OnDisconnected (false, new FizzMqttConnectException (ret, "connect_failed"));
-                                break;
-                        }
-                    }
+                            else if (conTask.IsCompleted)
+                            {
+                                var authResult = conTask.Result;
+                                var resultCode = authResult.ResultCode;
+                                if (resultCode == MqttClientConnectResultCode.Success)
+                                {
+                                    if (_manualDisconnect)
+                                    {
+                                        DisconnectAsync();
+                                    }
+                                }
+                                else if (resultCode == MqttClientConnectResultCode.NotAuthorized)
+                                {
+                                    OnDisconnected(false, new FizzMqttAuthException());
+                                }
+                                else
+                                {
+                                    OnDisconnected(false, new FizzMqttConnectException((byte) resultCode, "connect_failed"));
+                                }
+                            }
+                        });
+
                 }
                 catch (Exception ex)
                 {
@@ -170,7 +181,7 @@ namespace Fizz.Chat.Impl
 
             if (IsConnected)
             {
-                _client.Disconnect();
+                _client.DisconnectAsync();
             }
             else
             {
@@ -213,11 +224,11 @@ namespace Fizz.Chat.Impl
             });
         }
 
-        private void OnMqttMessageReceived (object sender, MqttMsgPublishEventArgs msg)
+        private void OnMqttMessageReceived (MqttApplicationMessageReceivedEventArgs eventArgs)
         {
             if (MessageReceived != null)
             {
-                _dispatcher.Post (() => MessageReceived.Invoke (this, msg.Message));
+                _dispatcher.Post (() => MessageReceived.Invoke (this, eventArgs.ApplicationMessage.Payload));
             }
         }
     }
