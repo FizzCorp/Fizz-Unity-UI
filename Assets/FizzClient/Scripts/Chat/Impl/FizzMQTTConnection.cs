@@ -5,6 +5,9 @@ using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Options;
 using System;
 using System.Threading;
+using MQTTnet.Adapter;
+using MQTTnet.Client.Disconnecting;
+using UnityEngine;
 
 namespace Fizz.Chat.Impl
 {
@@ -59,14 +62,13 @@ namespace Fizz.Chat.Impl
         private static readonly int RETRY_DELAY_MS = 10 * 1000;
 
         private readonly IMqttClient _client;
-        private readonly IMqttClientFactory _clientFactory;
         private readonly IMqttClientOptions _clientOptions;
 
         private readonly bool _retry;
         private bool _manualDisconnect = false;
         private readonly IFizzActionDispatcher _dispatcher;
 
-        public bool IsConnected { get { return (_client == null)? false : _client.IsConnected; } }
+        public bool IsConnected => _client?.IsConnected ?? false;
 
         // TODO: make this thread safe using Interlocked.Add/Interlocked.Remove
         public Action<object, bool> Connected { set; get; }
@@ -102,22 +104,38 @@ namespace Fizz.Chat.Impl
                 .WithTcpServer(FizzConfig.MQTT_HOST_ENDPOINT)
                 .WithCredentials(username, password)
                 .WithTls()
-                .WithCleanSession()
+                .WithCleanSession(cleanSession)
                 .WithKeepAlivePeriod(TimeSpan.FromSeconds(30))
                 .Build();
 
             _retry = retry;
             _dispatcher = dispatcher;
 
-            _clientFactory = new MqttFactory();
-            _client = _clientFactory.CreateMqttClient();
+            var clientFactory = new MqttFactory();
+            _client = clientFactory.CreateMqttClient();
 
 
-            _client.UseDisconnectedHandler(discArgs => {
-                OnDisconnected(discArgs.ClientWasConnected, null);
+            _client.UseDisconnectedHandler(discArgs =>
+            {
+                if (discArgs.Exception is MqttConnectingFailedException failedException)
+                {
+                    if (failedException.ResultCode == MqttClientConnectResultCode.BadUserNameOrPassword
+                        || failedException.ResultCode == MqttClientConnectResultCode.NotAuthorized)
+                        OnDisconnected(discArgs.ClientWasConnected, new FizzMqttAuthException());
+                }
+                else if (discArgs.Exception != null)
+                {
+                    OnDisconnected(discArgs.ClientWasConnected, discArgs.Exception);
+                }
+                else
+                {
+                    OnDisconnected(discArgs.ClientWasConnected, null);
+                }
             });
 
             _client.UseConnectedHandler(conArgs => {
+                if (_manualDisconnect) return;
+
                 if (Connected != null)
                 {
                     _dispatcher.Post(() => Connected.Invoke(this, conArgs.AuthenticateResult.IsSessionPresent));
@@ -135,44 +153,14 @@ namespace Fizz.Chat.Impl
 
         private void ConnectInternal ()
         {
-            ThreadPool.QueueUserWorkItem (payload =>
+            try
             {
-                try
-                {
-                    _client.ConnectAsync(_clientOptions)
-                        .ContinueWith(conTask => {
-                            if (conTask.IsCanceled || conTask.IsFaulted)
-                            {
-                                OnDisconnected(false, new FizzMqttConnectException((byte) MqttClientConnectResultCode.UnspecifiedError, "connect_failed"));
-                            }
-                            else if (conTask.IsCompleted)
-                            {
-                                var authResult = conTask.Result;
-                                var resultCode = authResult.ResultCode;
-                                if (resultCode == MqttClientConnectResultCode.Success)
-                                {
-                                    if (_manualDisconnect)
-                                    {
-                                        DisconnectAsync();
-                                    }
-                                }
-                                else if (resultCode == MqttClientConnectResultCode.NotAuthorized)
-                                {
-                                    OnDisconnected(false, new FizzMqttAuthException());
-                                }
-                                else
-                                {
-                                    OnDisconnected(false, new FizzMqttConnectException((byte) resultCode, "connect_failed"));
-                                }
-                            }
-                        });
-
-                }
-                catch (Exception ex)
-                {
-                    OnDisconnected (false, ex);
-                }
-            });
+                _client.ConnectAsync(_clientOptions);
+            }
+            catch (Exception ex)
+            {
+                OnDisconnected (false, ex);
+            }
         }
 
         public void DisconnectAsync ()
