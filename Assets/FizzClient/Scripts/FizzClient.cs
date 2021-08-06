@@ -68,7 +68,7 @@ namespace Fizz
             }
 
             _dispatcher = new FizzActionDispatcher();
-            _chat = new FizzChatClient(appId, _dispatcher);
+            _chat = new FizzChatClient(_dispatcher);
             _restClient = new FizzRestClient(_dispatcher);
             _sessionClient = new FizzIdSecretSessionProvider(appId, appSecret, _restClient);
             _authClient = new FizzAuthRestClient(_restClient);
@@ -76,16 +76,11 @@ namespace Fizz
             _moderationClient = new FizzModerationClient();
         }
 
-        public FizzClient(string appId, IFizzSessionProvider sessionClient)
+        public FizzClient(IFizzSessionProvider sessionClient)
         {
-            if (string.IsNullOrEmpty(appId))
-            {
-                throw FizzException.ERROR_INVALID_APP_ID;
-            }
-
             _dispatcher = new FizzActionDispatcher();
             _sessionClient = sessionClient;
-            _chat = new FizzChatClient(appId, _dispatcher);
+            _chat = new FizzChatClient(_dispatcher);
             _restClient = new FizzRestClient(_dispatcher);
             _authClient = new FizzAuthRestClient(_restClient);
             _ingestionClient = new FizzIngestionClient(new FizzInMemoryEventLog(), _dispatcher);

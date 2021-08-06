@@ -32,13 +32,8 @@ namespace Fizz.Chat.Impl
         private readonly object synclock = new object ();
         private readonly IFizzActionDispatcher _dispatcher;
 
-        public FizzMQTTChannelMessageListener (string appId,
-                                              IFizzActionDispatcher dispatcher)
+        public FizzMQTTChannelMessageListener (IFizzActionDispatcher dispatcher)
         {
-            if (string.IsNullOrEmpty (appId))
-            {
-                throw ERROR_INVALID_APP_ID;
-            }
             if (dispatcher == null)
             {
                 throw ERROR_INVALID_DISPATCHER;

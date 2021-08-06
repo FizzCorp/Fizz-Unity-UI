@@ -82,7 +82,7 @@ namespace Fizz.Chat.Impl
                 return _messageListener.IsConnected;
             }
         }
-        public FizzChatClient (string appId, IFizzActionDispatcher dispatcher)
+        public FizzChatClient (IFizzActionDispatcher dispatcher)
         {
             if (dispatcher == null)
             {
@@ -91,7 +91,7 @@ namespace Fizz.Chat.Impl
 
             _dispatcher = dispatcher;
 
-            _messageListener = CreateListener (appId, _dispatcher);
+            _messageListener = CreateListener (_dispatcher);
             _groups = new FizzGroups();
             _users = new FizzUsers();
             _userNotifications = new FizzUserNotifications();
@@ -517,9 +517,9 @@ namespace Fizz.Chat.Impl
             });
         }
 
-        protected FizzMQTTChannelMessageListener CreateListener (string appId, IFizzActionDispatcher dispatcher)
+        protected FizzMQTTChannelMessageListener CreateListener (IFizzActionDispatcher dispatcher)
         {
-            return new FizzMQTTChannelMessageListener (appId, dispatcher);
+            return new FizzMQTTChannelMessageListener (dispatcher);
         }
 
         private void IfOpened (Action callback)
