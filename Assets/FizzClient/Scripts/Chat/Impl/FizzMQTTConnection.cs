@@ -1,13 +1,10 @@
-﻿using Fizz.Common;
+﻿using System;
+using Fizz.Common;
 using MQTTnet;
+using MQTTnet.Adapter;
 using MQTTnet.Client;
 using MQTTnet.Client.Connecting;
 using MQTTnet.Client.Options;
-using System;
-using System.Threading;
-using MQTTnet.Adapter;
-using MQTTnet.Client.Disconnecting;
-using UnityEngine;
 
 namespace Fizz.Chat.Impl
 {
@@ -38,7 +35,7 @@ namespace Fizz.Chat.Impl
             Exception = ex;
         }
     }
-
+    
     public interface IFizzMqttConnection
     {
         bool IsConnected { get; }
@@ -175,7 +172,7 @@ namespace Fizz.Chat.Impl
             {
                 if (Disconnected != null)
                 {
-                    _dispatcher.Post(() => Disconnected.Invoke(this, new FizzMqttDisconnectedArgs(IsConnected, null)));
+                    _dispatcher.Post(() => Disconnected.Invoke(this, new FizzMqttDisconnectedArgs(false, null)));
                 }
             }
         }
@@ -184,7 +181,7 @@ namespace Fizz.Chat.Impl
         {
             if (Disconnected != null)
             {
-                _dispatcher.Post (() => Disconnected.Invoke (this, new FizzMqttDisconnectedArgs (false, ex)));
+                _dispatcher.Post (() => Disconnected.Invoke (this, new FizzMqttDisconnectedArgs (clientConnected, ex)));
             }
 
             if (_manualDisconnect)

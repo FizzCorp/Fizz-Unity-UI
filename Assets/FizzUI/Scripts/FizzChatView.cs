@@ -206,13 +206,6 @@ namespace Fizz.UI
             FizzService.Instance.GroupRepository.OnGroupMembersUpdated -= OnGroupMembersUpdated;
         }
 
-        protected override void OnConnectionStateChange(bool isConnected)
-        {
-            base.OnConnectionStateChange(isConnected);
-
-            FizzLogger.D("OnConnectionStateChange isConnected " + isConnected);
-        }
-
         private void HandleSendMessage(string message)
         {
             if (string.IsNullOrEmpty(message)) return;
