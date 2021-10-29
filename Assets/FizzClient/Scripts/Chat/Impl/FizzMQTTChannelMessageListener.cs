@@ -251,11 +251,9 @@ namespace Fizz.Chat.Impl
         {
             JSONNode payload = JSONNode.Parse (message.Data);
             JSONClass translationData = payload["translations"].AsObject;
-            IDictionary<string, string> translations = null;
-
+            IDictionary<string, string> translations = new Dictionary<string, string> ();
             if (translationData != null)
             {
-                translations = new Dictionary<string, string> ();
                 foreach (string key in translationData.Keys)
                 {
                     translations.Add (key, translationData[key]);

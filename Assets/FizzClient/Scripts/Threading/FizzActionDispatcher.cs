@@ -37,28 +37,19 @@ namespace Fizz.Threading
         public void Process()
         {
             long now = FizzUtils.Now();
-            int fired = 0;
+            if (timers.Count <= 0 || timers.Keys[0] > now)
+            {
+                return;
+            }
             List<Action> timersToDispatch = new List<Action>();
 
             lock(synclock)
             {
-                foreach (var timer in timers)
+                while (timers.Count > 0 && timers.Keys[0] <= now)
                 {
-                    if (timer.Key <= now)
-                    {
-                        timersToDispatch.Add(timer.Value);
-                        fired++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                while (fired-- > 0)
-                {
+                    timersToDispatch.Add(timers.Values[0]);
                     timers.RemoveAt(0);
-                }    
+                }
             }
 
             foreach (var timer in timersToDispatch)
